@@ -14,5 +14,6 @@ cout<<assembler.status<<"\n";
 for (_uva_error_t err:assembler.errors){
 	cout<<err.message<<"\n";
 }
+cout<<replaceAll("hello, 2,2,2 3","2","4")<<"\n";
 return 0;
 }

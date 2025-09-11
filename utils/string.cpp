@@ -79,7 +79,7 @@ string trim(string text){
 string replaceAll(string text, string from, string to){
 	string cpy = text;
 
-	while(cpy.find(from) > -1){
+	while(cpy.find(from) != string::npos){
 		cpy.replace(cpy.find(from),to.length(), to);
 	}
 
