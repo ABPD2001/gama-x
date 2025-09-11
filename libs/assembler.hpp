@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <cmath>
 #include <iostream>
+#include <stack>
 #include "../utils/string.hpp"
 #include "../utils/vector.hpp"
 #include "../utils/number.hpp"
@@ -21,6 +22,7 @@ using std::uint8_t;
 using std::uint32_t;
 using std::uint16_t;
 using std::cout;
+using std::stack;
 
 namespace fs = std::filesystem;
 using fs::exists;
@@ -44,7 +46,7 @@ class UVA_ASSEMBLER {
 	vector<double> vir_regs = {0,255,0,0,0,0,0,0,0,0};
 	vector<string> vir_regs_names =  {"x","y","v","a","sleep","r0","r1","r2","r3","r4","r5","st"};
 	vector<label_t> labels;
-	
+	stack<double> vir_stack;
 
 	string file_in;
 	string file_out;

@@ -148,21 +148,54 @@ string UVA_ASSEMBLER::_transpile_(string content,const vector<string> vir_regs_n
                                         else this->errors.push_back((_uva_error_t){"'decr' instructions set value is invalid!","INVALID_VALUE","value",i+idx});
                                 }
 			}
-
+			else if(CMD == "push"){
+				if(params.size() != 1 || params[0].size()) this->errors.push_back((_uva_error_t) {"'push' instruction set values missed!","MISSED_VALUE","value"});
+				else {
+					if(params[0][0] == '#') this->vir_stack.push(to_double(trim(params[0])));
+					else {
+						const short int reg = find(this->vir_regs_names,params[0]);
+						if(reg > -1) this->vir_stack.push(this->vir_regs[reg]);
+						else this->errors.push_back((_uva_error_t){"'push' instruction set value is invalid!","INVALID_VLAUE","value"});
+					}
+				}
+			}
+			else if(CMD == "pull"){
+				if(params.size() != 1 || params[0].empty()) this->errors.push_back((_uva_error_t){"'pull' instruction set value missed!","MISSED_VALUE","value"});
+				else {
+					const short int reg = find(this->vir_regs_names,params[0]);
+					if(reg > -1) {
+						this->vir_regs[reg] = this->vir_stack.top();
+						this->vir_stack.pop();
+					}
+					else this->errors.push_back((_uva_error_t){"'pull' instruction set value is invalid!","INVALID_VALUE","value"});
+				}
+			}
 			else if(CMD == "call") {
-			        if(params.size()!=1) this->errors.push_back((_uva_error_t){"'call' instructions set values missed!","MISSED_VALUE","syntax",i+idx});
+			        if(!(params.size()>1 && params.size() < 3)) this->errors.push_back((_uva_error_t){"'call' instructions set values missed!","MISSED_VALUE","syntax",i+idx});
 				else if(params[0].length()){
 					string text;
 					for (uint16_t i = 0; i<this->labels.size(); i++) {
 						if(this->labels[i].name == params[0]) text = this->labels[i].text;
 					}
-					if(text.length()) output+=this->_transpile_(text,this->vir_regs_names,this->vir_regs, i+idx);
+					if(text.length()) {
+						if(params.size() == 2) {
+							if (params[1] == "EQ" && cmp) continue;
+							else if(params[1] == "LE" && (cmp > 0 || !cmp)) continue;
+						        else if(params[1] == "GE" && (cmp < 0 || !cmp)) continue;
+							else if(params[1] == "NE" && !cmp) continue;	
+						}
+						output+=this->_transpile_(text,this->vir_regs_names,this->vir_regs, i+idx);
+					}
 					else this->errors.push_back((_uva_error_t){"'call' instructions set value is invalid!","INVALID_VALUE","value",i+idx}); 
+				}
+			}
+			else if(CMD == "nop"){
+				for(string p:params){
+					for(int i = 0;i <to_double(p); i++){}
 				}
 			}
 			else this->errors.push_back((_uva_error_t){"Invalid instruction entered!","INVALID_INSTRUCTION","decode",i+idx});
 		}
-	this->vir_regs = vir_regs;
 
 	return output;
 }
