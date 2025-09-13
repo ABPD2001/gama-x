@@ -48,9 +48,10 @@ class UVA_ASSEMBLER {
 	vector<label_t> labels;
 	stack<double> vir_stack;
 
-	string file_in;
+	vector<string> files_in;
 	string file_out;
 	string startLabel;
+	bool verbose;
 
 
 	string _transpile_(string content, const vector<string> vir_reg_names, vector<double> &vir_regs, uint32_t idx);
@@ -59,7 +60,7 @@ class UVA_ASSEMBLER {
 	public:
 		vector<_uva_error_t> errors;
 		uint8_t status = 0;
-		UVA_ASSEMBLER(string file_in, string file_out);
+		UVA_ASSEMBLER(vector<string> files_in, string file_out, bool verbose);
 		~UVA_ASSEMBLER();
 		uint8_t compile();
 		

@@ -1,14 +1,21 @@
 #include "./assembler.hpp"
 
-UVA_ASSEMBLER::UVA_ASSEMBLER(string file_in, string file_out){
-	if(!exists(file_in)) {
+UVA_ASSEMBLER::UVA_ASSEMBLER(vector<string> files_in, string file_out, bool verbose){
+	//if(!exists(file_in)) {
+	//	this->status = 1;
+	//	return;
+	//}
+	
+	this->verbose = verbose;
+	if(files_in.size()){
+		this->file_r.open(files_in[0],ios::in);
+		this->file_o.open(file_out,ios::out);
+	}
+	else {
 		this->status = 1;
 		return;
 	}
-	
-	this->file_r.open(file_in,ios::in);
-	this->file_o.open(file_out,ios::out);
-	this->file_in = file_in;
+	this->files_in = files_in;
 	this->file_out = file_out;
 	if(file_r.rdstate() != ios::goodbit) this->status = -1;
 	else if(file_o.rdstate() != ios::goodbit) this->status = -2;
@@ -270,12 +277,17 @@ vector<label_t> UVA_ASSEMBLER::_slice_labels_(string content){
 	uint32_t idx_line = -1;
 	char empties[7] = {'\r','\n',' ','\t','\a'};
 
+	if(this->verbose) cout<<"slicing labels...\n";
+
 	for(uint32_t i = 0; i<lines.size(); i++){
 		if(!filter(lines[i],empties,7).length()) continue;
 		lines[i] = trim(lines[i]);
 
 		if(cur_label.empty() && lines[i].find(':') != string::npos && lines.size()-1 != i) {
 			cur_label = filter(filter(lines[i],':'),empties,7);
+			for(label_t lbl:this->labels){
+				if(lbl.name == cur_label) this->errors.push_back((_uva_error_t){"label "+cur_label+" overloaded!","LABEL_OVERLOADED","syntax"});
+			}
 			idx_line = i;
 		}
 
@@ -295,7 +307,7 @@ UVA_ASSEMBLER::~UVA_ASSEMBLER(){
 	this->status = 3;
 	this->errors.clear();
 	this->labels.clear();
-	this->file_in.clear();
+	this->files_in.clear();
 	this->file_out.clear();
 	this->startLabel.clear();
 	this->vir_regs_names.clear();
@@ -306,15 +318,24 @@ uint8_t UVA_ASSEMBLER::compile(){
 	string file_content = "";
 	string out;
 	string temp_line;
+	string file_content_result = "";
 	
+	for(string f:this->files_in){
+	this->file_r.open(f,ios::in);
+	if(this->verbose) cout<<"reading file "<<f<<"...";
 	while(getline(this->file_r,temp_line)){
 		file_content+=temp_line+'\n';
 	}
 
 	temp_line[temp_line.length()-1] = '\0';
-	
+	if(this->verbose) cout<<"readed.\nco-processing...\n";
 	out = this->_co_processors_(file_content);
-	this->labels = this->_slice_labels_(file_content);
+	file_content_result+=file_content;
+	file_content_result+='\n';
+	}
+	file_content_result[file_content_result.length()-1] = '\0';
+
+	this->labels = this->_slice_labels_(file_content_result);
 	bool found = false;
 
 	for(label_t lbl: this->labels){
@@ -329,8 +350,6 @@ uint8_t UVA_ASSEMBLER::compile(){
 		this->status=2;
 		return this->status;
 	}
-
-	//out += this->_transpile_(mainPoint->text,this->vir_regs_names,this->vir_regs,mainPoint->line_idx);
 	this->file_o << out;
 
 	return this->status;
