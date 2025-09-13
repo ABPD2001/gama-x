@@ -5,12 +5,17 @@ UVA_ASSEMBLER::UVA_ASSEMBLER(vector<string> files_in, string file_out, bool verb
 	//	this->status = 1;
 	//	return;
 	//}
+	//
+	for(string f:files_in){
+		if(!exists(f)) {
+			this->status = 1;
+			return;
+		}
+	}
 	
 	this->verbose = verbose;
-	if(files_in.size()){
-		this->file_r.open(files_in[0],ios::in);
-		this->file_o.open(file_out,ios::out);
-	}
+	if(files_in.size()) this->file_o.open(file_out,ios::out);
+	
 	else {
 		this->status = 1;
 		return;
