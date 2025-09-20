@@ -22,7 +22,6 @@ using std::uint8_t;
 using std::uint32_t;
 using std::uint16_t;
 using std::cout;
-using std::stack;
 
 namespace fs = std::filesystem;
 using fs::exists;
@@ -46,11 +45,13 @@ class UVA_ASSEMBLER {
 	vector<double> vir_regs = {0,255,0,0,0,0,0,0,0,0};
 	vector<string> vir_regs_names =  {"x","y","v","a","sleep","r0","r1","r2","r3","r4","r5","st"};
 	vector<label_t> labels;
-	stack<double> vir_stack;
+	vector<double> vir_stack;
 
 	vector<string> files_in;
 	string file_out;
 	string startLabel;
+	uint32_t stack_limit;
+	bool stack_disbled;
 	bool verbose;
 
 
@@ -62,7 +63,6 @@ class UVA_ASSEMBLER {
 		uint8_t status = 0;
 		UVA_ASSEMBLER(vector<string> files_in, string file_out, bool verbose);
 		~UVA_ASSEMBLER();
-		uint8_t compile();
-		
+		uint8_t compile();	
 };
 #endif

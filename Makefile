@@ -1,2 +1,2 @@
 build:
-	g++ ./main.cpp ./utils/*.cpp ./libs/*.cpp -o ./uva
+	g++ ./main.cpp ./utils/*.cpp ./core/*.cpp -o ./uva

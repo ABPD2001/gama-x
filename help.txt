@@ -1,15 +1,10 @@
 <-- UVA (Ultra.Violet.Assembler) -->
 
 Usage: uva [*.s files...] [-o, -h, -v...]
-
 Flags:
 	[-o --output]: binary output file (*.uvb).
 	[-h, --help]: print this catalog.
-	[-d, --disable-stack]: disable stack (virtual stack).
-	[-l, --stack-limit]: limit stack to a specific count.
 	[-v, --verbose]: increase verbosity.
 	[-V, --version]: show version only.
-	[-i, --initial-registers]: set of values as initial value for registers from r0 to rN.
-	[-r, --register-count]: set count of registers.
 
 V1.0.0

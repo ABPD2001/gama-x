@@ -52,7 +52,6 @@ string UVA_ASSEMBLER::_transpile_(string content,const vector<string> vir_regs_n
 
 				tar_reg_idx = find(vir_regs_names,params[0]);
 				if(tar_reg_idx != -1 && params[1].length()) {
-					cout<<tar_reg_idx<<"\n";
 					if(params[1][0] == '#') vir_regs[tar_reg_idx] = to_double(trim(params[1]));
 					else {
 						signed short int reg2 = find(vir_regs_names,params[1]);
@@ -163,10 +162,10 @@ string UVA_ASSEMBLER::_transpile_(string content,const vector<string> vir_regs_n
 			else if(CMD == "push"){
 				if(params.size() != 1 || params[0].size()) this->errors.push_back((_uva_error_t) {"'push' instruction set values missed!","MISSED_VALUE","value"});
 				else {
-					if(params[0][0] == '#') this->vir_stack.push(to_double(trim(params[0])));
+					if(params[0][0] == '#') this->vir_stack.push_back(to_double(trim(params[0])));
 					else {
 						const short int reg = find(this->vir_regs_names,params[0]);
-						if(reg > -1) this->vir_stack.push(this->vir_regs[reg]);
+						if(reg > -1) this->vir_stack.push_back(this->vir_regs[reg]);
 						else this->errors.push_back((_uva_error_t){"'push' instruction set value is invalid!","INVALID_VLAUE","value"});
 					}
 				}
@@ -176,8 +175,9 @@ string UVA_ASSEMBLER::_transpile_(string content,const vector<string> vir_regs_n
 				else {
 					const short int reg = find(this->vir_regs_names,params[0]);
 					if(reg > -1) {
-						this->vir_regs[reg] = this->vir_stack.top();
-						this->vir_stack.pop();
+						this->vir_regs[reg] = this->vir_stack[this->vir_stack.size()-1];
+						this->vir_stack = vector<double>(this->vir_stack.begin(),this->vir_stack.end()-1);
+						
 					}
 					else this->errors.push_back((_uva_error_t){"'pull' instruction set value is invalid!","INVALID_VALUE","value"});
 				}
