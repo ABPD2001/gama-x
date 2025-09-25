@@ -4,7 +4,8 @@ Usage: uva [*.s files...] [-o, -h, -v...]
 Flags:
 	[-o --output]: binary output file (*.uvb).
 	[-h, --help]: print this catalog.
-	[-v, --verbose]: increase verbosity.
-	[-V, --version]: show version only.
-
+	[-v, --version]: show version only.
+	[-i, --registers-initial]: add initial value for registers.
+	[-l, --registers-length]: set registers length.
+	[-b, --binary]: binary output.
 V1.0.0

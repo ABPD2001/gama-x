@@ -20,7 +20,7 @@ int main(int argc, char *argv[]){
 	string help = "";
 	string temp_line;
 	fstream help_f;
-	bool verbose = false;
+	_uva_config_t config;
 
 	help_f.open("./help.txt",ios::in);
 
@@ -46,11 +46,35 @@ int main(int argc, char *argv[]){
 			cout<<help;	
 			return 0;
 		}
-
-		else if(param == "-v" || param == "--verbose") verbose = true;
-		else if(param == "-V" || param == "--version") {
+		else if(param == "-v" || param == "--version") {
 			cout<<VERSION<<"\n";
 			return 0;
+		}
+		else if(param == "-l" || param == "--register-length"){
+			if(i == argc-1) {
+				cout<<param<<" value missed!\n";
+				return 1;
+			}
+			vector<string> reg_names;
+			for(uint16_t i = 0; i<to_double(string(argv[i+1])); i++){
+				reg_names.push_back('r'+to_string(i));
+			}
+			config.names = reg_names;
+		}
+		else if(param == "-i" || param == "--registers-initial"){
+			if(i == argc-1){
+				cout<<param<<" value missed!\n";
+				return 1;
+			}	
+			vector<double> reg_values;
+			const vector<string> values = split(param,',');
+			for(uint16_t i = 0; i<values.size() && i<config.names.size(); i++){
+				reg_values.push_back(to_double(values[i]));
+			}
+			config.values = reg_values;
+		}
+		else if(param == "-b" || param == "--binary"){
+			config.binary = true;
 		}
 		else files.push_back(string(argv[i]));
 	
@@ -60,11 +84,9 @@ int main(int argc, char *argv[]){
 		cout<<"No file entered!\n";
 		return 1;
 	}
-	UVA_ASSEMBLER uva_asm = {files,output_file,verbose};
-	if(verbose) cout<<"Preparing for compilation...\n";
+	UVA_ASSEMBLER uva_asm = {files,output_file};
 	uva_asm.compile();
 
-	if(verbose) cout<<"Compilation completed.\n";
 
 	for(_uva_error_t err:uva_asm.errors){
 		cout<<"Error at line" << err.idx<<": "<<err.message<<"\nCause: "<<err.cause<<"\n";
