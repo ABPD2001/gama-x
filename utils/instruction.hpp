@@ -15,7 +15,7 @@ struct _uva_error_t {
 	string message;
 	string cause;
 	string type;
-	uint32_t idx;
+	string line;
 };
 
 struct _uva_snippet_t {
@@ -31,13 +31,13 @@ struct _uva_common_t {
 };
 
 struct _uva_instruction_t:_uva_common_t {
-	(*bool error_check) (vector<string> params, vector<_uva_error_t> &errors);
-	(*void run)(vector<_uva_snippet_t> &snippets,vector<string> params);
+	(bool *error_check) (vector<_uva_error_t> *errors,vector<string> params);
+	(void *run)(vector<_uva_snippet_t> &snippets,vector<string> params);
 };
 
 struct _uva_pre_processor_t:_uva_common_t {
+	(void *check_error)(vector<_uva_error_t> *errors, vector<string> params);
 	(void *run)(string &content);
-	(void *check_error)(vector<_uva_error_t> &errors, vector<string> params);
 };
 
 class UVA_ASSEMBLER_INSTRUCTIONS {
@@ -50,5 +50,13 @@ class UVA_ASSEMBLER_INSTRUCTIONS {
 		UVA_ASSEMBLER_INSTRUCTIONS();
 		UVA_ASSEMBLER_INSTRUCTIONS(vector<_uva_instruction_t> instructions, vector<_uva_error_t> *errors);
 };
-
+class UVA_ASSEMBLER_PRE_PROCESSORS {
+	vector<_uva_pre_processor_t> pre_processors;
+	vector<_uva_error_t> *errors;
+	
+	public:
+		void run(string &content,string line);
+		UVA_ASSEMBLER_PRE_PROCESSORS();
+		UVA_ASSEMBLER_PRE_PROCESSORS(vector<_uva_pre_processor_t> pre_processors,vector<_uva_error_t> *errors);
+};
 #endif

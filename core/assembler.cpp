@@ -1,39 +1,14 @@
 #include "./assembler.hpp"
 
-UVA_ASSEMBLER::UVA_ASSEMBLER(vector<string> files_in, string file_out, bool verbose){
-	//if(!exists(file_in)) {
-	//	this->status = 1;
-	//	return;
-	//}
-	//
-	for(string f:files_in){
-		if(!exists(f)) {
-			this->status = 1;
-			return;
-		}
-	}
-	
-	this->verbose = verbose;
-	if(files_in.size()) this->file_o.open(file_out,ios::out);
-	
-	else {
-		this->status = 1;
-		return;
-	}
-	this->files_in = files_in;
-	this->file_out = file_out;
-	if(file_r.rdstate() != ios::goodbit) this->status = -1;
-	else if(file_o.rdstate() != ios::goodbit) this->status = -2;
-
-	this->status = 0;
+UVA_ASSEMBLER::UVA_ASSEMBLER(string content, _uva_config_t config = {}){
+	this->input = content;
+	this->config = config;
 }
+UVA_ASSEMBELR::UVA_ASSEMBLER(){}
 
 string UVA_ASSEMBLER::_transpile_(string content,const vector<string> vir_regs_names, vector<double> &vir_regs,uint32_t idx){
-	string output = "";
-	string temp_line;
-
-	signed long int cmp = 0;
 	vector<string> lines = split(content,'\n');
+	signed long int cmp = 0;
 	char empties[7] = {'\t','\n','\f','\r',' ','\a','\v'};
 	
 	for(uint32_t i = 0; i<lines.size(); i++){

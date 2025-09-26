@@ -2,7 +2,7 @@
 #define UVA_ASSEMBLER_HPP
 #include <string>
 #include <cmath>
-#include "../utils/string.hpp"
+#include "../utils/instruction.hpp"
 #include "../utils/vector.hpp"
 #include "../utils/number.hpp"
 
@@ -15,28 +15,22 @@ using std::uint8_t;
 using std::uint32_t;
 using std::uint16_t;
 
-struct _uva_error_t {
-	string message;
-	string cause;
-	string type;
-	uint32_t idx;
-};
-
 struct _uva_label_t {
 	string text;
 	string name;
 	uint32_t line_idx;
 };
 
-struct _uva_snippet_t {
-	uint64_t time;
-	uint32_t x;
-	uint32_t y;
-	bool v;
+struct _uva_config_t {
+	vector<_uva_instruction_t> instructions = vector<_uva_instruction_t>();
+	vector<_uva_pre_processor_t> pre_processors = vector<_uva_pre_processor_t>();
+	vector<string> reg_names = vector<string>();
+	vector<double> reg_values = vector<double>();
 };
 
 class UVA_ASSEMBLER {
 	UVA_ASSEMBLER_INSTRUCTIONS uva_instructor;
+	_uva_config_t config;
 	vector<_uva_snippet_t> output;
 	vector<_uva_label_t> labels;
 	vector<double> vir_regs = {0,255,0,0,0,0,0,0,0,0};
@@ -54,7 +48,8 @@ class UVA_ASSEMBLER {
 		uint8_t status = 0;
 
 		UVA_ASSEMBLER(string content, _uva_config_t config);
+		UVA_ASSEMBLER();
 		~UVA_ASSEMBLER();
-		string compile();	
+		string compile();
 };
 #endif
