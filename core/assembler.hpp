@@ -2,7 +2,7 @@
 #define UVA_ASSEMBLER_HPP
 #include <string>
 #include <cmath>
-#include "../utils/instruction.hpp"
+#include "../utils/string.hpp"
 #include "../utils/vector.hpp"
 #include "../utils/number.hpp"
 
@@ -21,15 +21,30 @@ struct _uva_label_t {
 	uint32_t line_idx;
 };
 
+struct _uva_error_t {
+	string message;
+	string cause;
+	string type;
+	string line;
+};
+
+struct _uva_snippet_t {
+	uint64_t t; // time
+	uint32_t x; // x position
+	uint32_t y; // y position
+	bool v; // actual value
+};
+
 struct _uva_config_t {
 	vector<_uva_instruction_t> instructions = vector<_uva_instruction_t>();
 	vector<_uva_pre_processor_t> pre_processors = vector<_uva_pre_processor_t>();
 	vector<string> reg_names = vector<string>();
 	vector<double> reg_values = vector<double>();
+	uint32_t y_max;
+	uint32_t x_max;
 };
 
 class UVA_ASSEMBLER {
-	UVA_ASSEMBLER_INSTRUCTIONS uva_instructor;
 	_uva_config_t config;
 	vector<_uva_snippet_t> output;
 	vector<_uva_label_t> labels;
@@ -39,7 +54,7 @@ class UVA_ASSEMBLER {
 	string input;
 	string startLabel;
 
-	vector<_uva_snippet_t> _transpile_(string content, uint32_t idx);
+	vector<_uva_snippet_t> _transpile_(string content, vector<string> vir_regs_names, vector<double> &vir_regs);
 	vector<_uva_label_t> _slice_labels_(string content);
 	void _pre_processors_(string &content);
 

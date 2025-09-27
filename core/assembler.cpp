@@ -6,22 +6,27 @@ UVA_ASSEMBLER::UVA_ASSEMBLER(string content, _uva_config_t config = {}){
 }
 UVA_ASSEMBELR::UVA_ASSEMBLER(){}
 
-string UVA_ASSEMBLER::_transpile_(string content,const vector<string> vir_regs_names, vector<double> &vir_regs,uint32_t idx){
+string UVA_ASSEMBLER::_transpile_(string content,const vector<string> vir_regs_names, vector<double> &vir_regs){
 	vector<string> lines = split(content,'\n');
 	signed long int cmp = 0;
-	char empties[7] = {'\t','\n','\f','\r',' ','\a','\v'};
+	const char empties[7] = {'\t','\n','\f','\r',' ','\a','\v'};
 	
+
 	for(uint32_t i = 0; i<lines.size(); i++){
 		if(!filter(lines[i],empties,7).length()) continue;
 		
 		temp_line = trim(lines[i]);
 		const vector<string> parts = split(temp_line,' ');
 		const vector<string> params = split(join(vector<string>(parts.begin()+1,parts.end())," "),',');
+		for(uint8_t i = 0; i<params.size(); i++){
+			if(filter(params[i],const_cast<char[7]>(empties),7).empty()) this->errors.push_back((_uva_error_t) ({"'"+CMD+"' instruction set arguemnt "+to_string(i+1) + " has invalid syntax!","INVALID_VALUE_SYNTAX","syntax",lines[i]}));
+		};
+
 
 			if(CMD == "mov"){
 				signed short int tar_reg_idx = -1;
 				if(params.size() != 2) {
-					this->errors.push_back((_uva_error_t){"'mov' instrction set values missed!","MISSED_VALUE","syntax",i+idx});
+					this->errors.push_back((_uva_error_t){"'mov' instrction set arguments missed!","MISSED_ARGUMENS","value",line});
 					continue;
 				}
 
@@ -37,59 +42,56 @@ string UVA_ASSEMBLER::_transpile_(string content,const vector<string> vir_regs_n
 			}
 			else if(CMD == ".transpile") {
 				if(vir_regs[3]) {
-					vir_regs[1] = 255;
-					vir_regs[0] = 0;
+					vir_regs[1] = 0;
+					vir_regs[0] = this->config.x_max;
 				}
-
-				output+=join(vector<string>({to_string((int)vir_regs[0]),to_string((int)vir_regs[1]),to_string(vir_regs[2]>0),to_string((int) vir_regs[4])}),"-")+'\n';
+				_uva_snippet_t snippet = {(uint64_t) vir_regs[4], (uint32_t) (vir_regs[0]), (uint32_t) (vir_regs[1]), (bool) (vir_regs[2] > 0)};
+				output.push_back(snippet);
 			}
 			else if(CMD == "rst"){
 				vir_regs[0] = 0;
-				vir_regs[1] = 255;
+				vir_regs[1] = this->config.y_max;
 				vir_regs[2] = 0;
 				vir_regs[3] = 0;
 				vir_regs[4] = 0;
 			}
 			else if(CMD == "jmp"){
-				if(params.size()!=1) this->errors.push_back((_uva_error_t){"'jmp' instruction set must have line index to jump!","MISSED_VALUE","syntax",i+idx});
-				else if(isValidNumber(params[0])) i = min(lines.size()-1,to_uint32(params[0]));
+				if(params.size()>2 || params.size()<1) this->errors.push_back((_uva_error_t){"'jmp' instruction set must have line index to jump!","MISSED_VALUE","syntax",i+idx});
+				else if(isValidNumber(params[0])) {
+					const uint32_t num = to_uint32_t(params[0]);
+					if(num > lines.size()-1 || num < 0) {
+						this->errors.push_back((_uva_error_t) {"'jmp' instruction set argument is over/under of current block!","INVALID_JMP_PLACE","value",lines[i]});
+						continue;
+					}
+					if(params.size() == 2) {
+						if (params[1] == "EQ" && cmp) continue;
+						else if(params[1] == "LE" && cmp >= 0) continue;
+						else if(params[1] == "GE" && cmp <= 0) continue;
+						else if(params[1] != "AL") {
+							this->errors.push_back((_uva_error_t) {"'jmp' instruction set condition is invalid!","INVALID_CONDITION","value",line});
+						continue;
+						}
+					}
+					i = min(lines.size()-1,num);
+				}
+				else this->errors.push_back((_uva_error_t){"'jmp' instruction set jump address has invalid syntax!","INVALID_ARGUEMNT_SYNTAX","syntax",line});
 			}
 			else if(CMD == "cmp"){
-				if(params.size()!=2) this->errors.push_back((_uva_error_t){"'cmp' instruction set values missed!","MISSED_VALUE","syntax",i+idx});
+				if(params.size()!=2) {
+					this->errors.push_back((_uva_error_t){"'cmp' instruction set arguments are missed!","MISSED_ARGUMENTS","value",lines[i]});
+					continue;
+				}
 				const signed short int reg1_idx = find(this->vir_regs_names,params[0]);
 				const signed short int reg2_idx = find(this->vir_regs_names,params[1]);
 
 				if(reg1_idx > -1 && reg2_idx > -1) cmp = vir_regs[reg1_idx]-vir_regs[reg2_idx];
-				else this->errors.push_back((_uva_error_t){"'cmp' instruction set values are invalid!","INVALID_VALUE","value",i+idx});
-			}
-			else if(CMD == "jeq" && !cmp) {
-				if(params.size()!=1) this->errors.push_back((_uva_error_t){"'jeq' instructions set values missed!","MISSED_VALUE","syntax",i+idx});
-				else if(params[0].length()) i = min(lines.size()-1,to_uint32(params[0]));
-				else this->errors.push_back((_uva_error_t){"'jeq' instruction set value is invalid!","INVALID_VALUE","value",i+idx});
-			} 
-			else if(CMD == "jgr" && cmp){
-				if(params.size()!=1) this->errors.push_back((_uva_error_t){"'jgr' instructions set values missed!","MISSED_VALUE","syntax",i+idx});
-                                else if(params[0].length()) i = min(lines.size()-1,to_uint32(params[0]));
-                                else this->errors.push_back((_uva_error_t){"'jgr' instruction set value is invalid!","INVALID_VALUE","value",i+idx});
-			}
-			else if(CMD == "jlw" && cmp < 0){
-				if(params.size()!=1) this->errors.push_back((_uva_error_t){"'jlw' instructions set values missed!","MISSED_VALUE","syntax",i+idx});
-                                else if(params[0].length()) i = min(lines.size()-1,to_uint32(params[0]));
-                                else this->errors.push_back((_uva_error_t){"'jlw' instruction set value is invalid!","INVALID_VALUE","value",i+idx});
-			}
-			else if(CMD == "jeg" && cmp >= 0){
-				if(params.size()!=1) this->errors.push_back((_uva_error_t){"'jeg' instructions set values missed!","MISSED_VALUE","syntax",i+idx});
-                                else if(params[0].length()) i = min(lines.size()-1,to_uint32(params[0]));
-                                else this->errors.push_back((_uva_error_t){"'jeg' instruction set value is invalid!","INVALID_VALUE","value",i+idx});
-			}
-			else if(CMD == "jle" && cmp <= 0){
-				if(params.size()!=1) this->errors.push_back((_uva_error_t){"'jle' instructions set values missed!","MISSED_VALUE","syntax",i+idx});
-                                else if(params[0].length()) i = min(lines.size()-1,to_uint32(params[0]));
-                                else this->errors.push_back((_uva_error_t){"'jle' instruction set value is invalid!","INVALID_VALUE","value",i+idx});
+				else this->errors.push_back((_uva_error_t){"'cmp' instruction set registers are invalid!","INVALID_COMPARE_REGISTER","value",lines[i]});
 			}
 			else if(CMD == "add"){
-				if(params.size()!=2) this->errors.push_back((_uva_error_t){"'add' instructions set values missed!","MISSED_VALUE","syntax",i+idx});
-                                else if(params[0].length() && params[1].length()){
+				if(params.size()!=2) {
+					this->errors.push_back((_uva_error_t){"'add' instructions set arguments missed!","MISSED_ARGUMENTS","value",lines[i]});
+					continue;
+				}
 					const signed short int reg_idx = find(vir_regs_names,params[0]);
 					signed long int reg2 = 0;
 
@@ -97,83 +99,100 @@ string UVA_ASSEMBLER::_transpile_(string content,const vector<string> vir_regs_n
 					else reg2 = vir_regs[find(vir_regs_names,params[1])];
 
 					if(reg_idx > -1) vir_regs[reg_idx] += reg2;
-					else this->errors.push_back((_uva_error_t){"'add' instruction set value is invalid!","INVALID_VALUES","value",i+idx});
-				}
-                                else this->errors.push_back((_uva_error_t){"'add' instruction set value is invalid!","INVALID_VALUE","value",i+idx});
+					else this->errors.push_back((_uva_error_t){"'add' instruction set arguements are invalid!","INVALID_ARGUMENTS","value",lines[i]});
 			}
 
 			else if(CMD == "incr"){
-				if(params.size()!=1) this->errors.push_back((_uva_error_t){"'incr' instructions set values missed!","MISSED_VALUE","syntax",i+idx});
-				else if(params[0].length()){
+				if(params.size()!=1) {
+					this->errors.push_back((_uva_error_t){"'incr' instructions set arguments are missed!","MISSED_ARGUMENTS","value",lines[i]});
+					continue;
+				}
 					const signed short int reg_idx = find(vir_regs_names,params[0]);
 					if(reg_idx > -1) vir_regs[reg_idx]++;
-					else this->errors.push_back((_uva_error_t){"'incr' instructions set value is invalid!","INVALID_VALUE","value",i+idx}); 
-				}	
+					else this->errors.push_back((_uva_error_t){"'incr' instructions set argmuents are invalid!","INVALID_ARGUMENTS","value",lines[i]});
 			}
 			
 			else if(CMD == "sub"){
-				if(params.size()!=2) this->errors.push_back((_uva_error_t){"'min' instructions set values missed!","MISSED_VALUE","syntax",i+idx});
-                                else if(params[0].length() && params[1].length()){
-                                        const signed short int reg_idx = find(vir_regs_names,params[0]);
+				if(params.size()!=2) {
+					this->errors.push_back((_uva_error_t){"'min' instructions set arguments missed!","MISSED_ARGUMENTS","value",lines[i]});
+                                        continue;
+				}
+
+					const signed short int reg_idx = find(vir_regs_names,params[0]);
                                         signed long int reg2 = 0;
 
                                         if(params[1][0] == '#') reg2 = to_double(params[1].substr(1,params[1].length()));
                                         else reg2 = vir_regs[find(vir_regs_names,params[1])];
 
                                         if(reg_idx > -1) vir_regs[reg_idx] -= reg2;
-                                        else this->errors.push_back((_uva_error_t){"'add' instruction set value is invalid!","INVALID_VALUES","value",i+idx});
+                                        else this->errors.push_back((_uva_error_t){"'add' instruction set arguments are invalid!","INVALID_ARGUMENTS","value",lines[i]});
                                 }
-                                else this->errors.push_back((_uva_error_t){"'add' instruction set value is invalid!","INVALID_VALUE","value",i+idx});
-			}
 
 			else if(CMD == "decr"){
-				if(params.size()!=1) this->errors.push_back((_uva_error_t){"'decr' instructions set values missed!","MISSED_VALUE","value",i+idx});
-                                else if(params[0].length()){
-                                        const signed short int reg_idx = find(vir_regs_names,params[0]);
-                                        if(reg_idx > -1) vir_regs[reg_idx]--;
-                                        else this->errors.push_back((_uva_error_t){"'decr' instructions set value is invalid!","INVALID_VALUE","value",i+idx});
-                                }
+				if(params.size()!=1) {
+					this->errors.push_back((_uva_error_t){"'decr' instructions set arguments missed!","MISSED_ARGUMENTS","value",lines[i]});
+                                	continue;
+				}
+					else if(params[0].length()){
+                                 	       const signed short int reg_idx = find(vir_regs_names,params[0]);
+                                        	if(reg_idx > -1) vir_regs[reg_idx]--;
+                                        	else this->errors.push_back((_uva_error_t){"'decr' instructions set arguments is invalid!","INVALID_ARGUMENT","value",lines[i]});
+                                	}
 			}
 			else if(CMD == "push"){
-				if(params.size() != 1 || params[0].size()) this->errors.push_back((_uva_error_t) {"'push' instruction set values missed!","MISSED_VALUE","value"});
-				else {
+				if(params.size() != 1) {
+					this->errors.push_back((_uva_error_t) {"'push' instruction set arguments missed!","MISSED_ARGUMENTS","value"});
+					continue;
+				}
 					if(params[0][0] == '#') this->vir_stack.push_back(to_double(trim(params[0])));
 					else {
 						const short int reg = find(this->vir_regs_names,params[0]);
 						if(reg > -1) this->vir_stack.push_back(this->vir_regs[reg]);
-						else this->errors.push_back((_uva_error_t){"'push' instruction set value is invalid!","INVALID_VLAUE","value"});
+						else this->errors.push_back((_uva_error_t){"'push' instruction set register is invalid!","INVALID_STACK_REGISTER","value",lines[i]});
 					}
-				}
+				
 			}
 			else if(CMD == "pull"){
-				if(params.size() != 1 || params[0].empty()) this->errors.push_back((_uva_error_t){"'pull' instruction set value missed!","MISSED_VALUE","value"});
-				else {
+				if(params.size() != 1) {
+					this->errors.push_back((_uva_error_t){"'pull' instruction set arguments missed!","MISSED_ARGUMENTS","value",lines[i]});
+					continue;
+				}
 					const short int reg = find(this->vir_regs_names,params[0]);
 					if(reg > -1) {
 						this->vir_regs[reg] = this->vir_stack[this->vir_stack.size()-1];
 						this->vir_stack = vector<double>(this->vir_stack.begin(),this->vir_stack.end()-1);
 						
 					}
-					else this->errors.push_back((_uva_error_t){"'pull' instruction set value is invalid!","INVALID_VALUE","value"});
-				}
+					else this->errors.push_back((_uva_error_t){"'pull' instruction set argument is invalid!","INVALID_ARGUMENT","value",lines[i]});
+				
 			}
 			else if(CMD == "call") {
-			        if(!(params.size()>1 && params.size() < 3)) this->errors.push_back((_uva_error_t){"'call' instructions set values missed!","MISSED_VALUE","syntax",i+idx});
-				else if(params[0].length()){
+			        if(params.size()<1 && params.size() > 3) {
+					this->errors.push_back((_uva_error_t){"'call' instructions set arguments missed!","MISSED_ARGUMENTS","value",lines[i]});
+					continue;
+				}
 					string text;
-					for (uint16_t i = 0; i<this->labels.size(); i++) {
-						if(this->labels[i].name == params[0]) text = this->labels[i].text;
-					}
-					if(text.length()) {
-						if(params.size() == 2) {
-							if (params[1] == "EQ" && cmp) continue;
-							else if(params[1] == "LE" && (cmp > 0 || !cmp)) continue;
-						        else if(params[1] == "GE" && (cmp < 0 || !cmp)) continue;
-							else if(params[1] == "NE" && !cmp) continue;	
+				for (uint16_t i = 0; i<this->labels.size(); i++) {
+					if(this->labels[i].name == params[0]) text = this->labels[i].text;
+				}
+				if(text.length()) {
+					if(params.size() == 2) {
+						if (params[1] == "EQ" && cmp) continue;
+						else if(params[1] == "LE" && (cmp > 0 || !cmp)) continue;
+						else if(params[1] == "GE" && (cmp < 0 || !cmp)) continue;
+						else if(params[1] == "NE" && !cmp) continue;
+						else if(params[1] != "AL") {
+							this->errors.push_back((_uva_error_t) {"'call' instruction set condition is invalid!","INVALID_CONDITION","value",lines[i]});
+							continue;
 						}
-						output+=this->_transpile_(text,this->vir_regs_names,this->vir_regs, i+idx);
 					}
-					else this->errors.push_back((_uva_error_t){"'call' instructions set value is invalid!","INVALID_VALUE","value",i+idx}); 
+					
+					const vector<_uva_snippet_t> call_out = this->_transpile_(text,this->vir_regs_names,this->vir_regs);
+					for(_uva_snippet_t snippet:call_out){
+						this->output.push_back(snippet);
+					}
+					}
+					else this->errors.push_back((_uva_error_t){"'call' instructions set arguments are invalid!","INVALID_VALUE","value",lines[i]}); 
 				}
 			}
 			else if(CMD == "nop"){
