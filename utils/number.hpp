@@ -47,6 +47,11 @@ inline vector<string> split(string text, char splitter){
 }
 
 uint32_t to_uint32(string text);
+
+inline uint16_t to_uint16(string text){
+	return (uint16_t) to_uint32(text);
+}
+
 double to_double(string text);
 bool isValidNumber(string text);
 

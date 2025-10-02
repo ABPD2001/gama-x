@@ -55,6 +55,12 @@ string UVA_ASSEMBLER::_transpile_(string content,const vector<string> vir_regs_n
 				vir_regs[3] = 0;
 				vir_regs[4] = 0;
 			}
+			else if(CMD == "hrst"){
+				vir_regs[1] = this->config.x_max;
+				for(uint16_t i = 0; i<this->vir_regs.size(); i++){
+					this->vir_regs[i] = 0;
+				}
+			}
 			else if(CMD == "jmp"){
 				if(params.size()>2 || params.size()<1) this->errors.push_back((_uva_error_t){"'jmp' instruction set must have line index to jump!","MISSED_VALUE","syntax",i+idx});
 				else if(isValidNumber(params[0])) {

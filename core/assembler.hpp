@@ -36,8 +36,6 @@ struct _uva_snippet_t {
 };
 
 struct _uva_config_t {
-	vector<_uva_instruction_t> instructions = vector<_uva_instruction_t>();
-	vector<_uva_pre_processor_t> pre_processors = vector<_uva_pre_processor_t>();
 	vector<string> reg_names = vector<string>();
 	vector<double> reg_values = vector<double>();
 	uint32_t y_max;

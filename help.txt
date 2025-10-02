@@ -2,9 +2,10 @@
 
 Usage: uva [*.s files...] [-o, -h, -v...]
 Flags:
-	[-o --output]: binary output file (*.uvb).
 	[-h, --help]: print this catalog.
-	[-v, --verbose]: increase verbosity.
-	[-V, --version]: show version only.
-
-V1.0.0
+	[-v, --version]: show version and exit.
+	[-i, --initial-registers]: set initial value for registers [note: it can seperated by comma, also its dependent to -r flag].
+	[-r, --registers-count]: set count of working registers, number cannot be negetive.
+	[-b, --binary]: output binary instead of text.
+	[-x, --x-max]: maximum address value of 'x' register [note: 'x' register maximum value used in 'a' register to active all pins, by default is 255 (8-bit)].
+	[-y, --y-max]: maximum address value of 'y' register [note: 'y' register maximum value used in 'rst' instruction to reset all movement registers, by default is 255 (8-bit)].
