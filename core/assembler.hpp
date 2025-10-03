@@ -25,7 +25,7 @@ struct _uva_error_t {
 	string message;
 	string cause;
 	string type;
-	string line;
+	uint32_t line;
 };
 
 struct _uva_snippet_t {
@@ -52,7 +52,7 @@ class UVA_ASSEMBLER {
 	string input;
 	string startLabel;
 
-	vector<_uva_snippet_t> _transpile_(string content, vector<string> vir_regs_names, vector<double> &vir_regs);
+	vector<_uva_snippet_t> _transpile_(string content, uint16_t line_idx);
 	vector<_uva_label_t> _slice_labels_(string content);
 	void _pre_processors_(string &content);
 
@@ -63,6 +63,6 @@ class UVA_ASSEMBLER {
 		UVA_ASSEMBLER(string content, _uva_config_t config);
 		UVA_ASSEMBLER();
 		~UVA_ASSEMBLER();
-		string compile();
+		vector<_uva_snippet_t> compile();
 };
 #endif
