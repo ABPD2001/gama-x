@@ -9,28 +9,24 @@ using std::string;
 using std::fstream;
 using std::getline;
 using std::ios;
-using std::ios::iostate;
-using uint8_t;
+using std::uint8_t;
 
 namespace fs = std::filesystem;
 
 class File {
-	fstream file;
-	string path;
-
-	void check_status();
-	void init_status();
-	
+	bool check_status();
 	public:
-		iostate status = ios::goodbit;
-		uint8_t status_code = 0;
+		fstream file;
+		string path;
+		uint8_t status = 0;
 
-		File(string path, bool binary = false);
+		File();
+		File(string path);
 		string read();
-		iostate write(string content);
-		iostate overwrite(string content);
-		template<typename T> iostate bin_read(T *output, size_t size);
-		template<typename T> iostate bin_write(T *content, size_t size);
+		uint8_t write(string content);
+		uint8_t overwrite(string content);
+		template<typename T> uint8_t bin_read(T *output, size_t size);
+		template<typename T> uint8_t bin_write(T *content, size_t size);
 		bool ok();
 };
 #endif

@@ -5,17 +5,22 @@
 
 using std::cout;
 
+struct _file_binary_output_t {
+	_uva_snippet_t *snippets;
+	uint32_t length;
+};
+
 File *out_f;
 File *in_f;
 
-const char empties[7] = {'\r','\t','\n','\b',' ','\a','\v'};
+char empties[7] = {'\r','\t','\n','\b',' ','\a','\v'};
 
 void print_err(string type, string title, string cause);
 void safe_exit(int code);
 
-int main(char *argv[], int argc){
+int main(int argc, char *argv[]){
 	File help_f("./help.txt");
-	config_t config;
+	_uva_config_t config;
 
 	string file_in;
 	string file_out;
@@ -42,18 +47,18 @@ int main(char *argv[], int argc){
 				return 1;
 			}
 			
-			else if(filter(string(argv[i+1]),const_cast<char[7]>(empties),7).empty()){
-				print("User","Invalid arguemnt","[-i, --register-initial] flag value isnt valid!")
+			else if(filter(string(argv[i+1]),empties,7).empty()){
+				print_err("User","Invalid arguemnt","[-i, --register-initial] flag value isnt valid!");
 				return 1;
 			}
 
-			values = split(string(argv[i+1])), ',';
+			values = split(string(argv[i+1]), ',');
 			
 			for(string s:values){
-				reg_values.push_back(to_double(values));
+				reg_values.push_back(to_double(s));
 			}
 
-			const uint16_t name_value_compare = config.register_names.size() - config.register_values.size();
+			const uint16_t name_value_compare = config.reg_names.size() - config.reg_values.size();
 			if(name_value_compare) {
 				for(uint16_t i = 0; i<name_value_compare; i++){
 					reg_values.push_back(0);
@@ -67,12 +72,12 @@ int main(char *argv[], int argc){
 				print_err("User","Invalid argument","[-r, --registers-count] flag value missed!");
 				return 1;
 			}
-			else if(filter(string(argv[i+1]),const_cast<char[7]>(empties),7).empty()){
+			else if(filter(string(argv[i+1]),empties,7).empty()){
 				print_err("User","Invalid argument","[-r, --registers-count] flag value isnt valid!");
 				return 1;
 			}
 			
-			const int name_value_compare = config.reg_names.size() - config.reg_values.size()
+			const int name_value_compare = config.reg_names.size() - config.reg_values.size();
 			for(uint16_t i = 0; i<to_uint16(string(argv[i+1])); i++){
 				config.reg_names.push_back("r"+to_string(i));
 			}
@@ -86,7 +91,7 @@ int main(char *argv[], int argc){
 		else if(param == "-h" || param == "--help"){
 			const string help_txt = help_f.read();
 			if(help_f.status == ios::goodbit) cout<<help_f.read()<<"\n\n"<<VERSION<<"\n";
-			else cout<<print_err("System","Help file","Failed to open help file to print!")<<"\n";
+			else print_err("System","Help file","Failed to open help file to print!");
 			return (int) (help_f.status == ios::goodbit);
 		}
 		else if(param == "-x" || param == "--x-max"){
@@ -94,7 +99,7 @@ int main(char *argv[], int argc){
 				print_err("User","Invalid argument","[-x, --x-max] flag value missed!");
 				return 1;
 			}
-			else if(filter(string(argv[i+1]),const_cast<char[7]>(empties),7).empty()){
+			else if(filter(string(argv[i+1]),empties,7).empty()){
 				print_err("User","Invalid argument","[-x, --x-max] flag value isnt valid!");
 				return 1;
 			}
@@ -105,7 +110,7 @@ int main(char *argv[], int argc){
 				print_err("User","Invalid argument","[-y, --y-max] flag value missed!");
 				return 1;
 			}
-			else if(filter(argv[i+1],const_cast<char[7]>(empties),7).empty()){
+			else if(filter(argv[i+1],empties,7).empty()){
 				print_err("User","Invalid argument","[-y, --y-max] flag value isnt valid!");
 				return 1;
 			}
@@ -128,11 +133,11 @@ int main(char *argv[], int argc){
 	in_f = &in_file;
 	out_f = &out_file;
 	
-	if(in_f->status_code) {
+	if(in_f->status) {
 		print_err("File","Invalid file","failed to open input file!");
 		return 1;
 	}
-	if(out_f->status_code) {
+	if(out_f->status) {
 		print_err("File","Invalid file!","Faild to open output file!");
 		return 1;
 	}
@@ -147,9 +152,31 @@ int main(char *argv[], int argc){
 
 	UVA_ASSEMBLER uva_asm(input,config);
 
-	const string output = uva_asm.compile();
-	out_f->overwrite(output);
-	
+	const vector<_uva_snippet_t> snippet_out = uva_asm.compile();
+	if(binary){
+		const uint32_t length = snippet_out.size();
+		_uva_snippet_t *bin_snippets;
+		bin_snippets = new _uva_snippet_t[length];
+		
+		for(uint32_t i = 0; i<length; i++){
+			bin_snippets[i] = snippet_out[i];
+		}
+
+		_file_binary_output_t binary_output = {bin_snippets,length};
+		out_f->file.open(out_f->path,ios::binary|ios::out);
+		out_f->file.write((char*) &binary_output, sizeof(binary_output));
+		out_f->file.close();
+		
+	}
+	else {
+		string output;
+		for(_uva_snippet_t s:snippet_out){
+			const string output_l = join(vector<string>({to_string(s.x),to_string(s.y),to_string(s.v),to_string(s.t)}),",");
+			output += output_l;
+		}
+		out_f->overwrite(output);
+	}
+
 	if(!out_f->ok()){
 		print_err("File","File failure","Failed on writing to output file!");
 		return 1;
