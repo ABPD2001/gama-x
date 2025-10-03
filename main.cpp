@@ -154,18 +154,18 @@ int main(int argc, char *argv[]){
 
 	const vector<_uva_snippet_t> snippet_out = uva_asm.compile();
 	if(binary){
-		const uint32_t length = snippet_out.size();
-		_uva_snippet_t *bin_snippets;
-		bin_snippets = new _uva_snippet_t[length];
-		
-		for(uint32_t i = 0; i<length; i++){
-			bin_snippets[i] = snippet_out[i];
-		}
-
-		_file_binary_output_t binary_output = {bin_snippets,length};
-		out_f->file.open(out_f->path,ios::binary|ios::out);
-		out_f->file.write((char*) &binary_output, sizeof(binary_output));
-		out_f->file.close();
+//		const uint32_t length = snippet_out.size();
+//		_uva_snippet_t *bin_snippets;
+//		bin_snippets = new _uva_snippet_t[length];
+//		
+//		for(uint32_t i = 0; i<length; i++){
+//			bin_snippets[i] = snippet_out[i];
+//		}
+//
+//		_file_binary_output_t binary_output = {bin_snippets,length};
+//		out_f->file.open(out_f->path,ios::binary|ios::out);
+//		out_f->file.write((char*) &binary_output, sizeof(binary_output));
+//		out_f->file.close();
 		
 	}
 	else {

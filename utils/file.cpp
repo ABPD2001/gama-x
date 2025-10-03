@@ -25,8 +25,9 @@ string File::read(){
 	if(this->check_status()) return output;
 	
 	while(getline(this->file,temp_l)){
-		output+=temp_l;
+		output+=temp_l+'\n';
 	}
+	output[output.length()-1] = '\0';
 	
 	if(this->check_status()) return output;
 	this->file.close();
