@@ -1,14 +1,7 @@
-.main main
+.main _main
 .end
-main:
+_main:
 	mov x,#10
-	mov y,#16
-	mov r0, #1
-	mov r1, #1
-	cmp r0,r1
-	call test,EQ
+	mov y,#11
 	.transpile
-	end
-test:
-	mov v, #1
 	end

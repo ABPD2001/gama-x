@@ -292,6 +292,7 @@ vector<_uva_snippet_t> UVA_ASSEMBLER::_transpile_(string content, uint16_t line_
 			this->errors.push_back((_uva_error_t){"Invalid instruction entered!", "INVALID_INSTRUCTION", "decode", lx});
 	}
 
+	cout<<output.size()<<'\n';
 	return output;
 }
 
@@ -350,7 +351,7 @@ vector<_uva_label_t> UVA_ASSEMBLER::_slice_labels_(string content)
 	vector<string> lines = split(content, '\n');
 	string cur_label = "";
 
-	uint32_t idx_line = -1;
+	int idx_line = -1;
 	char empties[7] = {'\r', '\n', ' ', '\t', '\a'};
 
 	for (uint32_t i = 0; i < lines.size(); i++)
@@ -358,8 +359,7 @@ vector<_uva_label_t> UVA_ASSEMBLER::_slice_labels_(string content)
 		if (!filter(lines[i], empties, 7).length())
 			continue;
 		lines[i] = trim(lines[i]);
-
-		if (cur_label.empty() && lines[i].find(':') != string::npos && lines.size() - 1 != i)
+		if(cur_label.empty() && lines[i].find(':') != string::npos && lines.size() - 1 != i)
 		{
 			cur_label = filter(filter(lines[i], ':'), empties, 7);
 			for (_uva_label_t lbl : this->labels)
@@ -373,10 +373,10 @@ vector<_uva_label_t> UVA_ASSEMBLER::_slice_labels_(string content)
 			idx_line = i;
 		}
 
-		else if (lines[i] == "end" && cur_label.length() && idx_line != -1)
+		else if (lines[i].substr(0,3) == "end" && cur_label.length() && idx_line != -1)
 		{
 			const string content = join(vector<string>(lines.begin() + idx_line + 1, lines.begin() + i), "\n");
-			_uva_label_t label = {content, cur_label, idx_line};
+			_uva_label_t label = {content, cur_label, (uint32_t) idx_line};
 			cur_label.clear();
 			output.push_back(label);
 		}
@@ -398,17 +398,17 @@ UVA_ASSEMBLER::~UVA_ASSEMBLER()
 vector<_uva_snippet_t> UVA_ASSEMBLER::compile()
 {
 	vector<_uva_snippet_t> out;
-	string pre_processed_input;
+	string pre_processed_input = this->input;
 
 	this->_pre_processors_(pre_processed_input);
 	this->labels = this->_slice_labels_(pre_processed_input);
 	bool found = false;
-
 	for (_uva_label_t lbl : this->labels)
 	{
 		if (lbl.name == this->startLabel)
 		{
 			const vector<_uva_snippet_t> transpile_out = this->_transpile_(lbl.text, lbl.line_idx);
+			cout<<transpile_out.size()<<"\n";
 			for (_uva_snippet_t snip : transpile_out)
 			{
 				out.push_back(snip);
@@ -418,8 +418,8 @@ vector<_uva_snippet_t> UVA_ASSEMBLER::compile()
 		}
 	}
 
-	if (!found)
-		this->status = 2;
+	if (!found) this->status = 2;
+	
 
 	return out;
 }

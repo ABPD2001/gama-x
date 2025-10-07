@@ -22,15 +22,15 @@ int main(int argc, char *argv[]){
 	File help_f("./help.txt");
 	_uva_config_t config;
 
-	string file_in;
-	string file_out;
+	string file_in = "";
+	string file_out = "";
 
 	bool binary = false;
 
 	config.x_max = 255;
 	config.y_max = 255;
 
-	for(uint8_t i = 0; i<argc; i++){
+	for(uint8_t i = 1; i<argc; i++){
 		const string param = string(argv[i]);
 		
 		if(param == "-b" || param == "--binary") binary = true;
@@ -90,8 +90,8 @@ int main(int argc, char *argv[]){
 		}
 		else if(param == "-h" || param == "--help"){
 			const string help_txt = help_f.read();
-			if(help_f.status == ios::goodbit) cout<<help_f.read()<<"\n\n"<<VERSION<<"\n";
-			else print_err("System","Help file","Failed to open help file to print!");
+			cout<<help_f.status<<"\n"<<help_txt<<"\n\n"<<VERSION<<"\n";
+			// else print_err("System","Help file","Failed to open help file to print!");
 			return (int) (help_f.status == ios::goodbit);
 		}
 		else if(param == "-x" || param == "--x-max"){
@@ -110,12 +110,23 @@ int main(int argc, char *argv[]){
 				print_err("User","Invalid argument","[-y, --y-max] flag value missed!");
 				return 1;
 			}
-			else if(filter(argv[i+1],empties,7).empty()){
+			else if(filter(string(argv[i+1]),empties,7).empty()){
 				print_err("User","Invalid argument","[-y, --y-max] flag value isnt valid!");
 				return 1;
 			}
 			config.y_max = to_uint32(string(argv[i+1]));
 		}
+		//else if(param == "-o" || param == "--output"){
+		//	if(i == argc-1) {
+		//		print_err("User","Invalid argument","[-o, --output] flag value missed!");
+		//		return 1;
+		//	}
+		//	else if(filter(string(argv[argc+1]),empties,7).empty()){
+		//		print_err("User","Invalid argument","[-o, --output] flag value is invalid!");
+		//		return 1;
+		//	}
+		//	file_out = string(argv[argc+1]);
+		//}
 		else if(file_in.empty()){
 			file_in = param;
 		}
@@ -133,25 +144,23 @@ int main(int argc, char *argv[]){
 	in_f = &in_file;
 	out_f = &out_file;
 	
-	if(in_f->status) {
-		print_err("File","Invalid file","failed to open input file!");
-		return 1;
-	}
-	if(out_f->status) {
-		print_err("File","Invalid file!","Faild to open output file!");
-		return 1;
-	}
+	//if(in_f->status) {
+	//	print_err("File","Invalid file","failed to open input file!");
+	//	return 1;
+	//}
+	//if(out_f->status) {
+	//	print_err("File","Invalid file!","Faild to open output file!");
+	//	return 1;
+	//}
 	
 
 	const string input = in_f->read();
 	
-	if(!in_f->ok()){
-                print_err("File","File failure","Failed on reading from input file!");
-                return 1;
-        }
-
+//	if(!in_f->ok()){
+  //              print_err("File","File failure","Failed on reading from input file!");
+    //            return 1;
+      //  }
 	UVA_ASSEMBLER uva_asm(input,config);
-
 	const vector<_uva_snippet_t> snippet_out = uva_asm.compile();
 	if(binary){
 //		const uint32_t length = snippet_out.size();
@@ -172,6 +181,7 @@ int main(int argc, char *argv[]){
 		string output;
 		for(_uva_snippet_t s:snippet_out){
 			const string output_l = join(vector<string>({to_string(s.x),to_string(s.y),to_string(s.v),to_string(s.t)}),",");
+			cout<<s.x<<" "<<s.y<<" "<<s.t<<"\n";
 			output += output_l;
 		}
 		out_f->overwrite(output);

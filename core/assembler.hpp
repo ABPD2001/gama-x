@@ -2,6 +2,7 @@
 #define UVA_ASSEMBLER_HPP
 #include <string>
 #include <cmath>
+#include <iostream>
 #include "../utils/string.hpp"
 #include "../utils/vector.hpp"
 #include "../utils/number.hpp"
@@ -14,6 +15,7 @@ using std::to_string;
 using std::uint8_t;
 using std::uint32_t;
 using std::uint16_t;
+using std::cout;
 
 struct _uva_label_t {
 	string text;
