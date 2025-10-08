@@ -25,7 +25,7 @@ vector<_uva_snippet_t> UVA_ASSEMBLER::_transpile_(string content, uint16_t line_
 
 		temp_line = trim(lines[i]);
 		const vector<string> parts = split(temp_line, ' ');
-		const vector<string> params = split(join(vector<string>(parts.begin() + 1, parts.end()), " "), ',');
+		vector<string> params = split(join(vector<string>(parts.begin() + 1, parts.end()), " "), ',');
 		const uint32_t lx = i + line_idx;
 
 		for (uint8_t i = 0; i < params.size(); i++)
@@ -121,13 +121,32 @@ vector<_uva_snippet_t> UVA_ASSEMBLER::_transpile_(string content, uint16_t line_
 				this->errors.push_back((_uva_error_t){"'cmp' instruction set arguments are missed!", "MISSED_ARGUMENTS", "value", lx});
 				continue;
 			}
-			const signed short int reg1_idx = find(this->vir_regs_names, params[0]);
-			const signed short int reg2_idx = find(this->vir_regs_names, params[1]);
+			long int reg1_idx;
+			long int reg2_idx;
 
-			if (reg1_idx > -1 && reg2_idx > -1)
-				cmp = vir_regs[reg1_idx] - vir_regs[reg2_idx];
-			else
-				this->errors.push_back((_uva_error_t){"'cmp' instruction set registers are invalid!", "INVALID_COMPARE_REGISTER", "value", lx});
+			if(params[0][0] == '#') reg1_idx = to_double(params[0]);
+			else {
+				reg1_idx = find(this->vir_regs_names, params[0]);
+				if(reg1_idx == -1) {
+					this->errors.push_back((_uva_error_t){"'cmp' instruction set first argument isnt valid!","INVALID_ARGUMENT","value",lx});
+					continue;
+				}
+			}
+			if(params[1][0] == '#') {
+				reg2_idx = to_double(params[1]);
+				cmp = reg1_idx - reg2_idx;
+			}
+			else {
+				reg2_idx = find(this->vir_regs_names, params[1]);
+				if(reg2_idx == -1) {
+					this->errors.push_back((_uva_error_t){"'cmp' instruction set second argument isnt valid!","INVALID_ARGUMENT","value",lx});
+					continue;
+				}	
+			
+			cmp = vir_regs[reg1_idx] - vir_regs[reg2_idx];
+			}
+			cout<<"cmp --> "<<cmp<<"\n";
+			//else this->errors.push_back((_uva_error_t){"'cmp' instruction set registers are invalid!", "INVALID_COMPARE_REGISTER", "value", lx});
 		}
 		else if (CMD == "add")
 		{
@@ -249,30 +268,31 @@ vector<_uva_snippet_t> UVA_ASSEMBLER::_transpile_(string content, uint16_t line_
 				if (this->labels[i].name == params[0])
 					text = this->labels[i].text;
 			}
+
 			if (text.length())
 			{
 				if (params.size() == 2)
 				{
-					if (params[1] == "EQ" && cmp)
+					cout<<cmp<<"\n";
+					if (params[1] == "EQ" && cmp != 0)
 						continue;
-					else if (params[1] == "LE" && (cmp > 0 || !cmp))
+					else if (params[1] == "LE" && cmp >= 0)
 						continue;
-					else if (params[1] == "GE" && (cmp < 0 || !cmp))
+					else if (params[1] == "GE" && cmp <= 0)
 						continue;
 					else if (params[1] == "NE" && !cmp)
 						continue;
-					else if (params[1] != "AL")
-					{
-						this->errors.push_back((_uva_error_t){"'call' instruction set condition is invalid!", "INVALID_CONDITION", "value", lx});
-						continue;
-					}
+					//else if (params[1] == "AL")
+					//{
+					//	this->errors.push_back((_uva_error_t){"'call' instruction set condition is invalid!", "INVALID_CONDITION", "value", lx});
+					//	continue;
+					//}
 				}
 
 				const vector<_uva_snippet_t> call_out = this->_transpile_(text, lx);
-
-				for (_uva_snippet_t snippet : call_out)
+				for (uint32_t i = 0; i<call_out.size(); i++)
 				{
-					this->output.push_back(snippet);
+					output.push_back(call_out[i]);
 				}
 			}
 			else
@@ -292,7 +312,6 @@ vector<_uva_snippet_t> UVA_ASSEMBLER::_transpile_(string content, uint16_t line_
 			this->errors.push_back((_uva_error_t){"Invalid instruction entered!", "INVALID_INSTRUCTION", "decode", lx});
 	}
 
-	cout<<output.size()<<'\n';
 	return output;
 }
 
@@ -408,7 +427,6 @@ vector<_uva_snippet_t> UVA_ASSEMBLER::compile()
 		if (lbl.name == this->startLabel)
 		{
 			const vector<_uva_snippet_t> transpile_out = this->_transpile_(lbl.text, lbl.line_idx);
-			cout<<transpile_out.size()<<"\n";
 			for (_uva_snippet_t snip : transpile_out)
 			{
 				out.push_back(snip);
