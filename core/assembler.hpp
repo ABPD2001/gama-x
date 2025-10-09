@@ -48,7 +48,7 @@ class UVA_ASSEMBLER {
 	_uva_config_t config;
 	vector<_uva_snippet_t> output;
 	vector<_uva_label_t> labels;
-	vector<double> vir_regs = {0,255,0,0,0,0,0,0,0,0};
+	vector<double> vir_regs = {0,255,0,0,0,0,0,0,0,0,0,0};
 	vector<double> vir_stack;
 	vector<string> vir_regs_names =  {"x","y","v","a","sleep","r0","r1","r2","r3","r4","r5","st"};
 	string input;

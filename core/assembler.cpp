@@ -134,6 +134,7 @@ vector<_uva_snippet_t> UVA_ASSEMBLER::_transpile_(string content, uint16_t line_
 			}
 			if(params[1][0] == '#') {
 				reg2_idx = to_double(params[1]);
+				cout<<reg1_idx<<"-"<<reg2_idx<<"\n";
 				cmp = reg1_idx - reg2_idx;
 			}
 			else {
@@ -142,10 +143,8 @@ vector<_uva_snippet_t> UVA_ASSEMBLER::_transpile_(string content, uint16_t line_
 					this->errors.push_back((_uva_error_t){"'cmp' instruction set second argument isnt valid!","INVALID_ARGUMENT","value",lx});
 					continue;
 				}	
-			
 			cmp = vir_regs[reg1_idx] - vir_regs[reg2_idx];
 			}
-			cout<<"cmp --> "<<cmp<<"\n";
 			//else this->errors.push_back((_uva_error_t){"'cmp' instruction set registers are invalid!", "INVALID_COMPARE_REGISTER", "value", lx});
 		}
 		else if (CMD == "add")
@@ -273,7 +272,6 @@ vector<_uva_snippet_t> UVA_ASSEMBLER::_transpile_(string content, uint16_t line_
 			{
 				if (params.size() == 2)
 				{
-					cout<<cmp<<"\n";
 					if (params[1] == "EQ" && cmp != 0)
 						continue;
 					else if (params[1] == "LE" && cmp >= 0)

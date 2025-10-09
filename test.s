@@ -1,13 +1,14 @@
 .main _main
 .end
+
 _main:
-	mov r0, #1
-	mov r1, #2
+	mov r0,#1
+	mov r1,#2
 	mov x,#10
 	mov y,#11
 	.transpile
 	cmp r0,r1
-	call test,EQ
+	call test,NE
 	end
 
 test:
