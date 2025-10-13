@@ -1,2 +1,2 @@
 build:
-	g++ ./main.cpp ./utils/*.cpp ./core/*.cpp -o ./linker
+	g++ ./main.cpp ./utils/*.cpp ./core/*.cpp -o ./gxl
