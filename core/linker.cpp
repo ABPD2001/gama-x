@@ -79,38 +79,102 @@ string _GAMA_X_LINKER_::_merge_instructions_(vector<_GAMA_X_LINKER_file_t> files
 	return join(instructions,"\n");
 }
 
-bool _mov_ec_(string line){
-	
+bool _mov_ec_(vector<string> params,_GAMA_X_LINKER_file_t file, uint32_t line){
+	if(params.size() != 2) {
+		this->errors.push_back((_GAMA_X_LINKER_error_t){"Invalid arguments syntax ("+file.name+")","syntax","'mov' instruction set arguments are out of range!",line});
+	return true;
+	}
+	return false;
 }
-bool _jmp_ec_(string line){
-
+bool _jmp_ec_(vector<string> params,_GAMA_X_LINKER_file_t file, uint32_t line){
+	if(params.size() != 1){
+		this->errors.push_back((_GAMA_X_LINKER_error_t) {"Invalid arguments syntax ("+file.name+")","syntax","'jmp' instruction set arguments are out of range!",line});
+	return true;
+	}
+	if(!isValidNumber(params[0])){
+		this->errors.push_back((_GAMA_X_LINKER_error_t) {"Invalid argument type ("+file.name+")","value","'jmp' instruction set argument value is invalid (must be a valid number)!",line});
+		return true;
+	}
+	return false;
 }
-bool _cmp_ec_(string line){
-
+bool _cmp_ec_(vector<string> params, _GAMA_X_LINKER_file_t file, uint32_t line){
+	if(params.size() != 2){
+		this->errors.push_back((_GAMA_X_LINKER_error_t){"Invalid arguments syntax ("+file.name+")","syntax","'cmp' instruction set arguments are out of range!",line});
+		return true;
+	}
+	return false;
 }
-bool _add_ec_(string line){
-
+bool _add_ec_(vector<string> params, _GAMA_X_LINKER_file_t file, uint32_t line){
+	if(params.size() != 2){
+		this->errors.push_back((_GAMA_X_LINKER_error_t){"Invalid arguments syntax ("+file.name+")","syntax","'add' instruction set arguments are out of range!",line});
+		return true;
+	}
+	return false;
 }
 bool _incr_ec_(string line){
-
+	if(params.size() != 1){
+		this->errors.push_back((_GAMA_X_LINKER_error_t){"Invalid arguments syntax ("+file.name+")","syntax","'incr' instruction set arguments are out of range!",line});
+		return true;
+	}
+	return false;
 }
 bool _sub_ec_(string line){
-
+	if(params.size() != 2){
+		this->errors.push_back((_GAMA_X_LINKER_error_t){"Invalid arguments syntax ("+file.name+")","syntax","'sub' instruction set arguments are out of range!",line});
+		return true;
+	}
+	return false;
 }
-bool _decr_ec_(string line){
-
+bool _decr_ec_(vector<string> params, _GAMA_X_LINKER_file_t file, uint32_t line){
+	if(params.size() != 1){
+		this->errors.push_back((_GAMA_X_LINKER_error_t){"Invalid arguments syntax ("+file.name+")","syntax","'decr' instruction set arguments are out of range!",line});
+	return true;
+	}
+	return false;
 }
 bool _push_ec_(string line){
-
+	if(params.size() != 1){
+		this->errors.push_back((_GAMA_X_LINKER_error_t){"Invalid arguments syntax ("+file.name+")","syntax","'push' instruction set arguments are out of range!",line});
+		return true;
+	}
+	return false;
 }
 bool _pull_ec_(string line){
-
+	if(params.size() != 1){
+		this->errors.push_back((_GAMA_X_LINKER_error_t){"Invalid arguments syntax ("+file.name+")","syntax","'pull' instruction set arguments are out of range!",line});
+		return true;
+	}
+	return false;
 }
-bool _call_ec_(string line){
-
+bool _call_ec_(vector<string> params, _GAMA_X_LINKER_file_t, uint32_t line){
+	if(params.size() < 1 || params.size() > 2){
+		this->errors.push_back((_GAMA_X_LINKER_error_t){"Invalid arguments syntax ("+file.name+")","syntax","'call' instruction set arguments are out of range!",line});
+	return true;
+	}
+	else if(params.size() == 2){
+		string conditions[] = {"NE","AL","EQ","GE"};
+		bool isCorrect = false;
+		for(uint8_t i = 0; i<4; i++){
+			if (conditions[i] == params[1]) {
+				isCorrect = true;
+				break;
+			}
+		}
+		if(!isCorrect){
+			this->errors.push_back((_GAMA_X_LINKER_error_t) {"Invalid arguments syntax ("+file.name+")","syntax","'call' instruction set arguments are out of range!",line});
+			return true;
+		}
+	}
+	return false;
 }
-bool _nop_ec_(string line){
-
+bool _nop_ec_(vector<string> params, _GAMA_X_LINKER_file_t file, uint32_t line){
+	const uint16_t errors_c = this->errors.size();
+	for(string p:params){
+		if(!isValidNumber(p)) {
+			this->errors.push_back((_GAMA_X_LINKER_error_t){"Invalid arguments syntax ("+file.name+")","syntax","'nop' instruction set arguments are out of range!",line});
+		}
+	}
+	return !(errors_c != this->errors.size());
 }
 
 void _GAMA_X_LINKER_::_check_errors_(_GAMA_X_LINKER_file_t file){
@@ -123,11 +187,11 @@ void _GAMA_X_LINKER_::_check_errors_(_GAMA_X_LINKER_file_t file){
 		const vector<string> params = parts.size() > 1 ? split(parts[1],',') : {};
 		
 		if(parts.size()>2) {
-			this->errors.push_back((_GAMA_X_LINKER_error_t){"invalid instruction syntax","syntax","instruction syntax is invalid, extra space detected!"});
+			this->errors.push_back((_GAMA_X_LINKER_error_t){"invalid instruction syntax ("+file.name+")","syntax","instruction syntax is invalid, extra space detected!",i});
 			continue;
 		}
 		
 		const short int instruction_idx = find(instruction_names,parts[0]);	
-		if(error_checks[instruction_idx](lines[i])) continue;
+		if(!error_checks[instruction_idx](params)) continue;
 	}
 }
