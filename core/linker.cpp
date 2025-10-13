@@ -1,12 +1,12 @@
 #include "./linker.hpp"
 
-_GAMA_X_LINKER_::_GAMA_X_LINKER_(vector<string> contents) {
-	this->contents = contents;
+_GAMA_X_LINKER_::_GAMA_X_LINKER_(vector<_GAMA_X_LINKER_file_t> files) {
+	this->files = files;
 }
 
 _GAMA_X_LINKER::_GAMA_X_LINKER_(){}
 
-void _GAMA_X_LINKER_::_slice_labels(string content){
+void _GAMA_X_LINKER_::_slice_labels_(string content){
 	vector<_GAMA_X_LINKER_label_t> output;
 	vector<string> lines = split(content, '\n');
 	string cur_label = "";
@@ -194,4 +194,18 @@ void _GAMA_X_LINKER_::_check_errors_(_GAMA_X_LINKER_file_t file){
 		const short int instruction_idx = find(instruction_names,parts[0]);	
 		if(!error_checks[instruction_idx](params)) continue;
 	}
+}
+
+string _GAMA_X_LINKER_::merge(){
+	const string pre_processors = this->_merge_pre_processors_(this->files);
+	const string instructions = this->_merge_instructions_(this->files);
+	
+	for(_GAMA_X_LINKER_file_t f:this->files){
+		this->_slice_labels_(f.content);
+	}
+
+	this->_check_errors();
+	if(this->errors.size()) return "";
+	
+	return (pre_processors+'\n'+instructions);
 }

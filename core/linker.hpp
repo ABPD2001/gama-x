@@ -32,7 +32,7 @@ struct _GAMA_X_LINKER_file_t {
 typedef (*bool _GAMA_X_LINKER_err_check_t)(string line);
 
 class _GAMA_X_LINKER_ {
-	vector<string> contents;
+	vector<_GAMA_X_LINKER_file_t> files;
 	vector<vector<_GAMA_X_LINKER_label_t>> labels;
 	vector<_GAMA_X_LINKER_error_t> errors;
 
@@ -45,6 +45,6 @@ class _GAMA_X_LINKER_ {
 		uint8_t status = 0;
 
 		_GAMA_X_LINKER_();
-		_GAMA_X_LINKER_(vector<string> contents);
+		_GAMA_X_LINKER_(vector<_GAMA_X_LINKER_file_t> files);
 		string merge();
 };
