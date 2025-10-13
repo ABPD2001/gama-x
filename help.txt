@@ -1,6 +1,6 @@
-<-- UVA (Ultra.Violet.Assembler) -->
+<-- Gama-X Assembler -->
 
-Usage: uva [*.s files...] [-o, -h, -v...]
+Usage: gxa [*.s files...] [-o, -h, -v...]
 Flags:
 	[-h, --help]: print this catalog.
 	[-v, --version]: show version and exit.
