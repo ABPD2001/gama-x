@@ -27,9 +27,6 @@ int main(int argc, char *argv[]){
 
 	bool binary = false;
 
-	config.x_max = 255;
-	config.y_max = 255;
-
 	for(uint8_t i = 1; i<argc; i++){
 		const string param = string(argv[i]);
 		
@@ -93,28 +90,6 @@ int main(int argc, char *argv[]){
 			cout<<help_f.status<<"\n"<<help_txt<<"\n\n"<<VERSION<<"\n";
 			// else print_err("System","Help file","Failed to open help file to print!");
 			return (int) (help_f.status == ios::goodbit);
-		}
-		else if(param == "-x" || param == "--x-max"){
-			if(i == argc-1){
-				print_err("User","Invalid argument","[-x, --x-max] flag value missed!");
-				return 1;
-			}
-			else if(filter(string(argv[i+1]),empties,7).empty()){
-				print_err("User","Invalid argument","[-x, --x-max] flag value isnt valid!");
-				return 1;
-			}
-			config.x_max = to_uint32(string(argv[i+1]));
-		}
-		else if(param == "-y" || param == "--y-max"){
-			if(i == argc-1){
-				print_err("User","Invalid argument","[-y, --y-max] flag value missed!");
-				return 1;
-			}
-			else if(filter(string(argv[i+1]),empties,7).empty()){
-				print_err("User","Invalid argument","[-y, --y-max] flag value isnt valid!");
-				return 1;
-			}
-			config.y_max = to_uint32(string(argv[i+1]));
 		}
 		//else if(param == "-o" || param == "--output"){
 		//	if(i == argc-1) {

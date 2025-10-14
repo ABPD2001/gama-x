@@ -32,25 +32,22 @@ struct _uva_error_t {
 
 struct _uva_snippet_t {
 	uint64_t t; // time
-	uint32_t x; // x position
-	uint32_t y; // y position
-	bool v; // actual value
+	uint32_t x; // x value
+	uint32_t y; // y value
 };
 
 struct _uva_config_t {
 	vector<string> reg_names = vector<string>();
 	vector<double> reg_values = vector<double>();
-	uint32_t y_max;
-	uint32_t x_max;
 };
 
 class UVA_ASSEMBLER {
 	_uva_config_t config;
 	vector<_uva_snippet_t> output;
 	vector<_uva_label_t> labels;
-	vector<double> vir_regs = {0,255,0,0,0,0,0,0,0,0,0,0};
+	vector<double> vir_regs = {0,255,0,0,0,0,0,0,0,0};
 	vector<double> vir_stack;
-	vector<string> vir_regs_names =  {"x","y","v","a","sleep","r0","r1","r2","r3","r4","r5","st"};
+	vector<string> vir_regs_names =  {"x","y","sleep","r0","r1","r2","r3","r4","r5","st"};
 	string input;
 	string startLabel;
 

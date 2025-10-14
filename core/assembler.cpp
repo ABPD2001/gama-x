@@ -59,29 +59,15 @@ vector<_uva_snippet_t> UVA_ASSEMBLER::_transpile_(string content, uint16_t line_
 		}
 		else if (CMD == ".transpile")
 		{
-			if (vir_regs[3])
-			{
-				vir_regs[1] = 0;
-				vir_regs[0] = this->config.x_max;
-			}
-			_uva_snippet_t snippet = {(uint64_t)vir_regs[4], (uint32_t)(vir_regs[0]), (uint32_t)(vir_regs[1]), (bool)(vir_regs[2] > 0)};
+			_uva_snippet_t snippet = {(uint64_t)vir_regs[2], (uint32_t)(vir_regs[0]), (uint32_t)(vir_regs[1])};
 			output.push_back(snippet);
 		}
-		else if (CMD == "rst")
-		{
-			vir_regs[0] = 0;
-			vir_regs[1] = this->config.y_max;
-			vir_regs[2] = 0;
-			vir_regs[3] = 0;
-			vir_regs[4] = 0;
-		}
-		else if (CMD == "hrst")
+		else if (CMD == ".reset")
 		{
 			for (uint16_t i = 0; i < this->vir_regs.size(); i++)
 			{
 				this->vir_regs[i] = 0;
 			}
-			vir_regs[1] = this->config.y_max;
 		}
 		else if (CMD == "jmp")
 		{
