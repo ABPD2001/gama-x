@@ -7,14 +7,15 @@
 
 using std::fstream;
 using std::cout;
-using std::filelsystem::exists;
+using std::filesystem::exists;
 using std::string;
+using std::ios;
 
 void print_err(string type, string title, string cause);
 
 int main(int argc, char *argv[]){
 	vector<_GAMA_X_LINKER_file_t> _linker_files_;
-	vector<string> file_in;
+	vector<string> files_in;
 	string output;
 	char empties[7] = {'\n',' ','\t','\b','\v','\r','\a'};
 
@@ -66,7 +67,7 @@ int main(int argc, char *argv[]){
 		_linker_files_.push_back((_GAMA_X_LINKER_file_t) {content,files_in[i]});
 	}
 
-	_GAMA_X_LINKER linker(_linker_files_);
+	_GAMA_X_LINKER_ linker(_linker_files_);
 	const string merged_content = linker.merge();
 	fstream out_f;
 	out_f.open(output,ios::out);

@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <vector>
 #include "../utils/string.hpp"
-#include "../utils/number.hppi"
+#include "../utils/number.hpp"
 #include "../utils/vector.hpp"
 
 using std::string;
@@ -15,13 +15,14 @@ using std::vector;
 struct _GAMA_X_LINKER_label_t {
 	string name;
 	string text;
+	uint32_t line;
 };
 
 struct _GAMA_X_LINKER_error_t {
 	string title;
 	string type;
 	string description;
-	uint32_t line;
+	long int line;
 };
 
 struct _GAMA_X_LINKER_file_t {
@@ -29,15 +30,15 @@ struct _GAMA_X_LINKER_file_t {
 	string name;
 };
 
-typedef (*bool _GAMA_X_LINKER_err_check_t)(string line);
+typedef bool *(_GAMA_X_LINKER_err_check_t) (vector<_GAMA_X_LINKER_error_t>, vector<string>, _GAMA_X_LINKER_file_t, uint32_t);
 
 class _GAMA_X_LINKER_ {
 	vector<_GAMA_X_LINKER_file_t> files;
 	vector<vector<_GAMA_X_LINKER_label_t>> labels;
 	vector<_GAMA_X_LINKER_error_t> errors;
 
-	void _slice_labels_(string content);
-	void _check_errors_(string content);
+	void _slice_labels_(_GAMA_X_LINKER_file_t file);
+	void _check_errors_(string content, string filename);
 	string _merge_pre_processors_(vector<_GAMA_X_LINKER_file_t> files);
 	string _merge_instructions_(vector<_GAMA_X_LINKER_file_t> files);
 
