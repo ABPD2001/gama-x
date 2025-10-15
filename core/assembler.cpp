@@ -55,7 +55,57 @@ vector<_uva_snippet_t> UVA_ASSEMBLER::_transpile_(string content, uint16_t line_
 				}
 			}
 			else
-				this->errors.push_back((_uva_error_t){"'mov' instruction set value missed or is invalid!", "MISSED_OR_INVALID_REGISTER_NAME", "syntax", lx});
+				this->errors.push_back((_uva_error_t){"'mov' instruction set value missed or is invalid!", "MISSED_OR_INVALID_REGISTER_NAME", "value", lx});
+		}
+		else if(CMD == "log"){
+			signed short int tar_reg_idx = -1;
+			uint32_t bin1;
+			uint32_t bin2;
+
+			if(params.size() != 3){
+				this->errors.push_back((_uva_error_t){"'log' instruction set value missed or is invalid!","MISSED_OR_INVALID_REGISTER_NAME","value",lx});
+				continue;
+			}
+			tar_reg_idx = find(vir_regs_names,params[0]);
+			if (tar_reg_idx > -1 && params[1].size()) {
+				bin1 = (uint32_t) vir_regs[tar_reg_idx];
+				const uint8_t dest_idx = tar_reg_idx;
+
+				if(params[1][0] == '#') bin2 = to_uint32(params[1]);
+				else {
+					tar_reg_idx = find(vir_regs_names,params[1]);
+					if(tar_reg_idx > -1) bin2 = (uint32_t) (vir_regs[tar_reg_idx]);
+				}
+				if(params[2] == "AND"){
+					vir_regs[dest_idx] bin1&bin2;
+				}
+				else if(params[2] == "ORR"){
+					vir_regs[dest_idx] = bin1|bin2;
+				}
+				else if(params[2] == "EOR"){
+					vir_regs[dest_idx] = bin1^bin2;
+				}
+				else if(params[2] == "NOR"){
+					vir_regs[dest_idx] = ~(bin1|bin2);
+				}
+				else if(params[2] == "NAND"){
+					vir_regs[dest_idx] = ~(bin1&bin2);
+				}
+				else if(params[2] == "NEOR"){
+					vir_regs[dest_idx] = ~(bin1^bin2);
+				}
+				else if(params[2] == "NOT"){
+					vir_regs[dest_idx] = ~bin1;
+				}
+				else {
+					this->errors.push_back((_uva_error_t) {"'log' instruction set operation is invalid!","INVALID_LOGICAL_OPERATION","value",lx});
+					continue;
+				}
+			}
+			else {
+				this->errors.push_back((_uva_error_t) {"'log' instruction set arguments are invalid!","INVALID_ARGUMENTS","value",lx});
+				continue;
+			}
 		}
 		else if (CMD == ".transpile")
 		{
@@ -282,7 +332,6 @@ vector<_uva_snippet_t> UVA_ASSEMBLER::_transpile_(string content, uint16_t line_
 			else
 				this->errors.push_back((_uva_error_t){"'call' instructions set arguments are invalid!", "INVALID_VALUE", "value", lx});
 		}
-
 		else if (CMD == "nop")
 		{
 			for (string p : params)

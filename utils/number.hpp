@@ -54,7 +54,7 @@ inline uint16_t to_uint16(string text){
 
 double to_double(string text);
 bool isValidNumber(string text);
-
+string to_bin32(string text);
 inline uint32_t min(int num1, int num2){
         return num1 > num2 ? num2 : num1;
 }
