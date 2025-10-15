@@ -191,7 +191,7 @@ bool _transpile_ec_(vector<_GAMA_X_LINKER_error_t> &errors, vector<string> param
 }
 
 void _GAMA_X_LINKER_::_check_errors_(string content, string filename){
-	_GAMA_X_LINKER_err_check_t *error_checks[] = {_mov_ec_,_jmp_ec_,_cmp_ec_,_add_ec_,_incr_ec_,_sub_ec_,_decr_ec_,_push_ec_,_pull_ec_,_call_ec_,_nop_ec_,_transpile_ec_};
+	_GAMA_X_LINKER_err_check_t error_checks[] = {_mov_ec_,_jmp_ec_,_cmp_ec_,_add_ec_,_incr_ec_,_sub_ec_,_decr_ec_,_push_ec_,_pull_ec_,_call_ec_,_nop_ec_,_transpile_ec_};
 
 	const vector<string> instruction_names = {"mov","cmp","add","incr","sub","decr","push","pull","call","nop",".transpile"};
 	const vector<string> lines = split(content,'\n');

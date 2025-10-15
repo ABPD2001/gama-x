@@ -10,6 +10,7 @@ using std::cout;
 using std::filesystem::exists;
 using std::string;
 using std::ios;
+using std::getline;
 
 void print_err(string type, string title, string cause);
 
@@ -28,13 +29,16 @@ int main(int argc, char *argv[]){
 		else if(param == "-h" || param == "--help"){
 			fstream help_f;
 			help_f.open("./help.txt",ios::in);
-			string content;
+			if(!help_f.is_open()) {
+				print_err("System","Help file failure","Failed to open help file to print!");
+				return 1;
+			}
 			string temp_l;
 			while(getline(help_f,temp_l)){
-				content+="\n";
+				cout<<temp_l<<"\n";
 			}
 			help_f.close();
-			cout<<content<<VERSION<<"\n";
+			cout<<VERSION<<"\n";
 			return 0;
 		}
 		else if(param == "-o" || param == "--output"){

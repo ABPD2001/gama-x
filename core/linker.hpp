@@ -30,7 +30,7 @@ struct _GAMA_X_LINKER_file_t {
 	string name;
 };
 
-typedef bool *(_GAMA_X_LINKER_err_check_t) (vector<_GAMA_X_LINKER_error_t>, vector<string>, _GAMA_X_LINKER_file_t, uint32_t);
+typedef bool (*_GAMA_X_LINKER_err_check_t) (vector<_GAMA_X_LINKER_error_t>&, vector<string>, _GAMA_X_LINKER_file_t, uint32_t);
 
 class _GAMA_X_LINKER_ {
 	vector<_GAMA_X_LINKER_file_t> files;
