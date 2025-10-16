@@ -155,10 +155,16 @@ int main(int argc, char *argv[]){
 	else {
 		string output;
 		for(_uva_snippet_t s:snippet_out){
-			const string output_l = join(vector<string>({to_string(s.x),to_string(s.y),to_string(s.v),to_string(s.t)}),",");
-			cout<<s.x<<" "<<s.y<<" "<<s.t<<"\n";
+			const string output_l = join(vector<string>({to_string(s.x),to_string(s.y),to_string(s.t)}),",")+'\n';
 			output += output_l;
 		}
+		if(uva_asm.errors.size()){
+			for(_uva_error_t err:uva_asm.errors){
+				cout<<err.message<<"\n";
+				cout<<err.cause<<"\n";
+			}
+		}
+		output[output.size()-1] = '\0';
 		out_f->overwrite(output);
 	}
 

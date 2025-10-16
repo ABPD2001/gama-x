@@ -25,8 +25,9 @@ vector<_uva_snippet_t> UVA_ASSEMBLER::_transpile_(string content, uint16_t line_
 
 		temp_line = trim(lines[i]);
 		const vector<string> parts = split(temp_line, ' ');
-		vector<string> params = split(join(vector<string>(parts.begin() + 1, parts.end()), " "), ',');
+		vector<string> params = parts.size() > 1 ? split(join(vector<string>(parts.begin() + 1, parts.end()), " "), ',') : vector<string>();
 		const uint32_t lx = i + line_idx;
+		cout<<params.size()<<" "<<CMD<<"\n";
 
 		for (uint8_t i = 0; i < params.size(); i++)
 		{
@@ -69,34 +70,21 @@ vector<_uva_snippet_t> UVA_ASSEMBLER::_transpile_(string content, uint16_t line_
 			tar_reg_idx = find(vir_regs_names,params[0]);
 			if (tar_reg_idx > -1 && params[1].size()) {
 				bin1 = (uint32_t) vir_regs[tar_reg_idx];
-				const uint8_t dest_idx = tar_reg_idx;
+				const uint8_t dest_idx = find(vir_regs_names,params[0]);
 
-				if(params[1][0] == '#') bin2 = to_uint32(params[1]);
+				if(params[1][0] == '#') bin2 = to_uint32(trim(params[1].substr(1,params[1].length())));
 				else {
 					tar_reg_idx = find(vir_regs_names,params[1]);
 					if(tar_reg_idx > -1) bin2 = (uint32_t) (vir_regs[tar_reg_idx]);
 				}
-				if(params[2] == "AND"){
-					vir_regs[dest_idx] bin1&bin2;
-				}
-				else if(params[2] == "ORR"){
-					vir_regs[dest_idx] = bin1|bin2;
-				}
-				else if(params[2] == "EOR"){
-					vir_regs[dest_idx] = bin1^bin2;
-				}
-				else if(params[2] == "NOR"){
-					vir_regs[dest_idx] = ~(bin1|bin2);
-				}
-				else if(params[2] == "NAND"){
-					vir_regs[dest_idx] = ~(bin1&bin2);
-				}
-				else if(params[2] == "NEOR"){
-					vir_regs[dest_idx] = ~(bin1^bin2);
-				}
-				else if(params[2] == "NOT"){
-					vir_regs[dest_idx] = ~bin1;
-				}
+				cout<<"values "<<bin1<<" "<<bin2<<"\n";
+				if(params[2] == "AND") vir_regs[dest_idx] = bin1&bin2;
+				else if(params[2] == "ORR") vir_regs[dest_idx] = bin1|bin2;
+				else if(params[2] == "EOR") vir_regs[dest_idx] = bin1^bin2;
+				else if(params[2] == "NOR") vir_regs[dest_idx] = ~(bin1|bin2);
+				else if(params[2] == "NAND") vir_regs[dest_idx] = ~(bin1&bin2);
+				else if(params[2] == "NEOR") vir_regs[dest_idx] = (bin1^bin2);
+				else if(params[2] == "NOT") vir_regs[dest_idx] = ~bin1;
 				else {
 					this->errors.push_back((_uva_error_t) {"'log' instruction set operation is invalid!","INVALID_LOGICAL_OPERATION","value",lx});
 					continue;
@@ -105,6 +93,44 @@ vector<_uva_snippet_t> UVA_ASSEMBLER::_transpile_(string content, uint16_t line_
 			else {
 				this->errors.push_back((_uva_error_t) {"'log' instruction set arguments are invalid!","INVALID_ARGUMENTS","value",lx});
 				continue;
+			}
+		}
+		else if(CMD == "shf"){
+			signed short int tar_reg_idx = -1;
+			uint32_t val;
+			uint32_t amount;
+
+			if(params.size() != 3){
+				this->errors.push_back((_uva_error_t){"'shf' instruction set arguments are invalid!","INVALID_ARGUMENTS","value",lx});
+				continue;
+			}
+			else {
+				tar_reg_idx = find(vir_regs_names,params[0]);
+				if(tar_reg_idx > -1) 
+					val = vir_regs[tar_reg_idx];
+				else {
+					this->errors.push_back((_uva_error_t){"'shf' instruction set argument is invalid!","INVALID_REGISTERS_ARGUMENTS","value",lx});
+					continue;
+				}
+				if(params[1].size()){
+					if(params[1][0] == '#') amount = to_uint32(trim(params[1].substr(1,params[1].length())));
+					else {
+						tar_reg_idx = find(vir_regs_names,params[1]);
+						if(tar_reg_idx > -1) amount = (uint32_t) vir_regs[tar_reg_idx];
+						else {
+							this->errors.push_back((_uva_error_t){"'shf' instruction set argument is invalid!","INVALID_REGUSTERS_ARGUMENTS","value",lx});
+							continue;
+						}
+					}
+				}
+				tar_reg_idx = find(vir_regs_names,params[0]);
+				cout<<"shf --> "<<val<<" "<<amount<<'\n';
+				if(params[2] == "LEFT") vir_regs[tar_reg_idx] = val << amount;
+				else if(params[2] == "RIGHT") vir_regs[tar_reg_idx] = val >> amount;
+				else {
+					this->errors.push_back((_uva_error_t){"'shf' instruction set operation is invalid!","INVALID_SHIFT_OPERATION","value",lx});
+					continue;
+				}
 			}
 		}
 		else if (CMD == ".transpile")

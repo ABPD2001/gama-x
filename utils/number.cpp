@@ -46,24 +46,3 @@ bool isValidNumber(string text){
 	}	
 	return true;
 }
-
-string to_bin32(uint32_t number){
-	string output = "";
-
-	for(uint8_t n = 32; n!=-1; n--){
-		if(num_txt - pow(2,n) > -1){
-			output[32-n] = '1';
-			num_txt -= pow(2,n);
-		}
-	}
-
-	return output;
-}
-
-string read_bin32(string text){
-	uint32_t output = 0;
-	for(uint8_t  n = 0; n<32; n++){
-		if(text[n] == '1') output += pow(2,n);
-	}
-	return output;
-}
