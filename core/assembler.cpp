@@ -68,7 +68,7 @@ vector<_uva_snippet_t> UVA_ASSEMBLER::_transpile_(string content, uint16_t line_
 				continue;
 			}
 			tar_reg_idx = find(vir_regs_names,params[0]);
-			if (tar_reg_idx > -1 && params[1].size()) {
+			if (tar_reg_idx > -1 && params[1].length()) {
 				bin1 = (uint32_t) vir_regs[tar_reg_idx];
 				const uint8_t dest_idx = find(vir_regs_names,params[0]);
 
