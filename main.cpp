@@ -1,17 +1,22 @@
 #include <iostream>
+#include <fstream>
 #include "./core/assembler.hpp"
-#include "./utils/file.hpp"
+#include <filesystem>
 #define VERSION "V1.0.0"
 
 using std::cout;
+using std::fstream;
+using std::ios;
+using std::getline;
+namespace fs = std::filesystem;
 
 struct _file_binary_output_t {
 	_uva_snippet_t *snippets;
 	uint32_t length;
 };
 
-File *out_f;
-File *in_f;
+fstream out_f;
+fstream in_f;
 
 char empties[7] = {'\r','\t','\n','\b',' ','\a','\v'};
 
@@ -19,11 +24,13 @@ void print_err(string type, string title, string cause);
 void safe_exit(int code);
 
 int main(int argc, char *argv[]){
-	File help_f("./help.txt");
+	fstream help_f;
 	_uva_config_t config;
 
-	string file_in = "";
-	string file_out = "";
+	string file_in;
+	string file_out;
+
+	help_f.open("./help.txt",ios::in);
 
 	bool binary = false;
 
@@ -86,58 +93,55 @@ int main(int argc, char *argv[]){
 			}
 		}
 		else if(param == "-h" || param == "--help"){
-			const string help_txt = help_f.read();
-			cout<<help_f.status<<"\n"<<help_txt<<"\n\n"<<VERSION<<"\n";
-			// else print_err("System","Help file","Failed to open help file to print!");
-			return (int) (help_f.status == ios::goodbit);
+			string help_txt = "";
+			string help_temp;
+
+			while(getline(help_f,help_temp)){
+				help_txt += help_temp+'\n';
+			}
+			help_txt[help_txt.length()-1] = '\0';
+
+			cout<<help_txt<<"\n\n"<<VERSION<<"\n";
+			if (help_f.rdstate() != ios::goodbit) print_err("System","Help file","Failed to open help file to print!");
+			const int output_code = (help_f.rdstate() != ios::goodbit);
+			help_f.close();
+
+			return output_code;
 		}
-		//else if(param == "-o" || param == "--output"){
-		//	if(i == argc-1) {
-		//		print_err("User","Invalid argument","[-o, --output] flag value missed!");
-		//		return 1;
-		//	}
-		//	else if(filter(string(argv[argc+1]),empties,7).empty()){
-		//		print_err("User","Invalid argument","[-o, --output] flag value is invalid!");
-		//		return 1;
-		//	}
-		//	file_out = string(argv[argc+1]);
-		//}
-		else if(file_in.empty()){
-			file_in = param;
-		}
-		else if(file_out.empty()){
-			file_out = param;
-		}
+		else if(file_in.empty()) file_in = param;
+		else if(file_out.empty()) file_out = param;
 		else {
 			print_err("User","Extra arguments","extra positional argument recieved!");
 			return 1;
 		}
 	}
 	
-	File in_file(file_in);
-	File out_file(file_out);
-	in_f = &in_file;
-	out_f = &out_file;
-	
-	//if(in_f->status) {
-	//	print_err("File","Invalid file","failed to open input file!");
-	//	return 1;
-	//}
-	//if(out_f->status) {
-	//	print_err("File","Invalid file!","Faild to open output file!");
-	//	return 1;
-	//}
-	
+	if(!fs::exists(file_in)){
+		print_err("User","Invalid file path","path is not a valid and detectable file!");
+		return 1;
+	}
 
-	const string input = in_f->read();
+	in_f.open(file_in,ios::in);
+	out_f.open(file_out,ios::out);
 	
-//	if(!in_f->ok()){
-  //              print_err("File","File failure","Failed on reading from input file!");
-    //            return 1;
-      //  }
+	if(in_f.rdstate() != ios::goodbit){
+		print_err("File","File failure","Failed to open input file!");
+		return 1;
+	}
+
+	string input;
+	string input_temp;
+
+	while(getline(in_f,input_temp)){
+		input+=input_temp+'\n';
+	}
+	input[input.length()-1] = '\0';
+
 	UVA_ASSEMBLER uva_asm(input,config);
 	const vector<_uva_snippet_t> snippet_out = uva_asm.compile();
 	if(binary){
+		out_f.close();
+		out_f.open(file_out,ios::out|ios::binary);
 //		const uint32_t length = snippet_out.size();
 //		_uva_snippet_t *bin_snippets;
 //		bin_snippets = new _uva_snippet_t[length];
@@ -165,12 +169,8 @@ int main(int argc, char *argv[]){
 			}
 		}
 		output[output.size()-1] = '\0';
-		out_f->overwrite(output);
-	}
-
-	if(!out_f->ok()){
-		print_err("File","File failure","Failed on writing to output file!");
-		return 1;
+		out_f << output;
+		out_f.close();
 	}
 	
 	const bool erroed = uva_asm.errors.size();
