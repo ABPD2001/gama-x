@@ -1,10 +1,12 @@
 #include <string>
 #include <cstdint>
 #include <vector>
+#include <iostream>
 
 using std::string;
 using std::uint32_t;
 using std::vector;
+using std::cout;
 
 struct _GXL_error_t{
 	string file;
@@ -13,8 +15,8 @@ struct _GXL_error_t{
 };
 
 struct _GXL_file_t {
-	string name;
 	string content;
+	string name;
 };
 
 class _GXL_{
