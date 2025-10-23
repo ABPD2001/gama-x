@@ -1,77 +1,59 @@
 #include <iostream>
-#include <string>
-#include <iostream>
-#include "./core/assembler.hpp"
 #include <fstream>
-#include <filesystem>
-#include <cmath>
-#define VERSION "V1.0.0"
+#include <vector>
+#include <string>
+#include <cstdint>
+#include "./core/linker.hpp"
+#include "./core/assembler.hpp"
+#define VERSION "1.0.0"
 
+using std::vector;
 using std::string;
 using std::cout;
-using std::cin;
-using std::getline;
+using std::string;
 using std::ios;
+using std::uint8_t;
 
-namespace fs = std::filesystem;
+vector<fstream> files_in;
+fstream file_out;
+
+void print_err(string type, string title,string cause);
 
 int main(int argc, char *argv[]){
-	string output_file;
-	string help = "";
-	string temp_line;
-	fstream help_f;
-	bool verbose = false;
-
-	help_f.open("./help.txt",ios::in);
-
-	while (getline(help_f,temp_line)){
-		help+=temp_line+'\n';
-	}
-
-	temp_line.clear();
-	vector<string> files;
-
+	vector<string> input_files;
+	string output_path;
+	
 	for(uint8_t i = 1; i<argc; i++){
-		const string param = argv[i];
-		if(param == "-o" || param == "--output") {
-			if(i == argc-1) {
-				cout<<"flag '-o' value missed!\n";
+		const string param = string(argv[i]);
+		if(param == "-h" || param == "--help"){
+			fstream help_f;
+			help_f.open("./help.txt",ios::in);
+			string help_temp;
+
+			while(getline(help_temp,help_f)){
+				cout<<help_temp<<"\n";
+			}
+			cout<<VERSION<<"\n";
+			
+			return 0;
+
+		}
+		else if(param == "-v" || param == "--version"){
+			cout<<VERSION<<'\n';
+
+			return 0;
+		}
+		else if(param == "-o" || param == "--output"){
+			if(i == argc-1){
+				print_err("User","Invalid output file!","[-o, --output] flag value isnt valid!");
 				return 1;
 			}
-			output_file = string(argv[i+1]);
 			i++;
+			output_path = string(argv[i]);
+			continue;
 		}
 	
-		else if(param == "-h" || param == "--help") {
-			cout<<help;	
-			return 0;
-		}
-
-		else if(param == "-v" || param == "--verbose") verbose = true;
-		else if(param == "-V" || param == "--version") {
-			cout<<VERSION<<"\n";
-			return 0;
-		}
-		else files.push_back(string(argv[i]));
-	
 	}
 
-	if(!files.size()) {
-		cout<<"No file entered!\n";
-		return 1;
-	}
-	UVA_ASSEMBLER uva_asm = {files,output_file,verbose};
-	if(verbose) cout<<"Preparing for compilation...\n";
-	uva_asm.compile();
-
-	if(verbose) cout<<"Compilation completed.\n";
-
-	for(_uva_error_t err:uva_asm.errors){
-		cout<<"Error at line" << err.idx<<": "<<err.message<<"\nCause: "<<err.cause<<"\n";
-	}
-
-	const bool errored = uva_asm.errors.size()>0;
-	if(errored) cout<<"Compilation failed!\n";
-
-	return (int) errored;
+	return 0;
 }
