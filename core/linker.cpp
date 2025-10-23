@@ -24,7 +24,6 @@ string _GXL_::_merge_pre_processors_(vector<_GXL_file_t> files){
 		}
 		
 		string pre_processors = f.content.substr(0,idx);
-
 		if(idx_module == string::npos) output += pre_processors+'\n';
 		else {
 			pre_processors.replace(idx_module,7,string(""));
@@ -46,9 +45,7 @@ string _GXL_::_merge_instructions_(vector<_GXL_file_t> files){
 			this->errors.push_back((_GXL_error_t){f.name,"Invalid instruction segmention (pre-processors invalid end point)!","syntax"});
 			continue;
 		}
-		cout<<f.content.length()<<"\n";		
 		const string instructions = f.content.substr(idx+4,f.content.length()-idx-4);
-		//cout<<instructions<<"\n";
 		output+=instructions+'\n';
 	}
 	output[output.length()-1] = '\0';
