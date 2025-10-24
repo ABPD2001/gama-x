@@ -1,5 +1,5 @@
-#ifndef UVA_ASSEMBLER_HPP
-#define UVA_ASSEMBLER_HPP
+#ifndef _GXA__HPP
+#define _GXA__HPP
 #include <string>
 #include <cmath>
 #include <iostream>
@@ -8,60 +8,65 @@
 #include "../utils/number.hpp"
 
 #define CMD parts[0]
-using std::string;
-using std::min;
-using std::max;
-using std::to_string;
-using std::uint8_t;
-using std::uint32_t;
-using std::uint16_t;
 using std::cout;
+using std::max;
+using std::min;
+using std::string;
+using std::to_string;
+using std::uint16_t;
+using std::uint32_t;
+using std::uint8_t;
 
-struct _uva_label_t {
+struct _GXA_label_t
+{
 	string text;
 	string name;
 	uint32_t line_idx;
 };
 
-struct _uva_error_t {
+struct _GXA_error_t
+{
 	string message;
 	string cause;
 	string type;
 	uint32_t line;
 };
 
-struct _uva_snippet_t {
+struct _GXA_snippet_t
+{
 	uint64_t t; // time
 	uint32_t x; // x value
 	uint32_t y; // y value
 };
 
-struct _uva_config_t {
+struct _GXA_config_t
+{
 	vector<string> reg_names = vector<string>();
 	vector<double> reg_values = vector<double>();
 };
 
-class UVA_ASSEMBLER {
-	_uva_config_t config;
-	vector<_uva_snippet_t> output;
-	vector<_uva_label_t> labels;
-	vector<double> vir_regs = {0,255,0,0,0,0,0,0,0,0};
+class _GXA_
+{
+	_GXA_config_t config;
+	vector<_GXA_snippet_t> output;
+	vector<_GXA_label_t> labels;
+	vector<double> vir_regs = {0, 255, 0, 0, 0, 0, 0, 0, 0, 0};
 	vector<double> vir_stack;
-	vector<string> vir_regs_names =  {"x","y","sleep","r0","r1","r2","r3","r4","r5","st"};
+	vector<string> vir_regs_names = {"x", "y", "sleep", "r0", "r1", "r2", "r3", "r4", "r5", "st"};
 	string input;
 	string startLabel;
 
-	vector<_uva_snippet_t> _transpile_(string content, uint16_t line_idx);
-	vector<_uva_label_t> _slice_labels_(string content);
+	vector<_GXA_snippet_t> _transpile_(string content, uint16_t line_idx);
+	vector<_GXA_label_t> _slice_labels_(string content);
 	void _pre_processors_(string &content);
 
-	public:
-		vector<_uva_error_t> errors;
-		uint8_t status = 0;
+public:
+	vector<_GXA_error_t> errors;
+	uint8_t status = 0;
 
-		UVA_ASSEMBLER(string content, _uva_config_t config);
-		UVA_ASSEMBLER();
-		~UVA_ASSEMBLER();
-		vector<_uva_snippet_t> compile();
+	_GXA_(string content, _GXA_config_t config);
+	_GXA_();
+	~_GXA_();
+	vector<_GXA_snippet_t> compile();
 };
 #endif
