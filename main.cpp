@@ -3,6 +3,7 @@
 #include "./core/assembler.hpp"
 #include <filesystem>
 #define VERSION "V1.0.0"
+#define HELP "<-- Gama-X Assembler -->\n\nUsage: gxa [*.s files...] [-o, -h, -v...]\nFlags:\n\t[-h, --help]: print this catalog.\n\t[-v, --version]: show version and exit.\n\t[-i, --initial-registers]: set initial value for registers [note: it can seperated by comma, also its dependent to -r flag].\n\t[-r, --registers-count]: set count of working registers, number cannot be negetive.\n\t[-b, --binary]: output binary instead of text.\n"
 
 using std::cout;
 using std::fstream;
@@ -32,7 +33,7 @@ int main(int argc, char *argv[])
 	string file_in;
 	string file_out;
 
-	help_f.open("./help.txt", ios::in);
+	//help_f.open("./help.txt", ios::in);
 
 	bool binary = false;
 
@@ -111,23 +112,22 @@ int main(int argc, char *argv[])
 		}
 		else if (param == "-h" || param == "--help")
 		{
-			string help_txt = "";
-			string help_temp;
+	//		string help_txt = "";
+	//		string help_temp;
 
-			while (getline(help_f, help_temp))
-			{
-				help_txt += help_temp + '\n';
-			}
-			help_txt[help_txt.length() - 1] = '\0';
+	//		while (getline(help_f, help_temp))
+	//		{
+	//			help_txt += help_temp + '\n';
+	//		}
+	//		help_txt[help_txt.length() - 1] = '\0';
 
-			cout << help_txt << "\n\n"
-				 << VERSION << "\n";
-			if (help_f.rdstate() != ios::goodbit)
-				print_err("System", "Help file", "Failed to open help file to print!");
-			const int output_code = (help_f.rdstate() != ios::goodbit);
-			help_f.close();
-
-			return output_code;
+			cout << HELP << VERSION << "\n";
+	//		if (help_f.rdstate() != ios::goodbit)
+	//			print_err("System", "Help file", "Failed to open help file to print!");
+	//		const int output_code = (help_f.rdstate() != ios::goodbit);
+	//		help_f.close();
+	return 0;
+	//		return output_code;
 		}
 		else if (file_in.empty())
 			file_in = param;
