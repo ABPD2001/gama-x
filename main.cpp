@@ -4,6 +4,7 @@
 #include <fstream>
 #include "./core/linker.hpp"
 #define VERSION "V1.0.0"
+#define HELP "<-- Gama-X Linker -->\n\nUsage: gxl [*.s files...] [-o, -h, -v...]\nFlags:\n\t[-h, --help]: print this catalog.\n\t[-v, --version]: show version and exit.\n\t[-o, --output]: assembly output file.\n"
 
 using std::fstream;
 using std::cout;
@@ -27,18 +28,18 @@ int main(int argc, char *argv[]){
 			return 0;
 		}
 		else if(param == "-h" || param == "--help"){
-			fstream help_f;
-			help_f.open("./help.txt",ios::in);
-			if(!help_f.is_open()) {
-				print_err("System","Help file failure","Failed to open help file to print!");
-				return 1;
-			}
-			string temp_l;
-			while(getline(help_f,temp_l)){
-				cout<<temp_l<<"\n";
-			}
-			help_f.close();
-			cout<<VERSION<<"\n";
+			//fstream help_f;
+			//help_f.open("./help.txt",ios::in);
+			//if(!help_f.is_open()) {
+			//	print_err("System","Help file failure","Failed to open help file to print!");
+			//	return 1;
+			//}
+			//string temp_l;
+			//while(getline(help_f,temp_l)){
+			//	cout<<temp_l<<"\n";
+			//}
+			//help_f.close();
+			cout<<HELP<<VERSION<<"\n";
 			return 0;
 		}
 		else if(param == "-o" || param == "--output"){
