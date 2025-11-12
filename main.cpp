@@ -2,6 +2,8 @@
 #include <string>
 #include <fstream>
 #include <cstdint>
+#include "./utils/number.hpp"
+#include "./utils/string.hpp"
 #define HELP "<-- UVision exporter -->\n\tBasic Usage: uve [input, output, -v,-h...]\n\t[-v, --version]: show version.\n\t[-h, --help]: print this catalog."
 #define VERSION "V1.0.0"
 
@@ -9,10 +11,10 @@ using std::cout;
 using std::cin;
 using std::getline;
 using std::string;
+using std::to_string;
 using std::fstream;
 using std::ios;
 using std::uint8_t;
-
 
 void print_err(string type, string title, string desc);
 void input(string ask,string &save);
@@ -50,16 +52,16 @@ int main(int argc, char *argv[]){
 	fstream input_f;
 	input_f.open(input_file,ios::in);
 
-	uint32_t maximum_time = 0;
+	unsigned int maximum_time = 0;
 	string content;
 	while(getline(input_f,temp)){
 		content+=temp+'\n';
 		const vector<string> parts = split(temp,',');
-		maximum_time+=to_uint32(parts[1]);
+		maximum_time+=to_uint32(parts[2]);
 	}
-	first_line+=maximum_time+"}";
+	first_line+=to_string(maximum_time)+"}";
 	content[content.length()-1] = '\0';
-
+	first_line = replace_all(first_line,(char) 39, (char) 34);
 	input_f.close();
 	fstream output_f;
 	output_f.open(output_file,ios::out);
