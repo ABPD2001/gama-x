@@ -45,15 +45,19 @@ int main(int argc, char *argv[]){
 	input("Enter description:",temp);
 	first_line += temp+"','date':'";
 	input("Enter date:",temp);
-	first_line += temp+"'}";
+	first_line += temp+"','time':";
 
 	fstream input_f;
 	input_f.open(input_file,ios::in);
 
+	uint32_t maximum_time = 0;
 	string content;
 	while(getline(input_f,temp)){
 		content+=temp+'\n';
+		const vector<string> parts = split(temp,',');
+		maximum_time+=to_uint32(parts[1]);
 	}
+	first_line+=maximum_time+"}";
 	content[content.length()-1] = '\0';
 
 	input_f.close();
