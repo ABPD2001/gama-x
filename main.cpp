@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include "./core/assembler.hpp"
+#include "./utils/binary.hpp"
 #include <filesystem>
 #define VERSION "V1.0.0"
 #define HELP "<-- Gama-X Assembler -->\n\nUsage: gxa [*.s files...] [-o, -h, -v...]\nFlags:\n\t[-h, --help]: print this catalog.\n\t[-v, --version]: show version and exit.\n\t[-i, --initial-registers]: set initial value for registers [note: it can seperated by comma, also its dependent to -r flag].\n\t[-r, --registers-count]: set count of working registers, number cannot be negetive.\n\t[-b, --binary]: output binary instead of text.\n"
@@ -10,12 +11,6 @@ using std::fstream;
 using std::getline;
 using std::ios;
 namespace fs = std::filesystem;
-
-struct _file_binary_output_t
-{
-	_GXA_snippet_t *snippets;
-	uint32_t length;
-};
 
 fstream out_f;
 fstream in_f;
@@ -35,14 +30,24 @@ int main(int argc, char *argv[])
 
 	//help_f.open("./help.txt", ios::in);
 
-	bool binary = false;
+	uint8_t binary = 0;
 
 	for (uint8_t i = 1; i < argc; i++)
 	{
 		const string param = string(argv[i]);
 
-		if (param == "-b" || param == "--binary")
-			binary = true;
+		if (param == "-b" || param == "--binary"){
+			if(i == argc-1){
+				print_err("User","Invalid argument","[-b, --binary] flag value missed!");
+				return 1;
+			}
+			else if(filter(string(argv[i+1]),empties,7).empty() || !isValidNumber(string(argv[i+1]))){
+				print_err("User","Invalid argument","[-b, --binary] flag value isnt valid!");
+				return 1;
+			}
+			binary = to_uint32(string(argv[i+1]));
+			i++;
+		}
 		else if (param == "-v" || param == "--version")
 		{
 			cout << VERSION << "\n";
@@ -169,7 +174,28 @@ int main(int argc, char *argv[])
 	if (binary)
 	{
 		out_f.close();
-		out_f.open(file_out, ios::out | ios::binary);
+		out_f.open(file_out, ios::out);
+		string file_out = "";
+		for(unsigned int i = 0; i<snippet_out.size(); i++){
+			string binx = to_binary(snippet_out[i].x);
+			string biny = to_binary(snippet_out[i].y);
+			string bint = to_binary64(snippet_out[i].t);
+
+			const string binx_parts[4] = {binx.substr(0,8), binx.substr(8,8), binx.substr(16,8), binx.substr(24,8)};
+			const string biny_parts[4] = {biny.substr(0,8), biny.substr(8,8), biny.substr(16,8), biny.substr(24,8)} ;
+			const string bint_parts[8] =  {bint.substr(0,8), bint.substr(8,8), bint.substr(16,8), bint.substr(24,8), bint.substr(32,8), bint.substr(40,8), bint.substr(48,8),bint.substr(56,8)};
+			for(uint8_t i = 0; i<binary; i++){
+				file_out += from_binary8(binx_parts[3-i]);
+			}
+			for(uint8_t i = 0; i<binary; i++){
+				file_out += (char) from_binary8(biny_parts[3-i]);
+			}
+			for (uint8_t i = 0; i<8; i++){
+				file_out += (char) from_binary8(bint_parts[3-i]);
+			}
+		}
+		out_f<<file_out<<"\n";
+		out_f.close();
 	}
 	else
 	{

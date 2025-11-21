@@ -27,7 +27,6 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 		const vector<string> parts = split(temp_line, ' ');
 		vector<string> params = parts.size() > 1 ? split(join(vector<string>(parts.begin() + 1, parts.end()), " "), ',') : vector<string>();
 		const uint32_t lx = i + line_idx;
-		cout << params.size() << " " << CMD << "\n";
 
 		for (uint8_t i = 0; i < params.size(); i++)
 		{
@@ -83,7 +82,6 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 					if (tar_reg_idx > -1)
 						bin2 = (uint32_t)(vir_regs[tar_reg_idx]);
 				}
-				cout << "values " << bin1 << " " << bin2 << "\n";
 				if (params[2] == "AND")
 					vir_regs[dest_idx] = bin1 & bin2;
 				else if (params[2] == "ORR")
@@ -148,7 +146,6 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 					}
 				}
 				tar_reg_idx = find(vir_regs_names, params[0]);
-				cout << "shf --> " << val << " " << amount << '\n';
 				if (params[2] == "LEFT")
 					vir_regs[tar_reg_idx] = val << amount;
 				else if (params[2] == "RIGHT")
@@ -227,7 +224,6 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 			if (params[1][0] == '#')
 			{
 				reg2_idx = to_double(params[1]);
-				cout << reg1_idx << "-" << reg2_idx << "\n";
 				cmp = reg1_idx - reg2_idx;
 			}
 			else

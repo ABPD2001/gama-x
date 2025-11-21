@@ -52,7 +52,7 @@ class _GXA_
 	vector<_GXA_label_t> labels;
 	vector<double> vir_regs = {0, 255, 0, 0, 0, 0, 0, 0, 0, 0};
 	vector<double> vir_stack;
-	vector<string> vir_regs_names = {"x", "y", "sleep", "r0", "r1", "r2", "r3", "r4", "r5", "st"};
+	vector<string> vir_regs_names = {"x", "y", "t", "r0", "r1", "r2", "r3", "r4", "r5", "st"};
 	string input;
 	string startLabel;
 
