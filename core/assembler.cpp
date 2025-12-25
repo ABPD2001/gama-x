@@ -185,9 +185,13 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 				{
 					if (params[1] == "EQ" && cmp)
 						continue;
-					else if (params[1] == "LE" && cmp >= 0)
+					else if (params[1] == "LE" && cmp > 0)
 						continue;
-					else if (params[1] == "GE" && cmp <= 0)
+					else if (params[1] == "GE" && cmp < 0)
+						continue;
+					else if(params[1] == "LS" && cmp >= 0)
+						continue;
+					else if(params[1] == "GT" && cmp <= 0)
 						continue;
 					else if (params[1] != "AL")
 					{
