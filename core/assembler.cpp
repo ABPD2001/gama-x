@@ -257,7 +257,90 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 			else
 				this->errors.push_back((_GXA_error_t){"'add' instruction set arguements are invalid!", "INVALID_ARGUMENTS", "value", lx});
 		}
+		else if (CMD == "mul")
+		{
+			if (params.size() != 2)
+			{
+				this->errors.push_back((_GXA_error_t){"'min' instructions set arguments missed!", "MISSED_ARGUMENTS", "value", lx});
+				continue;
+			}
 
+			const signed short int reg_idx = find(vir_regs_names, params[0]);
+			signed long int reg2 = 0;
+
+			if (params[1][0] == '#')
+				reg2 = to_double(params[1].substr(1, params[1].length()));
+			else
+				reg2 = vir_regs[find(vir_regs_names, params[1])];
+
+			if (reg_idx > -1)
+				vir_regs[reg_idx] *= reg2;
+			else
+				this->errors.push_back((_GXA_error_t){"'add' instruction set arguments are invalid!", "INVALID_ARGUMENTS", "value", lx});
+		}
+		else if (CMD == "div")
+		{
+			if (params.size() != 2)
+			{
+				this->errors.push_back((_GXA_error_t){"'min' instructions set arguments missed!", "MISSED_ARGUMENTS", "value", lx});
+				continue;
+			}
+
+			const signed short int reg_idx = find(vir_regs_names, params[0]);
+			signed long int reg2 = 0;
+
+			if (params[1][0] == '#')
+				reg2 = to_double(params[1].substr(1, params[1].length()));
+			else
+				reg2 = vir_regs[find(vir_regs_names, params[1])];
+
+			if (reg_idx > -1)
+				vir_regs[reg_idx] /= reg2;
+			else
+				this->errors.push_back((_GXA_error_t){"'add' instruction set arguments are invalid!", "INVALID_ARGUMENTS", "value", lx});
+		}
+		else if (CMD == "sub")
+		{
+			if (params.size() != 2)
+			{
+				this->errors.push_back((_GXA_error_t){"'min' instructions set arguments missed!", "MISSED_ARGUMENTS", "value", lx});
+				continue;
+			}
+
+			const signed short int reg_idx = find(vir_regs_names, params[0]);
+			signed long int reg2 = 0;
+
+			if (params[1][0] == '#')
+				reg2 = to_double(params[1].substr(1, params[1].length()));
+			else
+				reg2 = vir_regs[find(vir_regs_names, params[1])];
+
+			if (reg_idx > -1)
+				vir_regs[reg_idx] = sqrt(reg2);
+			else
+				this->errors.push_back((_GXA_error_t){"'add' instruction set arguments are invalid!", "INVALID_ARGUMENTS", "value", lx});
+		}
+		else if (CMD == "pow")
+		{
+			if (params.size() != 2)
+			{
+				this->errors.push_back((_GXA_error_t){"'min' instructions set arguments missed!", "MISSED_ARGUMENTS", "value", lx});
+				continue;
+			}
+
+			const signed short int reg_idx = find(vir_regs_names, params[0]);
+			signed long int reg2 = 0;
+
+			if (params[1][0] == '#')
+				reg2 = to_double(params[1].substr(1, params[1].length()));
+			else
+				reg2 = vir_regs[find(vir_regs_names, params[1])];
+
+			if (reg_idx > -1)
+				vir_regs[reg_idx] = pow(vir_regs[reg_idx],reg2);
+			else
+				this->errors.push_back((_GXA_error_t){"'add' instruction set arguments are invalid!", "INVALID_ARGUMENTS", "value", lx});
+		}
 		else if (CMD == "incr")
 		{
 			if (params.size() != 1)

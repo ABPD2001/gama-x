@@ -11,6 +11,8 @@
 using std::cout;
 using std::max;
 using std::min;
+using std::pow;
+using std::sqrt;
 using std::string;
 using std::to_string;
 using std::uint16_t;
