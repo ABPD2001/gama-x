@@ -1,34 +1,47 @@
-# Gama-X
+# Gama-X Programming language
 
-A alternative for old non-logical dsl (domain static language), its _logical, faster, optimized_ and way more _lightweighted_.
+A powerful replacement for traditional, logic-less **DSLs** (_Domain static language_). **Gama-X** is a _fast_, _lightweight_, and _logic-driven_ intermediate language that combines low-level efficiency with the ease of high-level programming.
 
 ## why this language?
 
-because, it have these:
+Combining the flexibility of high-level logic with a hybrid **Compiler-Interpreter** architecture, _Gama-X_ delivers significantly faster performance than conventional interpreters.
 
-- loops
-- mathimaticals
-- conditions `if-else`
-- Pre-Processor commands
-- syntax of `assembly`
+Gama-X incorporates advanced logical constructs, including:
 
-at total, its a complete language but not a native one, in other words, Gama-X is developed for machine with its driver!
+- **Labels & Branching:** Enabling modular code structure and efficient jumps.
 
-_note:_ its executable only for machine with _Gama-X driver_.
+- **Conditional Logic:** Supporting complex decision-making processes during execution.
 
-### Time complexity
+- **Arithmetic & Binary Logic:** Full support for mathematical operations and bitwise manipulations.
 
-contrary to G-Code, this one, has **O(1)** time complexity, in other words, always runs each line on constant time, this is best thing for _real-time_ machines!
+- **Dynamic Variables:** Efficient memory management through symbolic variable handling.
 
-_note:_ `G-Code` has **O(n log(n))** time complexity, its not designed for _real-time_ machines!
+> _note:_ its important to know, _Gama-X is **not** executable as native_, actually, machines with its driver can execute it.
 
-### Easy to design driver
+> _note_: also you must know, _Gama-X is **logic-simulated** language_, all logics, computes on your personal computer, then, all calculated results, runs on machine as a raw output file.
 
-to writing a driver for your own machine, just follow these steps:
+### Theoretical Complexity
 
-1. Read output file.
-2. Seperate parts and use them.
-3. you are done.
+While G-Code is widely used, it suffers from the overhead of being an interpreted language. Based on empirical data and interpreter analysis, the comparison is as follows:
+
+| Feature                 | G-Code (Legacy)                 | Gama-X (Modern)                     |
+| :---------------------- | :------------------------------ | :---------------------------------- |
+| **Time Complexity**     | **$O(n  \log (n))$** (Variable) | **$O(1)$** (Constant)               |
+| **Execution Model**     | Line-by-line Parsing            | Direct Binary Execution             |
+| **Real-time Stability** | Low (Non-deterministic)         | **Highest (Deterministic)**         |
+| **Logic Support**       | None (Motion only)              | Full (Conditions, Loops, Variables) |
+
+#### Why $O(1)$?
+
+In **G-Code**, the controller must read text, tokenize it, and search through symbol tables for every single line. This process is time-consuming and its duration fluctuates ($O(n \log n)$).
+
+In **Gama-X**, all logical overhead is shifted to the **Pre-compilation Phase**. The target hardware receives pre-calculated binary data. Writing a value to a register or memory address takes the same amount of time regardless of program size, resulting in a **Constant Time Complexity of O(1)**.
+
+> _note:_ This makes Gama-X the ideal choice for **High-Precision Real-time Systems** where every microsecond counts and execution time must be perfectly predictable.
+
+## How to use this language?
+
+still there is no documention for this language...
 
 ---
 
