@@ -8,6 +8,7 @@
 #include "../utils/number.hpp"
 
 #define CMD parts[0]
+
 using std::cout;
 using std::max;
 using std::min;
@@ -61,6 +62,7 @@ class _GXA_
 	vector<_GXA_snippet_t> _transpile_(string content, uint16_t line_idx);
 	vector<_GXA_label_t> _slice_labels_(string content);
 	void _pre_processors_(string &content);
+	signed long int cmp = 0;
 
 public:
 	vector<_GXA_error_t> errors;

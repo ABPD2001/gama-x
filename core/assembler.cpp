@@ -10,12 +10,9 @@ _GXA_::_GXA_() {}
 vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 {
 	vector<_GXA_snippet_t> output;
-	const vector<string> &vir_regs_names = this->vir_regs_names;
-	vector<double> &vir_regs = this->vir_regs;
 	vector<string> lines = split(content, '\n');
 	string temp_line;
 
-	signed long int cmp = 0;
 	char empties[7] = {'\t', '\n', '\f', '\r', ' ', '\a', '\v'};
 
 	for (uint32_t i = 0; i < lines.size(); i++)
@@ -43,15 +40,15 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 				continue;
 			}
 
-			tar_reg_idx = find(vir_regs_names, params[0]);
+			tar_reg_idx = find(this->vir_regs_names, params[0]);
 			if (tar_reg_idx != -1 && params[1].length())
 			{
 				if (params[1][0] == '#')
-					vir_regs[tar_reg_idx] = to_double(trim(params[1]));
+					this->vir_regs[tar_reg_idx] = to_double(trim(params[1]));
 				else
 				{
-					signed short int reg2 = find(vir_regs_names, params[1]);
-					vir_regs[tar_reg_idx] = vir_regs[reg2];
+					signed short int reg2 = find(this->vir_regs_names, params[1]);
+					this->vir_regs[tar_reg_idx] = this->vir_regs[reg2];
 				}
 			}
 			else
@@ -68,34 +65,34 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 				this->errors.push_back((_GXA_error_t){"'log' instruction set value missed or is invalid!", "MISSED_OR_INVALID_REGISTER_NAME", "value", lx});
 				continue;
 			}
-			tar_reg_idx = find(vir_regs_names, params[0]);
+			tar_reg_idx = find(this->vir_regs_names, params[0]);
 			if (tar_reg_idx > -1 && params[1].length())
 			{
-				bin1 = (uint32_t)vir_regs[tar_reg_idx];
-				const uint8_t dest_idx = find(vir_regs_names, params[0]);
+				bin1 = (uint32_t)this->vir_regs[tar_reg_idx];
+				const uint8_t dest_idx = find(this->vir_regs_names, params[0]);
 
 				if (params[1][0] == '#')
 					bin2 = to_uint32(trim(params[1].substr(1, params[1].length())));
 				else
 				{
-					tar_reg_idx = find(vir_regs_names, params[1]);
+					tar_reg_idx = find(this->vir_regs_names, params[1]);
 					if (tar_reg_idx > -1)
-						bin2 = (uint32_t)(vir_regs[tar_reg_idx]);
+						bin2 = (uint32_t)(this->vir_regs[tar_reg_idx]);
 				}
 				if (params[2] == "AND")
-					vir_regs[dest_idx] = bin1 & bin2;
+					this->vir_regs[dest_idx] = bin1 & bin2;
 				else if (params[2] == "ORR")
-					vir_regs[dest_idx] = bin1 | bin2;
+					this->vir_regs[dest_idx] = bin1 | bin2;
 				else if (params[2] == "EOR")
-					vir_regs[dest_idx] = bin1 ^ bin2;
+					this->vir_regs[dest_idx] = bin1 ^ bin2;
 				else if (params[2] == "NOR")
-					vir_regs[dest_idx] = ~(bin1 | bin2);
+					this->vir_regs[dest_idx] = ~(bin1 | bin2);
 				else if (params[2] == "NAND")
-					vir_regs[dest_idx] = ~(bin1 & bin2);
+					this->vir_regs[dest_idx] = ~(bin1 & bin2);
 				else if (params[2] == "NEOR")
-					vir_regs[dest_idx] = (bin1 ^ bin2);
+					this->vir_regs[dest_idx] = (bin1 ^ bin2);
 				else if (params[2] == "NOT")
-					vir_regs[dest_idx] = ~bin1;
+					this->vir_regs[dest_idx] = ~bin1;
 				else
 				{
 					this->errors.push_back((_GXA_error_t){"'log' instruction set operation is invalid!", "INVALID_LOGICAL_OPERATION", "value", lx});
@@ -121,9 +118,9 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 			}
 			else
 			{
-				tar_reg_idx = find(vir_regs_names, params[0]);
+				tar_reg_idx = find(this->vir_regs_names, params[0]);
 				if (tar_reg_idx > -1)
-					val = vir_regs[tar_reg_idx];
+					val = this->vir_regs[tar_reg_idx];
 				else
 				{
 					this->errors.push_back((_GXA_error_t){"'shf' instruction set argument is invalid!", "INVALID_REGISTERS_ARGUMENTS", "value", lx});
@@ -135,9 +132,9 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 						amount = to_uint32(trim(params[1].substr(1, params[1].length())));
 					else
 					{
-						tar_reg_idx = find(vir_regs_names, params[1]);
+						tar_reg_idx = find(this->vir_regs_names, params[1]);
 						if (tar_reg_idx > -1)
-							amount = (uint32_t)vir_regs[tar_reg_idx];
+							amount = (uint32_t)this->vir_regs[tar_reg_idx];
 						else
 						{
 							this->errors.push_back((_GXA_error_t){"'shf' instruction set argument is invalid!", "INVALID_REGUSTERS_ARGUMENTS", "value", lx});
@@ -145,11 +142,11 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 						}
 					}
 				}
-				tar_reg_idx = find(vir_regs_names, params[0]);
+				tar_reg_idx = find(this->vir_regs_names, params[0]);
 				if (params[2] == "LEFT")
-					vir_regs[tar_reg_idx] = val << amount;
+					this->vir_regs[tar_reg_idx] = val << amount;
 				else if (params[2] == "RIGHT")
-					vir_regs[tar_reg_idx] = val >> amount;
+					this->vir_regs[tar_reg_idx] = val >> amount;
 				else
 				{
 					this->errors.push_back((_GXA_error_t){"'shf' instruction set operation is invalid!", "INVALID_SHIFT_OPERATION", "value", lx});
@@ -159,7 +156,7 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 		}
 		else if (CMD == ".transpile")
 		{
-			_GXA_snippet_t snippet = {(uint64_t)vir_regs[2], (uint32_t)(vir_regs[0]), (uint32_t)(vir_regs[1])};
+			_GXA_snippet_t snippet = {(uint64_t)this->vir_regs[2], (uint32_t)(this->vir_regs[0]), (uint32_t)(this->vir_regs[1])};
 			output.push_back(snippet);
 		}
 		else if (CMD == ".reset")
@@ -183,15 +180,15 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 				}
 				if (params.size() == 2)
 				{
-					if (params[1] == "EQ" && cmp)
+					if (params[1] == "EQ" && this->cmp)
 						continue;
-					else if (params[1] == "LE" && cmp > 0)
+					else if (params[1] == "LE" && this->cmp > 0)
 						continue;
-					else if (params[1] == "GE" && cmp < 0)
+					else if (params[1] == "GE" && this->cmp < 0)
 						continue;
-					else if(params[1] == "LS" && cmp >= 0)
+					else if(params[1] == "LS" && this->cmp >= 0)
 						continue;
-					else if(params[1] == "GT" && cmp <= 0)
+					else if(params[1] == "GT" && this->cmp <= 0)
 						continue;
 					else if (params[1] != "AL")
 					{
@@ -218,28 +215,26 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 				reg1_idx = to_double(params[0]);
 			else
 			{
-				reg1_idx = find(this->vir_regs_names, params[0]);
+				reg1_idx = vir_regs[find(this->vir_regs_names, params[0])];
 				if (reg1_idx == -1)
 				{
 					this->errors.push_back((_GXA_error_t){"'cmp' instruction set first argument isnt valid!", "INVALID_ARGUMENT", "value", lx});
 					continue;
 				}
 			}
-			if (params[1][0] == '#')
-			{
-				reg2_idx = to_double(params[1]);
-				cmp = reg1_idx - reg2_idx;
-			}
+			if (params[1][0] == '#') reg2_idx = to_double(params[1]);
 			else
 			{
-				reg2_idx = find(this->vir_regs_names, params[1]);
+				reg2_idx = vir_regs[find(this->vir_regs_names, params[1])];
 				if (reg2_idx == -1)
 				{
 					this->errors.push_back((_GXA_error_t){"'cmp' instruction set second argument isnt valid!", "INVALID_ARGUMENT", "value", lx});
 					continue;
 				}
-				cmp = vir_regs[reg1_idx] - vir_regs[reg2_idx];
+			//	this->cmp = reg1_idx - reg2_idx;
 			}
+			this->cmp = reg1_idx - reg2_idx;
+			cout<<"compare "<<this->cmp<<"\n";
 		}
 		else if (CMD == "add")
 		{
@@ -248,16 +243,16 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 				this->errors.push_back((_GXA_error_t){"'add' instructions set arguments missed!", "MISSED_ARGUMENTS", "value", lx});
 				continue;
 			}
-			const signed short int reg_idx = find(vir_regs_names, params[0]);
+			const signed short int reg_idx = find(this->vir_regs_names, params[0]);
 			signed long int reg2 = 0;
 
 			if (params[1][0] == '#')
 				reg2 = to_double(params[1].substr(1, params[1].length()));
 			else
-				reg2 = vir_regs[find(vir_regs_names, params[1])];
+				reg2 = this->vir_regs[find(this->vir_regs_names, params[1])];
 
 			if (reg_idx > -1)
-				vir_regs[reg_idx] += reg2;
+				this->vir_regs[reg_idx] += reg2;
 			else
 				this->errors.push_back((_GXA_error_t){"'add' instruction set arguements are invalid!", "INVALID_ARGUMENTS", "value", lx});
 		}
@@ -269,16 +264,16 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 				continue;
 			}
 
-			const signed short int reg_idx = find(vir_regs_names, params[0]);
+			const signed short int reg_idx = find(this->vir_regs_names, params[0]);
 			signed long int reg2 = 0;
 
 			if (params[1][0] == '#')
 				reg2 = to_double(params[1].substr(1, params[1].length()));
 			else
-				reg2 = vir_regs[find(vir_regs_names, params[1])];
+				reg2 = this->vir_regs[find(this->vir_regs_names, params[1])];
 
 			if (reg_idx > -1)
-				vir_regs[reg_idx] *= reg2;
+				this->vir_regs[reg_idx] *= reg2;
 			else
 				this->errors.push_back((_GXA_error_t){"'add' instruction set arguments are invalid!", "INVALID_ARGUMENTS", "value", lx});
 		}
@@ -290,16 +285,16 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 				continue;
 			}
 
-			const signed short int reg_idx = find(vir_regs_names, params[0]);
+			const signed short int reg_idx = find(this->vir_regs_names, params[0]);
 			signed long int reg2 = 0;
 
 			if (params[1][0] == '#')
 				reg2 = to_double(params[1].substr(1, params[1].length()));
 			else
-				reg2 = vir_regs[find(vir_regs_names, params[1])];
+				reg2 = this->vir_regs[find(this->vir_regs_names, params[1])];
 
 			if (reg_idx > -1)
-				vir_regs[reg_idx] /= reg2;
+				this->vir_regs[reg_idx] /= reg2;
 			else
 				this->errors.push_back((_GXA_error_t){"'add' instruction set arguments are invalid!", "INVALID_ARGUMENTS", "value", lx});
 		}
@@ -311,16 +306,16 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 				continue;
 			}
 
-			const signed short int reg_idx = find(vir_regs_names, params[0]);
+			const signed short int reg_idx = find(this->vir_regs_names, params[0]);
 			signed long int reg2 = 0;
 
 			if (params[1][0] == '#')
 				reg2 = to_double(params[1].substr(1, params[1].length()));
 			else
-				reg2 = vir_regs[find(vir_regs_names, params[1])];
+				reg2 = this->vir_regs[find(this->vir_regs_names, params[1])];
 
 			if (reg_idx > -1)
-				vir_regs[reg_idx] = sqrt(reg2);
+				this->vir_regs[reg_idx] = sqrt(reg2);
 			else
 				this->errors.push_back((_GXA_error_t){"'add' instruction set arguments are invalid!", "INVALID_ARGUMENTS", "value", lx});
 		}
@@ -332,16 +327,16 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 				continue;
 			}
 
-			const signed short int reg_idx = find(vir_regs_names, params[0]);
+			const signed short int reg_idx = find(this->vir_regs_names, params[0]);
 			signed long int reg2 = 0;
 
 			if (params[1][0] == '#')
 				reg2 = to_double(params[1].substr(1, params[1].length()));
 			else
-				reg2 = vir_regs[find(vir_regs_names, params[1])];
+				reg2 = this->vir_regs[find(this->vir_regs_names, params[1])];
 
 			if (reg_idx > -1)
-				vir_regs[reg_idx] = pow(vir_regs[reg_idx],reg2);
+				this->vir_regs[reg_idx] = pow(this->vir_regs[reg_idx],reg2);
 			else
 				this->errors.push_back((_GXA_error_t){"'add' instruction set arguments are invalid!", "INVALID_ARGUMENTS", "value", lx});
 		}
@@ -352,9 +347,9 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 				this->errors.push_back((_GXA_error_t){"'incr' instructions set arguments are missed!", "MISSED_ARGUMENTS", "value", lx});
 				continue;
 			}
-			const signed short int reg_idx = find(vir_regs_names, params[0]);
+			const signed short int reg_idx = find(this->vir_regs_names, params[0]);
 			if (reg_idx > -1)
-				vir_regs[reg_idx]++;
+				this->vir_regs[reg_idx]++;
 			else
 				this->errors.push_back((_GXA_error_t){"'incr' instructions set argmuents are invalid!", "INVALID_ARGUMENTS", "value", lx});
 		}
@@ -367,16 +362,16 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 				continue;
 			}
 
-			const signed short int reg_idx = find(vir_regs_names, params[0]);
+			const signed short int reg_idx = find(this->vir_regs_names, params[0]);
 			signed long int reg2 = 0;
 
 			if (params[1][0] == '#')
 				reg2 = to_double(params[1].substr(1, params[1].length()));
 			else
-				reg2 = vir_regs[find(vir_regs_names, params[1])];
+				reg2 = this->vir_regs[find(this->vir_regs_names, params[1])];
 
 			if (reg_idx > -1)
-				vir_regs[reg_idx] -= reg2;
+				this->vir_regs[reg_idx] -= reg2;
 			else
 				this->errors.push_back((_GXA_error_t){"'add' instruction set arguments are invalid!", "INVALID_ARGUMENTS", "value", lx});
 		}
@@ -390,9 +385,9 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 			}
 			else if (params[0].length())
 			{
-				const signed short int reg_idx = find(vir_regs_names, params[0]);
+				const signed short int reg_idx = find(this->vir_regs_names, params[0]);
 				if (reg_idx > -1)
-					vir_regs[reg_idx]--;
+					this->vir_regs[reg_idx]--;
 				else
 					this->errors.push_back((_GXA_error_t){"'decr' instructions set arguments is invalid!", "INVALID_ARGUMENT", "value", lx});
 			}
@@ -449,19 +444,23 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 			{
 				if (params.size() == 2)
 				{
-					if (params[1] == "EQ" && cmp != 0)
+					cout<<"cmp NE & EQ -> "<<this->cmp<<" "<<(!this->cmp)<<(this->cmp==0)<<"\n";
+					if (params[1] == "EQ" && this->cmp != 0)
 						continue;
-					else if (params[1] == "LE" && cmp >= 0)
+					else if (params[1] == "LE" && this->cmp >= 0)
 						continue;
-					else if (params[1] == "GE" && cmp <= 0)
+					else if (params[1] == "GE" && this->cmp <= 0)
 						continue;
-					else if (params[1] == "NE" && !cmp)
+					else if (params[1] == "NE" && !this->cmp)
 						continue;
+				
 				}
+				cout<<"im gonna run!\n";
 
 				const vector<_GXA_snippet_t> call_out = this->_transpile_(text, lx);
 				for (uint32_t i = 0; i < call_out.size(); i++)
 				{
+					cout<<call_out[i].x<<"x\n";
 					output.push_back(call_out[i]);
 				}
 			}
