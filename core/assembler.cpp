@@ -231,10 +231,8 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 					this->errors.push_back((_GXA_error_t){"'cmp' instruction set second argument isnt valid!", "INVALID_ARGUMENT", "value", lx});
 					continue;
 				}
-			//	this->cmp = reg1_idx - reg2_idx;
 			}
 			this->cmp = reg1_idx - reg2_idx;
-			cout<<"compare "<<this->cmp<<"\n";
 		}
 		else if (CMD == "add")
 		{
@@ -444,7 +442,6 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 			{
 				if (params.size() == 2)
 				{
-					cout<<"cmp NE & EQ -> "<<this->cmp<<" "<<(!this->cmp)<<(this->cmp==0)<<"\n";
 					if (params[1] == "EQ" && this->cmp != 0)
 						continue;
 					else if (params[1] == "LE" && this->cmp >= 0)
@@ -455,12 +452,10 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 						continue;
 				
 				}
-				cout<<"im gonna run!\n";
 
 				const vector<_GXA_snippet_t> call_out = this->_transpile_(text, lx);
 				for (uint32_t i = 0; i < call_out.size(); i++)
 				{
-					cout<<call_out[i].x<<"x\n";
 					output.push_back(call_out[i]);
 				}
 			}
