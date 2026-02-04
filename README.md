@@ -41,8 +41,8 @@ In **Gama-X**, all logical overhead is shifted to the **Pre-compilation Phase**.
 
 ## How to use this language?
 
-still there is no documention for this language...
+check [wiki/basic.md]("https://github.com/ABPD2001/gama-x/") as start of documention.
 
 ---
 
-Copyright © 2025. All rights reserved by Abolfazl Pouretemadi.
+_by Abolfazl Pouretemadi._
