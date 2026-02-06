@@ -190,11 +190,8 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 						continue;
 					else if(params[1] == "GT" && this->cmp <= 0)
 						continue;
-					else if (params[1] != "AL")
-					{
-						this->errors.push_back((_GXA_error_t){"'jmp' instruction set condition is invalid!", "INVALID_CONDITION", "value", lx});
+					else if(params[1] == "NE" && !this->cmp)
 						continue;
-					}
 				}
 				i = min(lines.size() - 1, num);
 			}
@@ -444,11 +441,15 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint16_t line_idx)
 				{
 					if (params[1] == "EQ" && this->cmp != 0)
 						continue;
-					else if (params[1] == "LE" && this->cmp >= 0)
+					else if (params[1] == "LE" && this->cmp > 0)
 						continue;
-					else if (params[1] == "GE" && this->cmp <= 0)
+					else if (params[1] == "GE" && this->cmp < 0)
 						continue;
 					else if (params[1] == "NE" && !this->cmp)
+						continue;
+					else if(params[1] == "GT" && this->cmp <= 0)
+						continue;
+					else if(params[1] == "LS" && this->cmp => 0)
 						continue;
 				
 				}
