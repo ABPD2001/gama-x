@@ -248,7 +248,7 @@ test_label:
 
 ## Next step
 
-check [wiki/directive-set.md](https://github/ABPD2001/gama-x/tree/main/wiki/directive-set.md) for directives.
+check [wiki/directive-set.md](https://github.com/ABPD2001/gama-x/blob/main/wiki/directive-set.md) for directives.
 
 ## Author
 

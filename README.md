@@ -16,9 +16,9 @@ Gama-X incorporates advanced logical constructs, including:
 
 - **Dynamic Variables:** Efficient memory management through symbolic variable handling.
 
-> _note:_ its important to know, _Gama-X is **not** executable as native_, actually, machines with its driver can execute it.
+> _Note:_ its important to know, _Gama-X is **not** executable as native_, actually, machines with its driver can execute it.
 
-> _note_: also you must know, _Gama-X is **logic-simulated** language_, all logics, computes on your personal computer, then, all calculated results, runs on machine as a raw output file.
+> _Note_: also you must know, _Gama-X is **logic-simulated** language_, all logics, computes on your personal computer, then, all calculated results, runs on machine as a raw output file.
 
 ### Theoretical Complexity
 
@@ -37,7 +37,7 @@ In **G-Code**, the controller must read text, tokenize it, and search through sy
 
 In **Gama-X**, all logical overhead is shifted to the **Pre-compilation Phase**. The target hardware receives pre-calculated binary data. Writing a value to a register or memory address takes the same amount of time regardless of program size, resulting in a **Constant Time Complexity of O(1)**.
 
-> _note:_ This makes Gama-X the ideal choice for **High-Precision Real-time Systems** where every microsecond counts and execution time must be perfectly predictable.
+> _Note:_ This makes Gama-X the ideal choice for **High-Precision Real-time Systems** where every microsecond counts and execution time must be perfectly predictable.
 
 ## How to use this language?
 
