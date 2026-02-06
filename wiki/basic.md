@@ -1,10 +1,14 @@
 # Documention
 
-here is quick menu:
+To begin learning **Gama-X**, start here. This page provides a comprehensive breakdown of the language's **grammar** and **syntax**.
 
+## Quick menu
+
+- **[Quick menu](#quick-menu)**
 - **[Prerequisites](#prerequisites)**
 - **[Getting Started with Syntax](#getting-started-with-syntax)**
 - **[Next step](#next-step)**
+- **[Author](#author)**
 
 ## Prerequisites
 
@@ -59,3 +63,7 @@ Similar to ARM Assembly, this language distinguishes between two primary types o
 ## Next step
 
 check [wiki/instruction-set.md](https://github.com/ABPD2001/gama-x/tree/main/wiki/instruction-set.md) for instruction set.
+
+## Author
+
+by ABPD2001 (_Abolfazl Pouretemadi_)
