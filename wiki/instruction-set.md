@@ -193,6 +193,7 @@ my_label:
   cmp x,y
   call my_label,NE
   @ jump to my_label (if x != y).
+  end
 
 my_label2:
   add x,#1
@@ -204,6 +205,7 @@ my_label2:
   cmp r0,y
   jmp 1,GT
   @ ^^^^^^ --> jump on line 1 nth.
+  end
 ```
 
 ## Memory Instructions
@@ -242,6 +244,7 @@ test_label:
   pull r1
   @ load from memory into r1 (memory ==> r1).
   add r0,r1
+  end
 ```
 
 ---

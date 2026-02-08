@@ -35,6 +35,7 @@ in ARM Assembly, syntax is like this:
 label_x:
     op1 arg1,arg2
     opX argY,argZ
+    end
 ```
 
 and Gama-X uses this syntax directly as its syntax.
@@ -42,6 +43,8 @@ and Gama-X uses this syntax directly as its syntax.
 > _Note:_ also in _ARM Assembly_, registers are named `r0 ~ r15` (in **armv7**) and its same with _Gama-X_.
 
 It is important to realize that you can customize and extend this language to meet your specific requirements whether that involves adding more registers, implementing advanced memory control, or even developing an entirely new language with Gama-X as its foundation.
+
+> _Important:_ its required to use `end` instruction at end of each label declaration.
 
 ## Language Command Types
 
