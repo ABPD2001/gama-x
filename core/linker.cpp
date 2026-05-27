@@ -110,6 +110,17 @@ void _GXL_::_add_libraries_()
         }
     }
 
+    vector<string> libraries_to_insert;
+    for (uint32_t i = 0; i < this->requested_libraries.size(); i++)
+    {
+        if (!includes<string>(libraries_to_insert, this->requested_libraries[i]))
+        {
+            libraries_to_insert.push_back(this->requested_libraries[i]);
+        }
+    }
+
+    this->requested_libraries = libraries_to_insert;
+
     for (string req_lib : this->requested_libraries)
     {
         bool found = false;
