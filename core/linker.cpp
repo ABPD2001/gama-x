@@ -57,10 +57,12 @@ void _GXL_::_add_libraries_()
     _GXL_library_metadata_chunk_header_t temp_header;
     _GXL_error_t error;
 
-    libraries_config_f.open(this->repository + "/metadata.riff", ios::binary | ios::ate);
+    const string metadata_path = (this->config.metadata_file_name.length() ? this->config.metadata_file_name : "/metadata.riff");
+
+    libraries_config_f.open(metadata_path, ios::binary | ios::ate);
     if (!libraries_config_f.is_open())
     {
-        error = {this->repository + "/metadata.riff", "Failed to open metadata file of repository!", "syntax", "REPOSITORY_METADATA_FAILURE", 0};
+        error = {metadata_path, "Failed to open metadata file of repository!", "syntax", "REPOSITORY_METADATA_FAILURE", 0};
         this->errors.push_back(error);
         libraries_config_f.close();
         return;
@@ -95,31 +97,31 @@ void _GXL_::_add_libraries_()
             _GXL_library_dependecy_t dep = {deps_name, dep_id};
             library_dependecies.push_back(dep);
         }
+        else
+        {
+            error = {metadata_path, "Failed to read chunk of repository metadata file!", "input-output", "CHUNK_PARSE_FAILURE", libraries_config_f.tellg()};
+            this->errors.push_back(error);
+            break;
+        }
     }
     libraries_config_f.close();
+    if (this->errors.size())
+        return;
 
-    for (uint32_t i = 0; i < library_metadatas.size(); i++)
+    if (this->config.dependecy_check)
     {
-        for (uint32_t j = 0; j < library_dependecies.size(); j++)
+        for (uint32_t i = 0; i < library_metadatas.size(); i++)
         {
-            if (library_dependecies[j].id == library_metadatas[i].dep_id)
+            for (uint32_t j = 0; j < library_dependecies.size(); j++)
             {
-                this->requested_libraries.insert(this->requested_libraries.begin(), library_dependecies[j].dependecies.begin(), library_dependecies[j].dependecies.end());
-                break;
+                if (library_dependecies[j].id == library_metadatas[i].dep_id)
+                {
+                    this->requested_libraries.insert(this->requested_libraries.begin(), library_dependecies[j].dependecies.begin(), library_dependecies[j].dependecies.end());
+                    break;
+                }
             }
         }
     }
-
-    vector<string> libraries_to_insert;
-    for (uint32_t i = 0; i < this->requested_libraries.size(); i++)
-    {
-        if (!includes<string>(libraries_to_insert, this->requested_libraries[i]))
-        {
-            libraries_to_insert.push_back(this->requested_libraries[i]);
-        }
-    }
-
-    this->requested_libraries = libraries_to_insert;
 
     for (string req_lib : this->requested_libraries)
     {
@@ -149,9 +151,9 @@ void _GXL_::_add_libraries_()
                 {
                     file.content += tmp_line + '\n';
                 }
-                file.content.resize(file.content.length() + 1);
-                file.content[file.content.size() - 1] = '\0';
                 lib_f.close();
+                file.content = file.content.substr(0, file.content.length() - 1);
+                this->files.push_back(file);
             }
         }
         if (!found)
@@ -159,14 +161,22 @@ void _GXL_::_add_libraries_()
             error = {"", "Invalid library '" + req_lib + "' requested!", "importation", "LIBRARY_NOT_FOUND", 0};
             this->errors.push_back(error);
         }
-        else
-            found = false;
     }
 }
 
-string _GXL_::merge()
+bool _GXL_::merge()
 {
-    this->_add_libraries_();
+    if (this->config.repository_check)
+    {
+        this->_add_libraries_();
+        if (this->errors.size())
+            return false;
+    }
     this->_merge_files_();
-    return this->merge_preprocessor + this->merge_instruction;
+
+    if (this->errors.size())
+        return false;
+    this->merged = this->merge_preprocessor + this->merge_instruction;
+
+    return true;
 }

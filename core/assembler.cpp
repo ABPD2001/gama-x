@@ -12,7 +12,7 @@ _GXA_::~_GXA_()
     this->errors = vector<_GXA_error_t>();
     this->labels = vector<_GXA_label_t>();
     this->input.clear();
-    this->startLabel.clear();
+    this->startLabel = {};
     this->vir_regs_names = vector<string>();
     this->vir_regs = vector<logictype_t>();
 }
@@ -402,7 +402,7 @@ void _GXA_::_pre_processors_(string &content)
 
         else if (parts[0] == ".main")
         {
-            this->startLabel = parts[1];
+            this->startLabel.name = parts[1];
             lines[i] = "_NONE_";
         }
         else if (parts[0] == ".argular")
@@ -713,33 +713,27 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
         }
         else if (parts[0] == "call")
         {
-            string text;
+            _GXA_label_t target_label;
             for (uint16_t i = 0; i < this->labels.size(); i++)
             {
                 if (this->labels[i].name == params[0])
-                    text = this->labels[i].text;
+                    target_label = this->labels[i];
             }
 
-            if (text.length())
+            if (params.size() == 2)
             {
-                if (params.size() == 2)
-                {
-                    if (params[1] == "EQ" && cmp != 0)
-                        continue;
-                    else if (params[1] == "LE" && cmp >= 0)
-                        continue;
-                    else if (params[1] == "GE" && cmp <= 0)
-                        continue;
-                    else if (params[1] == "NE" && !cmp)
-                        continue;
-                }
-
-                const vector<_GXA_snippet_t> call_out = this->_transpile_(text, lx);
-                for (uint32_t i = 0; i < call_out.size(); i++)
-                {
-                    output.push_back(call_out[i]);
-                }
+                if (params[1] == "EQ" && cmp != 0)
+                    continue;
+                else if (params[1] == "LE" && cmp >= 0)
+                    continue;
+                else if (params[1] == "GE" && cmp <= 0)
+                    continue;
+                else if (params[1] == "NE" && !cmp)
+                    continue;
             }
+
+            const vector<_GXA_snippet_t> call_out = this->_transpile_(target_label.text, target_label.line_idx);
+            output.insert(output.begin(), call_out.begin(), call_out.end());
         }
         else if (parts[0] == ".transpile")
         {
@@ -761,4 +755,32 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
     }
 
     return output;
+}
+
+bool _GXA_::compile()
+{
+    const vector<string> lines = split(this->input, '\n');
+    const vector<_GXA_label_t> labels = this->_slice_labels_(this->input);
+
+    for (_GXA_label_t lbl : labels)
+    {
+        if (lbl.name == this->startLabel.name)
+        {
+            this->startLabel = lbl;
+            break;
+        }
+    }
+
+    this->_check_pre_processors_errors_();
+    for (_GXA_label_t lbl : labels)
+    {
+        this->_check_errors_(lbl.text, lbl.line_idx);
+    }
+
+    if (this->errors.size())
+        return false;
+
+    this->_pre_processors_(this->input);
+    this->_transpile_(this->startLabel.name, this->startLabel.line_idx);
+    return true;
 }

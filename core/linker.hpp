@@ -77,7 +77,6 @@ struct _GXL_library_metadata_t // a user-friendly version structure from metadat
 
 class _GXL_
 {
-    vector<_GXL_error_t> errors;
     vector<_GXL_file_t> files;
     vector<string> requested_libraries;
 
@@ -91,8 +90,11 @@ class _GXL_
     void _add_libraries_();
 
 public:
+    string merged;
+    vector<_GXL_error_t> errors;
+
     _GXL_();
     _GXL_(vector<_GXL_file_t> files, _GXL_config_t config, string repository);
-    string merge();
+    bool merge();
 };
 #endif

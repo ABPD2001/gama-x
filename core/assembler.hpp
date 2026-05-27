@@ -76,7 +76,6 @@ struct _GXA_config_t
 class _GXA_
 {
     _GXA_config_t config;
-    vector<_GXA_snippet_t> output;
     vector<_GXA_label_t> labels;
 
     vector<logictype_t> vir_regs = {0, 255, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -86,8 +85,8 @@ class _GXA_
     vector<_GXA_external_argument_t> external_arguments;
     vector<_GXA_external_t> externals;
 
+    _GXA_label_t startLabel;
     string input;
-    string startLabel;
 
     uint64_t vir_sp = 0; // --- //
 
@@ -102,12 +101,13 @@ class _GXA_
     void _GXA_::_check_pre_processors_errors_();
 
 public:
+    vector<_GXA_snippet_t> output;
     vector<_GXA_error_t> errors;
     uint8_t status = 0;
 
     _GXA_(string content, _GXA_config_t config);
     _GXA_();
     ~_GXA_();
-    vector<_GXA_snippet_t> compile();
+    bool compile();
 };
 #endif
