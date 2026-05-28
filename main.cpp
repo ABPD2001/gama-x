@@ -7,6 +7,7 @@
 #include "./core/linker.hpp"
 #include "./core/lint.hpp"
 #define VERSION "v2.0.0"
+#define HELP "help..."
 
 using std::cout;
 using std::fstream;
@@ -49,8 +50,8 @@ int main(char *argv[], int argc)
     _GXLT_ _lint_;
 
     vector<_GXL_file_t> files;
-    vector<argument_t> config_arguments;
     vector<string> binary_logics;
+    vector<string> argvv;
     _GXA_config_t assembler_config = {vector<string>(), vector<string>(), vector<logictype_t>()};
     _GXL_config_t linker_config = {"", "metadata.riff", true, true};
 
@@ -61,9 +62,14 @@ int main(char *argv[], int argc)
     string output_filepath;
     bool binary_output;
 
-    for (uint64_t i = 0; i < argc; i++)
+    for (uint32_t i = 0; i < argc; i++)
     {
-        const string flag = string(argv[i]);
+        argvv.push_back(string(argv[i]));
+    }
+
+    for (uint64_t i = 0; i < argvv.size(); i++)
+    {
+        const string flag = argvv[i];
 
         if (flag == "-V" || flag == "--version")
         {
@@ -128,7 +134,15 @@ int main(char *argv[], int argc)
                 }
                 content = content.substr(0, content.length() - 1);
                 if (flag == "-c" || flag == "--config")
-                    config_arguments = parse_arguments(content);
+                {
+                    const vector<argument_t> config_arguments = parse_arguments(content);
+                    for (uint32_t j = 0; j < config_arguments.size(); j++)
+                    {
+                        argvv.push_back(config_arguments[j].key);
+                        argvv.push_back(config_arguments[j].value);
+                        argc += 2;
+                    }
+                }
                 else if (flag == "-e" || flag == "--error-format")
                     error_format = content;
                 else if (flag == "-m" || flag == "--metadata-filename")

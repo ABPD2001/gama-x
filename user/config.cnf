@@ -1,4 +1,4 @@
 registers=x,y,t,r0,r1,r2,r3,r4,r5
 values=0,255,0,0,0,0,0,0,0,0
 binary_logics=64u,32u,32u
-library_repository=/usr/lib/gama-x
+repository=/usr/lib/gama-x
