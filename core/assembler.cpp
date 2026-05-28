@@ -38,6 +38,7 @@ _GXA_::~_GXA_()
 
 vector<_GXA_external_argument_t> _GXA_::_parse_argular_(string path, uint32_t index)
 {
+    vector<_GXA_external_argument_t> output;
     fstream extern_f;
     vector<string> lines;
     string line;
@@ -46,16 +47,16 @@ vector<_GXA_external_argument_t> _GXA_::_parse_argular_(string path, uint32_t in
 
     if (!extern_f.is_open())
     {
-        _GXLT_error_cpy_t error = {path, "Failed to open file in '" + path + "'!", "FILE_READ_FAILURE", "input-output", index};
+        _GXLT_error_t error = {path, "Failed to open file in '" + path + "'!", "FILE_READ_FAILURE", "input-output", index};
         this->runtime_errors.push_back(error);
-        return;
+        return output;
     }
     while (getline(extern_f, line))
     {
         lines.push_back(line);
     }
 
-    for (uint16_t i = 0; i < lines.size(); i++)
+    for (uint32_t i = 0; i < lines.size(); i++)
     {
 
         for (uint64_t j = 0; j < lines[i].length(); j++)
@@ -67,16 +68,18 @@ vector<_GXA_external_argument_t> _GXA_::_parse_argular_(string path, uint32_t in
 
                 if (!isValidNumber(value))
                 {
-                    _GXLT_error_cpy_t error = {path, "Invalid syntax for" + name + "arguments value!", "INVALID_ARGUMNET_VALUE", "input-output", index};
+                    _GXLT_error_t error = {path, "Invalid syntax for" + name + "arguments value!", "INVALID_ARGUMNET_VALUE", "input-output", index};
                     this->runtime_errors.push_back(error);
-                    return;
+                    return output;
                 }
 
                 _GXA_external_argument_t argument = {name, value};
+                output.push_back(argument);
                 this->external_arguments.push_back(argument);
             }
         }
     }
+    return output;
 }
 
 void _GXA_::_open_extern_(string path, string name, uint32_t index)
@@ -89,7 +92,7 @@ void _GXA_::_open_extern_(string path, string name, uint32_t index)
 
     if (!extern_f.is_open())
     {
-        _GXLT_error_cpy_t error = {path, "Failed to open file in '" + path + "'!", "FILE_READ_FAILURE", "input-output", index};
+        _GXLT_error_t error = {path, "Failed to open file in '" + path + "'!", "FILE_READ_FAILURE", "input-output", index};
         this->runtime_errors.push_back(error);
         return;
     }
@@ -98,7 +101,8 @@ void _GXA_::_open_extern_(string path, string name, uint32_t index)
         content += line + '\n';
     }
 
-    content = content.substr(0, content.length() - 1);
+    if (content.length())
+        content = content.substr(0, content.length() - 1);
 
     _GXA_external_t external = {content, name};
     this->externals.push_back(external);
@@ -438,42 +442,42 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
         else if (parts[0] == "ceil")
         {
             const uint16_t reg_idx = find<string>(this->vir_regs_names, params[0]);
-            this->vir_regs[reg_idx] = (logictype_t)ceill(to_autoNumber(params[0]));
+            this->vir_regs[reg_idx] = (logictype_t)ceil(to_autoNumber(params[0]));
         }
         else if (parts[0] == "flr")
         {
             const uint16_t reg_idx = find<string>(this->vir_regs_names, params[0]);
-            this->vir_regs[reg_idx] = (logictype_t)floorl(to_autoNumber(params[0]));
+            this->vir_regs[reg_idx] = (logictype_t)floor(to_autoNumber(params[0]));
         }
         else if (parts[0] == "rnd")
         {
             const uint16_t reg_idx = find<string>(this->vir_regs_names, params[0]);
-            this->vir_regs[reg_idx] = (logictype_t)roundl(to_autoNumber(params[0]));
+            this->vir_regs[reg_idx] = (logictype_t)round(to_autoNumber(params[0]));
         }
         else if (parts[0] == "sin")
         {
             const uint16_t reg_idx = find<string>(this->vir_regs_names, params[0]);
-            this->vir_regs[reg_idx] = (logictype_t)sinl(to_autoNumber(params[0]));
+            this->vir_regs[reg_idx] = (logictype_t)sin(to_autoNumber(params[0]));
         }
         else if (parts[0] == "cos")
         {
             const uint16_t reg_idx = find<string>(this->vir_regs_names, params[0]);
-            this->vir_regs[reg_idx] = (logictype_t)cosl(to_autoNumber(params[0]));
+            this->vir_regs[reg_idx] = (logictype_t)cos(to_autoNumber(params[0]));
         }
         else if (parts[0] == "sinh")
         {
             const uint16_t reg_idx = find<string>(this->vir_regs_names, params[0]);
-            this->vir_regs[reg_idx] = (logictype_t)sinhl(to_autoNumber(params[0]));
+            this->vir_regs[reg_idx] = (logictype_t)sin(to_autoNumber(params[0]));
         }
         else if (parts[0] == "ln")
         {
             const uint16_t reg_idx = find<string>(this->vir_regs_names, params[0]);
-            this->vir_regs[reg_idx] = (logictype_t)logl(to_autoNumber(params[0]));
+            this->vir_regs[reg_idx] = (logictype_t)log(to_autoNumber(params[0]));
         }
         else if (parts[0] == "call")
         {
             _GXA_label_t target_label;
-            for (uint16_t i = 0; i < this->labels.size(); i++)
+            for (uint32_t i = 0; i < this->labels.size(); i++)
             {
                 if (this->labels[i].name == params[0])
                     target_label = this->labels[i];
@@ -497,7 +501,7 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
         else if (parts[0] == ".transpile")
         {
             _GXA_snippet_t snippet;
-            for (string s : this->config.special_registers_name)
+            for (string s : this->special_vir_regs_name)
             {
                 snippet.push_back(this->vir_regs[find<string>(this->vir_regs_names, s)]);
             }
@@ -505,7 +509,7 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
         }
         else if (parts[0] == ".reset")
         {
-            for (uint16_t i = 0; i < this->vir_regs.size(); i++)
+            for (uint32_t i = 0; i < this->vir_regs.size(); i++)
             {
                 this->vir_regs[i] = 0;
             }

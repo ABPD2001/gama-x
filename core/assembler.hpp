@@ -1,83 +1,28 @@
 #ifndef _GXA__HPP
 #define _GXA__HPP
-#include <string>
 #include <cmath>
-#include <fstream>
-#include <iostream>
-#include <filesystem>
+#include "./types.hpp"
 
-#include "../utils/string.hpp"
-#include "../utils/vector.hpp"
-#include "../utils/number.hpp"
-
-#include "../user/core.hpp"
-
-using std::cout;
-using std::fstream;
-using std::getline;
 using std::ios;
 using std::max;
 using std::min;
-using std::string;
 
 using std::abs;
-using std::ceill;
-using std::cosl;
-using std::floorl;
-using std::logl;
+using std::ceil;
+using std::cos;
+using std::floor;
+using std::log;
 using std::pow;
-using std::roundl;
-using std::sinhl;
-using std::sinl;
+using std::round;
+using std::sin;
 using std::sqrt;
-using std::tanl;
-
-using std::to_string;
-using std::uint16_t;
-using std::uint32_t;
-using std::uint8_t;
-
-namespace fs = std::filesystem;
-
-struct _GXA_label_t
-{
-    string text;
-    string name;
-    uint32_t line_idx;
-};
-
-struct _GXA_external_argument_t
-{
-    string name;
-    string value;
-};
-struct _GXA_external_t
-{
-    string content;
-    string name;
-};
-
-struct _GXA_config_t
-{
-    vector<string> registers_name;
-    vector<string> special_registers_name;
-    vector<logictype_t> register_values;
-};
-
-struct _GXLT_error_cpy_t
-{
-    string filename;
-    string message;
-    string cause;
-    string type;
-    uint32_t line;
-};
+using std::tan;
 
 class _GXA_
 {
     _GXA_config_t config;
     vector<_GXA_label_t> labels;
-    vector<_GXLT_error_cpy_t> runtime_errors;
+    vector<_GXLT_error_t> runtime_errors;
 
     vector<logictype_t> vir_regs = {0, 255, 0, 0, 0, 0, 0, 0, 0, 0};
     vector<logictype_t> vir_stack;

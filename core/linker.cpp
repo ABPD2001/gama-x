@@ -94,7 +94,7 @@ void _GXL_::_add_libraries_()
             char ch;
 
             libraries_config_f.read(dep_id, 8); // read 8 bytes as dependecy id.
-            while (ch != NULL || deps.empty())
+            while (ch || deps.empty())
             {
                 libraries_config_f.read(&ch, 1);
                 deps += ch;
@@ -160,7 +160,8 @@ void _GXL_::_add_libraries_()
                     file.content += tmp_line + '\n';
                 }
                 lib_f.close();
-                file.content = file.content.substr(0, file.content.length() - 1);
+                if (file.content.size())
+                    file.content = file.content.substr(0, file.content.length() - 1);
                 this->files.push_back(file);
             }
         }

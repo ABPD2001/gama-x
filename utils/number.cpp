@@ -16,7 +16,7 @@ uint64_t to_uint64(string text)
 {
 	uint64_t output = 0;
 
-	for (uint16_t i = 0; i < text.length(); i++)
+	for (uint32_t i = 0; i < text.length(); i++)
 	{
 		output += (text[i] - 48) * pow(10, i);
 	}
@@ -54,7 +54,7 @@ long int to_int64(string text)
 		text = text.substr(1);
 	}
 
-	for (uint16_t i = 0; i < text.length(); i++)
+	for (uint32_t i = 0; i < text.length(); i++)
 	{
 		output += (text[i] - 48) * pow(10, i);
 	}

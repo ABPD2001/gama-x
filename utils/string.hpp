@@ -2,8 +2,10 @@
 #define STRING_HPP
 #include <string>
 #include <vector>
+#include <cmath>
 #include <cstdint>
 
+using std::pow;
 using std::string;
 using std::uint16_t;
 using std::uint32_t;

@@ -12,45 +12,38 @@ string toBinary(long int value, uint8_t mode)
 	case 0: // s64.
 		for (uint8_t i = 0; i < 8; i++)
 		{
-			unsigned char b = value & (0xff << (i * 8));
-			sbytes[i] = b;
+			sbytes[i] = value & (0xff << (i * 8));
 		}
 		break;
 	case 1: // u32.
 		for (uint8_t i = 0; i < 4; i++)
 		{
-			unsigned char b = ((uint32_t)value) & (0xff << (i * 8));
-			ubytes[i] = b;
+			ubytes[i] = ((uint32_t)value) & (0xff << (i * 8));
 		}
 		break;
 	case 2: // s32
 		for (uint8_t i = 0; i < 4; i++)
 		{
-			unsigned char b = ((unsigned int)value) & (0xff << (i * 8));
-			sbytes[i] = b;
+			sbytes[i] = ((unsigned int)value) & (0xff << (i * 8));
 		}
 		break;
 	case 3: // u16
 		for (uint8_t i = 0; i < 2; i++)
 		{
-			unsigned char b = ((uint16_t)value) & (0xff << (i * 8));
-			ubytes[i] = b;
+			ubytes[i] = ((uint16_t)value) & (0xff << (i * 8));
 		}
 		break;
 	case 4: // s16
 		for (uint8_t i = 0; i < 2; i++)
 		{
-			unsigned char b = ((short int)value) & (0xff << (i * 8));
-			sbytes[i] = b;
+			sbytes[i] = ((short int)value) & (0xff << (i * 8));
 		}
 		break;
 	case 5: // u8
-		unsigned char b = ((uint8_t)value) & (0xff);
-		ubytes[0] = b;
+		ubytes[0] = ((uint8_t)value) & (0xff);
 		break;
 	case 6: // s8
-		unsigned char b = ((signed char)value) & (0xff);
-		sbytes[0] = b;
+		sbytes[0] = ((signed char)value) & (0xff);
 		break;
 	default:
 		return "";
@@ -95,7 +88,7 @@ vector<argument_t> parse_arguments(string content)
 
 	for (string l : lines)
 	{
-		for (uint16_t i = 0; i < l.length(); i++)
+		for (uint32_t i = 0; i < l.length(); i++)
 		{
 			argument_t argument;
 			bool skip = false;
@@ -152,7 +145,7 @@ string trim(string text)
 	signed long int end = -1;
 	char empties[7] = {'\t', '\r', ' ', '\b', '\f', '\a', '\v'};
 
-	for (uint16_t i = 0; i < text.length(); i++)
+	for (uint32_t i = 0; i < text.length(); i++)
 	{
 		if (start == -1 && !includes(empties, 7, text[i]))
 		{
@@ -161,7 +154,7 @@ string trim(string text)
 		}
 	}
 
-	for (uint16_t i = text.length() - 1; i > -1; i--)
+	for (int i = text.length() - 1; i > -1; i--)
 	{
 		if (end == -1 && !includes(empties, 7, text[i]))
 		{
@@ -176,7 +169,7 @@ string trim(string text)
 	string cpy = "";
 	bool spaced = false;
 
-	for (uint16_t i = 0; i < output.length(); i++)
+	for (uint32_t i = 0; i < output.length(); i++)
 	{
 		if (includes(empties, 7, output[i]))
 		{
