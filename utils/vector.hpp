@@ -29,10 +29,22 @@ bool includes_arr(T *arr, T element)
 	}
 	return false;
 }
+template <typename T = string>
+int find_arr(T *arr, T element)
+{
+	for (uint16_t i = 0; i < 65355; i++)
+	{
+		if (arr[i] == element)
+			return i;
+	}
+	return -1;
+}
 
 template <typename T = string>
 bool includes(vector<T> vec, T element)
 {
+	if (!vec.size())
+		return false;
 	for (uint8_t i = 0; i < vec.size(); i++)
 	{
 		if (vec[i] == element)

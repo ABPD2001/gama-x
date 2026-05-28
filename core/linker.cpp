@@ -1,16 +1,25 @@
 #include "./linker.hpp"
 
-_GXL_::_GXL_(vector<_GXL_file_t> files, _GXL_config_t config, string repository)
+_GXL_::_GXL_(vector<_GXL_file_t> files, _GXL_config_t config)
 {
     this->files = files;
-    this->repository = repository;
     this->config = config;
+    if (this->config.repository_path.length())
+        this->repository = this->config.repository_path;
 }
 _GXL_::_GXL_() {};
 
+void _GXL_::init(vector<_GXL_file_t> files, _GXL_config_t config)
+{
+    this->files = files;
+    this->config = config;
+    if (this->config.repository_path.length())
+        this->repository = this->config.repository_path;
+}
+
 void _GXL_::_merge_files_()
 {
-    _GXL_error_t error;
+    _GXLT_error_t error;
 
     for (_GXL_file_t f : this->files)
     {
@@ -19,13 +28,13 @@ void _GXL_::_merge_files_()
 
         if ((mainidx == string::npos && modidx == string::npos) || (mainidx != string::npos && modidx != string::npos))
         {
-            error = {f.name, "Invalid pre-processor type, its required to add main point or modular mode, only one mode!", "type", 0};
+            error = {f.name, "Invalid pre-processor type, its required to add main point or modular mode, only one mode!", "INVALID_FILE_TYPE", "syntax", 0};
             this->errors.push_back(error);
             continue;
         }
         if (f.content.find(".end") == string::npos)
         {
-            error = {f.name, "Invalid pre-processor segmention!", "syntax", "END_WORD_MISSED", 0};
+            error = {f.name, "Invalid pre-processor segmention!", "END_WORD_MISSED", "syntax", 0};
             this->errors.push_back(error);
             continue;
         }
@@ -42,8 +51,7 @@ void _GXL_::_merge_files_()
             else
                 this->merge_instruction += line + '\n';
 
-            this->merge_instruction.resize(this->merge_instruction.length() + 1);
-            this->merge_instruction[this->merge_instruction.length() - 1] = '\0';
+            this->merge_instruction = this->merge_instruction.substr(0, this->merge_instruction.length() - 1);
         }
     }
 }
@@ -55,14 +63,14 @@ void _GXL_::_add_libraries_()
     fstream libraries_config_f;
     _GXL_library_metadata_chunk_t temp_struct;
     _GXL_library_metadata_chunk_header_t temp_header;
-    _GXL_error_t error;
+    _GXLT_error_t error;
 
     const string metadata_path = (this->config.metadata_file_name.length() ? this->config.metadata_file_name : "/metadata.riff");
 
     libraries_config_f.open(metadata_path, ios::binary | ios::ate);
     if (!libraries_config_f.is_open())
     {
-        error = {metadata_path, "Failed to open metadata file of repository!", "syntax", "REPOSITORY_METADATA_FAILURE", 0};
+        error = {metadata_path, "Failed to open metadata file of repository!", "REPOSITORY_METADATA_FAILURE", "syntax", 0};
         this->errors.push_back(error);
         libraries_config_f.close();
         return;
@@ -99,7 +107,7 @@ void _GXL_::_add_libraries_()
         }
         else
         {
-            error = {metadata_path, "Failed to read chunk of repository metadata file!", "input-output", "CHUNK_PARSE_FAILURE", libraries_config_f.tellg()};
+            error = {metadata_path, "Failed to read chunk of repository metadata file!", "CHUNK_PARSE_FAILURE", "input-output", libraries_config_f.tellg()};
             this->errors.push_back(error);
             break;
         }
@@ -141,7 +149,7 @@ void _GXL_::_add_libraries_()
                 lib_f.open(fpath, ios::in);
                 if (!lib_f.is_open())
                 {
-                    error = {fpath, "Failed to read!", "input-output", "LIBRARY_MAIN_POINT_FAILURE", 0};
+                    error = {fpath, "Failed to read!", "LIBRARY_MAIN_POINT_FAILURE", "input-output", 0};
                     this->errors.push_back(error);
                     break;
                 }
@@ -158,7 +166,7 @@ void _GXL_::_add_libraries_()
         }
         if (!found)
         {
-            error = {"", "Invalid library '" + req_lib + "' requested!", "importation", "LIBRARY_NOT_FOUND", 0};
+            error = {"", "Invalid library '" + req_lib + "' requested!", "LIBRARY_NOT_FOUND", "importation", 0};
             this->errors.push_back(error);
         }
     }

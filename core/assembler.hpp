@@ -46,14 +46,6 @@ struct _GXA_label_t
     uint32_t line_idx;
 };
 
-struct _GXA_error_t
-{
-    string message;
-    string cause;
-    string type;
-    uint32_t line;
-};
-
 struct _GXA_external_argument_t
 {
     string name;
@@ -67,20 +59,30 @@ struct _GXA_external_t
 
 struct _GXA_config_t
 {
-    vector<_GXA_external_t> externs;
-    vector<string> register_names;
+    vector<string> registers_name;
+    vector<string> special_registers_name;
     vector<logictype_t> register_values;
-    string argular_content;
+};
+
+struct _GXLT_error_cpy_t
+{
+    string filename;
+    string message;
+    string cause;
+    string type;
+    uint32_t line;
 };
 
 class _GXA_
 {
     _GXA_config_t config;
     vector<_GXA_label_t> labels;
+    vector<_GXLT_error_cpy_t> runtime_errors;
 
     vector<logictype_t> vir_regs = {0, 255, 0, 0, 0, 0, 0, 0, 0, 0};
     vector<logictype_t> vir_stack;
     vector<string> vir_regs_names = {"x", "y", "t", "r0", "r1", "r2", "r3", "r4", "r5"};
+    vector<string> special_vir_regs_name = {"t", "x", "y"};
 
     vector<_GXA_external_argument_t> external_arguments;
     vector<_GXA_external_t> externals;
@@ -88,26 +90,24 @@ class _GXA_
     _GXA_label_t startLabel;
     string input;
 
-    uint64_t vir_sp = 0; // --- //
+    // uint64_t vir_sp = 0; // --- //
 
     vector<_GXA_snippet_t> _transpile_(string content, uint64_t line_idx);
-    vector<_GXA_label_t> _slice_labels_(string content);
 
     vector<_GXA_external_argument_t> _parse_argular_(string path, uint32_t index);
     void _open_extern_(string path, string name, uint32_t index);
 
-    void _pre_processors_(string &content);
-    void _check_errors_(string content, uint32_t index);
-    void _GXA_::_check_pre_processors_errors_();
-
 public:
     vector<_GXA_snippet_t> output;
-    vector<_GXA_error_t> errors;
     uint8_t status = 0;
+
+    void _pre_processors_(string &content, vector<uint32_t> ignore_lines);
+    vector<_GXA_label_t> _slice_labels_(string content);
 
     _GXA_(string content, _GXA_config_t config);
     _GXA_();
     ~_GXA_();
-    bool compile();
+    void init(string content, _GXA_config_t config);
+    vector<_GXA_snippet_t> compile();
 };
 #endif

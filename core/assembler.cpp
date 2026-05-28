@@ -4,17 +4,36 @@ _GXA_::_GXA_(string content, _GXA_config_t config = {})
 {
     this->input = content;
     this->config = config;
+    if (this->config.register_values.size())
+        this->vir_regs = this->config.register_values;
+    if (this->config.registers_name.size())
+        this->vir_regs_names = this->config.registers_name;
+    if (this->config.special_registers_name.size())
+        this->special_vir_regs_name = this->config.special_registers_name;
 }
+void _GXA_::init(string content, _GXA_config_t config = {})
+{
+    this->input = content;
+    this->config = config;
+    if (this->config.register_values.size())
+        this->vir_regs = this->config.register_values;
+    if (this->config.registers_name.size())
+        this->vir_regs_names = this->config.registers_name;
+    if (this->config.special_registers_name.size())
+        this->special_vir_regs_name = this->config.special_registers_name;
+}
+
 _GXA_::_GXA_() {}
 _GXA_::~_GXA_()
 {
     this->status = 3;
-    this->errors = vector<_GXA_error_t>();
-    this->labels = vector<_GXA_label_t>();
+    this->runtime_errors.clear();
+    this->labels.clear();
     this->input.clear();
     this->startLabel = {};
-    this->vir_regs_names = vector<string>();
-    this->vir_regs = vector<logictype_t>();
+    this->vir_regs_names.clear();
+    this->special_vir_regs_name.clear();
+    this->vir_regs.clear();
 }
 
 vector<_GXA_external_argument_t> _GXA_::_parse_argular_(string path, uint32_t index)
@@ -27,8 +46,8 @@ vector<_GXA_external_argument_t> _GXA_::_parse_argular_(string path, uint32_t in
 
     if (!extern_f.is_open())
     {
-        _GXA_error_t error = {"Failed to open file in '" + path + "'!", "FILE_READ_FAILURE", "input-output", index};
-        this->errors.push_back(error);
+        _GXLT_error_cpy_t error = {path, "Failed to open file in '" + path + "'!", "FILE_READ_FAILURE", "input-output", index};
+        this->runtime_errors.push_back(error);
         return;
     }
     while (getline(extern_f, line))
@@ -48,8 +67,8 @@ vector<_GXA_external_argument_t> _GXA_::_parse_argular_(string path, uint32_t in
 
                 if (!isValidNumber(value))
                 {
-                    _GXA_error_t error = {"Invalid syntax for" + name + "arguments value!", "INVALID_ARGUMNET_VALUE", "input-output", index};
-                    this->errors.push_back(error);
+                    _GXLT_error_cpy_t error = {path, "Invalid syntax for" + name + "arguments value!", "INVALID_ARGUMNET_VALUE", "input-output", index};
+                    this->runtime_errors.push_back(error);
                     return;
                 }
 
@@ -70,8 +89,8 @@ void _GXA_::_open_extern_(string path, string name, uint32_t index)
 
     if (!extern_f.is_open())
     {
-        _GXA_error_t error = {"Failed to open file in '" + path + "'!", "FILE_READ_FAILURE", "input-output", index};
-        this->errors.push_back(error);
+        _GXLT_error_cpy_t error = {path, "Failed to open file in '" + path + "'!", "FILE_READ_FAILURE", "input-output", index};
+        this->runtime_errors.push_back(error);
         return;
     }
     while (getline(extern_f, line))
@@ -79,254 +98,10 @@ void _GXA_::_open_extern_(string path, string name, uint32_t index)
         content += line + '\n';
     }
 
-    content.resize(content.length() + 1);
-    content[content.length() - 1] = '\0';
+    content = content.substr(0, content.length() - 1);
 
     _GXA_external_t external = {content, name};
     this->externals.push_back(external);
-}
-
-void _GXA_::_check_pre_processors_errors_()
-{
-    const vector<string> lines = split(this->input, '\n');
-
-    for (uint32_t i = 0; i < lines.size(); i++)
-    {
-        string tmp_line = trim(lines[i]);
-        if (lines[i][0] == '.')
-        {
-            tmp_line = tmp_line.substr(1);
-            vector<string> parts = split(tmp_line, ' ');
-            _GXA_error_t error;
-
-            if (tmp_line == "replace" && (parts.size() != 3 || parts[1].empty() || parts[2].empty()))
-            {
-
-                error = {"'.replace' pre-processor set arguments missed!", "CO_PROCCESSOR_VALUES_MISSED", "syntax", i};
-                this->errors.push_back(error);
-            }
-            else if (tmp_line == "main" && (parts.size() != 2 || parts[1].empty()))
-            {
-                error = {"'.main' pre-proccessor set argument missed!", "CO_PROCCESSOR_VALUE_MISSED", "syntax", i};
-                this->errors.push_back(error);
-            }
-            else if ((tmp_line == "argular" || tmp_line == "extern") && (parts[1].find_first_of('"') == parts[1].find_last_of('"') || parts[1].find_first_of('"') == string::npos))
-            {
-                error = {string("'.") + parts[0] + "' pre-proccessor set invalid argument syntax!", "CO_PROCCESSOR_INVALID_ARGUMENT_SYNTAX", "syntax", i};
-                this->errors.push_back(error);
-            }
-            else if ((tmp_line == "argular" || tmp_line == "extern") && (parts.size() != 2 || !fs::exists(parts[1])))
-            {
-                error = {"'.argular' pre-proccessor set argument isnt exists as a file!", "CO_PROCCESSOR_INVALID_FILE_PATH", "syntax", i};
-                this->errors.push_back(error);
-            }
-            else if (tmp_line == ".end" && parts.size() != 1)
-            {
-                error = {"'.end' pre-proccessor set does not accepts any arguments!", "CO_PROCCESSOR_INVALID_ARGUMENTS", "syntax", i};
-                this->errors.push_back(error);
-            }
-            else
-            {
-                error = {string("'.") + parts[0] + "' pre-proccessor set isnt valid!", "CO_PROCCESSOR_INVALID_INSTRUCTION", "syntax", i};
-                this->errors.push_back(error);
-            }
-        }
-    }
-}
-
-void _GXA_::_check_errors_(string content, uint32_t index)
-{
-    const string valid_instructions[27] = {"mov", "add", "sub", "mul", "div", "abs", "ln", "cos", "tan", "sin", "sinh", "ceil", "flr", "rnd", "call", "cmp", "push", "pull", "logi", "shif", "incr", "decr", "exint", "argint", ".transpile", ".debug", ".reset"};
-    const string three_register_instructions[8] = {"add", "sub", "mul", "div", "shif", "logi", "argint", "exint"};
-    const string mathmatic_instructions[4] = {"add", "sub", "mul", "div"};
-    const string mathmatic_two_reg[10] = {"abs", "ln", "cos", "tan", "sin", "sinh", "ceil", "flr", "rnd", "cmp"};
-    const string one_argument_instructions[5] = {"pull", "push", "incr", "decr", "call"};
-    const string one_register_arg_instructions[4] = {"pull", "push", "incr", "decr"};
-    const string two_one_op_reg_instructions[2] = {"shif", "logi"};
-    const string one_reg_one_name_instructions[2] = {"exint", "argint"};
-    const string no_arg_instructions[2] = {".reset", ".transpile"};
-
-    vector<string> lines = split(content, '\n');
-
-    for (uint32_t i = 0; i < lines.size(); i++)
-    {
-        const string line = trim(lines[i]);
-        const vector<string> parts = split(line, ' ');
-        const vector<string> args = split(parts[1], ',');
-        _GXA_error_t error;
-
-        if (!includes_arr<const string>(valid_instructions, parts[0]))
-        {
-            error = {"invalid instruction '" + parts[0] + string("'!"), "INVALID_INSTRUCTION", "syntax", index + i};
-            this->errors.push_back(error);
-        }
-        else if (includes_arr<const string>(mathmatic_two_reg, parts[0]))
-        {
-            if (args.size() != 2)
-            {
-                error = {(args.size() < 2 ? "to few" : "to much") + string(" arguments for '") + parts[0] + string("' instruction!"), args.size() < 3 ? "FEW_ARGUMENTS" : "MUCH_ARGUMENTS", "syntax", index + i};
-                this->errors.push_back(error);
-            }
-            if (args[0][0] == '#')
-            {
-                error = {"destination argument (first argument) cannot be a literal value!", "FIRST_ARGUMENT_LITERAL", "syntax", index + i};
-                this->errors.push_back(error);
-            }
-            if (args[1][0] == '#' && !isValidNumber(args[1].substr(1)))
-            {
-                error = {"second argumnet isnt a valid number!", "INVALID_ARGUMENT_SYNTAX", "syntax", index + i};
-                this->errors.push_back(error);
-            }
-            else if (!includes<string>(this->vir_regs_names, args[1]))
-            {
-                error = {"invalid register refrenced '" + args[1] + "'!", "INVALID_REGISTER_REFRENCED", "syntax", index + i};
-                this->errors.push_back(error);
-            }
-        }
-
-        else if (includes_arr<const string>(three_register_instructions, parts[0]))
-        {
-            if (args.size() != 3)
-            {
-                error = {(args.size() < 3 ? "to few" : "to much") + string(" arguments for '") + parts[0] + string("' instruction!"), args.size() < 3 ? "FEW_ARGUMENTS" : "MUCH_ARGUMENTS", "syntax", index + i};
-                this->errors.push_back(error);
-            }
-        }
-        else if (includes_arr<const string>(mathmatic_instructions, parts[0]))
-        {
-            if (args[0][0] == '#')
-            {
-                error = {"first argument cannot be a literal value!", "FIRST_ARGUMENT_LITERAL", "syntax", index + i};
-                this->errors.push_back(error);
-            }
-            if (args[1][0] == '#' && !isValidNumber(args[1].substr(1)))
-            {
-                error = {"second argumnet isnt a valid number!", "INVALID_ARGUMENT_SYNTAX", "syntax", index + i};
-                this->errors.push_back(error);
-            }
-            if (args[2][0] == '#' && !isValidNumber(args[1].substr(1)))
-            {
-                error = {"third argumnet isnt a valid number!", "INVALID_ARGUMENT_SYNTAX", "syntax", index + i};
-                this->errors.push_back(error);
-            }
-            for (uint8_t j = 0; j < 3; j++)
-            {
-                if (args[j][0] != '#' && !includes<string>(this->vir_regs_names, args[j]))
-                {
-                    error = {"invalid register refrenced '" + args[j] + "'!", "INVALID_REGISTER_REFRENCED", "syntax", index + i};
-                    this->errors.push_back(error);
-                }
-            }
-        }
-        else if (includes_arr<const string>(one_argument_instructions, parts[0]))
-        {
-            if (args.size() != 1)
-            {
-                error = {(args.size() > 1 ? "to much" : "to few") + string(" arguments for '") + parts[0] + string("' instruction!"), args.size() < 3 ? "FEW_ARGUMENTS" : "MUCH_ARGUMENTS", "syntax", index + i};
-                this->errors.push_back(error);
-            }
-        }
-        else if (includes_arr<const string>(one_register_arg_instructions, parts[0]))
-        {
-            if (!includes(this->vir_regs_names, args[0]))
-            {
-                error = {"invalid register refrenced '" + args[0] + "'!", "INVALID_REGISTER_REFRENCED", "syntax", index + i};
-                this->errors.push_back(error);
-            }
-        }
-        else if (includes_arr<const string>(no_arg_instructions, parts[0]))
-        {
-            if (!args[0].empty())
-            {
-                error = {parts[0] + " instruction does not accept any arguments!", toUppercase(parts[0].substr(1)) + "_INVALID_SYNTAX", "syntax", index + i};
-                this->errors.push_back(error);
-            }
-        }
-        else if (includes_arr<const string>(one_reg_one_name_instructions, parts[0]))
-        {
-            if (args[0][0] == '#')
-            {
-                error = {"first argument cannot be literal value!", "FIRST_ARGUMENT_LITERAL", "syntax", index + i};
-                this->errors.push_back(error);
-            }
-            if (!includes(this->vir_regs_names, args[0]))
-            {
-                error = {"invalid register refrenced '" + args[0] + "'!", "INVALID_REGISTER_REFRENCED", "syntax", index + i};
-                this->errors.push_back(error);
-            }
-            if (parts[0] == "argint")
-            {
-                bool found = false;
-
-                for (_GXA_external_argument_t arg : this->external_arguments)
-                {
-                    if (arg.name == args[2])
-                    {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found)
-                {
-                    error = {"invalid external argument refrenced '" + args[2] + "'!", "INVALID_EXTERNAL_ARGUMENT_REFRENCED", "syntax", index + i};
-                    this->errors.push_back(error);
-                }
-            }
-            else if (parts[0] == "exint")
-            {
-                bool found = false;
-
-                for (_GXA_external_t arg : this->externals)
-                {
-                    if (arg.name == args[2])
-                    {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found)
-                {
-                    error = {"invalid external refrenced '" + args[2] + "'!", "INVALID_EXTERNAL_REFRENCED", "syntax", index + i};
-                    this->errors.push_back(error);
-                }
-            }
-        }
-        else if (parts[0] == "call")
-        {
-            const string valid_conditions[6] = {"LE", "LS", "EQ", "NE", "GE", "GT"};
-            bool found = false;
-
-            if (args.size() < 1 || args.size() > 2)
-            {
-                error = {(args.size() > 2 ? "to much" : "to few") + string(" arguments for '") + parts[0] + string("' instruction!"), args.size() < 3 ? "FEW_ARGUMENTS" : "MUCH_ARGUMENTS", "syntax", index + i};
-                this->errors.push_back(error);
-            }
-
-            for (uint32_t j = 0; j < this->labels.size(); j++)
-            {
-                if (this->labels[j].name == args[0])
-                    found = true;
-            }
-
-            if (!found)
-            {
-                error = {"invalid label '" + args[0] + "' refrenced!", "INVALID_LABEL_REFRENCED", "syntax", index + i};
-                this->errors.push_back(error);
-            }
-
-            if (args.size() == 2 && !includes_arr<const string>(valid_conditions, args[1]))
-            {
-                error = {"invalid condition '" + args[1] + "' refrenced!", "INVALID_CONDITION_REFRENCED", "syntax", index + i};
-                this->errors.push_back(error);
-            }
-        }
-        else if (parts[0] == ".debug" && (lines[i].find('(') == string::npos || lines[i].find(')') == string::npos))
-        {
-            error = {"invalid syntax for .debug instruction!", "INVALID_DEBUG_SYNTAX", "syntax", index + i};
-            this->errors.push_back(error);
-            continue;
-        }
-    }
 }
 
 vector<_GXA_label_t> _GXA_::_slice_labels_(string content)
@@ -346,15 +121,6 @@ vector<_GXA_label_t> _GXA_::_slice_labels_(string content)
         if (cur_label.empty() && lines[i].find(':') != string::npos && lines.size() - 1 != i)
         {
             cur_label = filter(filter(lines[i], ':'), empties, 7);
-            for (_GXA_label_t lbl : this->labels)
-            {
-                if (lbl.name == cur_label)
-                {
-                    _GXA_error_t error = {"label " + cur_label + " overloaded!", "LABEL_OVERLOADED", "syntax", i};
-                    this->errors.push_back(error);
-                    break;
-                }
-            }
             idx_line = i;
         }
 
@@ -369,13 +135,15 @@ vector<_GXA_label_t> _GXA_::_slice_labels_(string content)
     return output;
 }
 
-void _GXA_::_pre_processors_(string &content)
+void _GXA_::_pre_processors_(string &content, vector<uint32_t> ignore_lines)
 {
     vector<string> lines = split(content, '\n');
     char empties[7] = {'\r', '\n', ' ', '\a', '\b', '\t', '\f'};
 
     for (uint32_t i = 0; i < lines.size(); i++)
     {
+        if (includes(ignore_lines, i))
+            continue;
         if (!filter(lines[i], empties, 7).length())
             continue;
         const vector<string> parts = split(lines[i], ' ');
@@ -436,15 +204,6 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
         const vector<string> parts = split(temp_line, ' ');
         vector<string> params = parts.size() > 1 ? split(join(vector<string>(parts.begin() + 1, parts.end()), " "), ',') : vector<string>();
         const uint32_t lx = i + line_idx;
-
-        for (uint8_t i = 0; i < params.size(); i++)
-        {
-            if (filter(params[i], empties, 7).empty())
-            {
-                _GXA_error_t error = {"'" + parts[0] + "' instruction set arguemnt " + to_string(i + 1) + " has invalid syntax!", "INVALID_VALUE_SYNTAX", "syntax", lx};
-                this->errors.push_back(error);
-            }
-        }
 
         if (parts[0] == "mov")
         {
@@ -737,7 +496,11 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
         }
         else if (parts[0] == ".transpile")
         {
-            _GXA_snippet_t snippet = {(uint64_t)this->vir_regs[2], (uint32_t)(this->vir_regs[0]), (uint32_t)(this->vir_regs[1])};
+            _GXA_snippet_t snippet;
+            for (string s : this->config.special_registers_name)
+            {
+                snippet.push_back(this->vir_regs[find<string>(this->vir_regs_names, s)]);
+            }
             output.push_back(snippet);
         }
         else if (parts[0] == ".reset")
@@ -757,7 +520,7 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
     return output;
 }
 
-bool _GXA_::compile()
+vector<_GXA_snippet_t> _GXA_::compile()
 {
     const vector<string> lines = split(this->input, '\n');
     const vector<_GXA_label_t> labels = this->_slice_labels_(this->input);
@@ -771,16 +534,8 @@ bool _GXA_::compile()
         }
     }
 
-    this->_check_pre_processors_errors_();
-    for (_GXA_label_t lbl : labels)
-    {
-        this->_check_errors_(lbl.text, lbl.line_idx);
-    }
-
-    if (this->errors.size())
-        return false;
-
-    this->_pre_processors_(this->input);
+    this->_pre_processors_(this->input, vector<uint32_t>());
     this->_transpile_(this->startLabel.name, this->startLabel.line_idx);
-    return true;
+
+    return this->output;
 }

@@ -5,6 +5,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include "./lint.hpp"
 #include "../utils/string.hpp"
 #include "../utils/vector.hpp"
 #define META_CHUNK_SIZE 280
@@ -17,16 +18,6 @@ using std::ios;
 using std::string;
 using std::uint32_t;
 using std::vector;
-
-struct _GXL_error_t
-{
-    string file;
-    string message;
-    string type;
-    string cause;
-    uint64_t index;
-};
-
 struct _GXL_file_t
 {
     string content;
@@ -35,6 +26,7 @@ struct _GXL_file_t
 
 struct _GXL_config_t
 {
+    string repository_path;
     string metadata_file_name;
     bool repository_check;
     bool dependecy_check;
@@ -91,10 +83,11 @@ class _GXL_
 
 public:
     string merged;
-    vector<_GXL_error_t> errors;
+    vector<_GXLT_error_t> errors;
 
     _GXL_();
-    _GXL_(vector<_GXL_file_t> files, _GXL_config_t config, string repository);
+    _GXL_(vector<_GXL_file_t> files, _GXL_config_t config);
+    void init(vector<_GXL_file_t> files, _GXL_config_t config);
     bool merge();
 };
 #endif

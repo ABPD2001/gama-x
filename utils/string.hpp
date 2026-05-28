@@ -1,4 +1,4 @@
-#ifndef StRING_HPP
+#ifndef STRING_HPP
 #define STRING_HPP
 #include <string>
 #include <vector>
@@ -24,8 +24,6 @@ string trim(string text);
 string replaceAll(string text, string from, string to);
 string filter(string text, char from);
 string filter(string text, char *chars, uint8_t count);
-string toUppercase(string text);
-string toLowercase(string text);
 
 string toBinary(long int value, uint8_t mode);
 inline string toBinaryu64(uint64_t value)
