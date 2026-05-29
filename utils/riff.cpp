@@ -203,6 +203,9 @@ bool validate_chunks(string filepath, bool &stat)
                     return false;
             }
         }
+        else if (string(temp_header.id) == "REPO")
+        {
+        }
         else
         {
             stat = true;
