@@ -187,7 +187,7 @@ void print_app_error(vector<_GXLT_error_t> errors, string format)
     if (!format.length())
         format = "Error in <FILE> at line <LINE>: <MESSAGE>\ntype <TYPE>, cause <CAUSE>";
     string temp = format;
-    const string forms[] = {"FILE", "MESSAGE", "CAUSE", "TYPE", "LINE"};
+    const string forms[] = {"<FILE>", "<MESSAGE>", "<CAUSE>", "<TYPE>", "<LINE>"};
 
     for (_GXLT_error_t err : errors)
     {
@@ -233,6 +233,8 @@ int main(int argc, char *argv[])
 
     _linker_.init(files, linker_config);
     _linker_.merge();
+    cout << "-- LINKER --\n"
+         << _linker_.merged << "\n\n";
     if (_linker_.errors.size())
     {
         cout << "<--- Gama-X Linker --->" << "\n";

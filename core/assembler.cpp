@@ -109,30 +109,54 @@ vector<_GXA_label_t> _GXA_::_slice_labels_(string content)
 {
     vector<_GXA_label_t> output;
     vector<string> lines = split(content, '\n');
-    string cur_label = "";
+    _GXA_label_t label;
+
+    cout << "--- SLICE CONTENTS ---" << content << "\n\n";
 
     int idx_line = -1;
-    char empties[7] = {'\r', '\n', ' ', '\t', '\a'};
+    char label_filter[8] = {'\r', '\n', ' ', '\a', '\b', '\t', '\f', ':'};
+    char empties[7] = {'\r', '\n', ' ', '\a', '\b', '\t', '\f'};
 
     for (uint32_t i = 0; i < lines.size(); i++)
     {
         if (!filter(lines[i], empties, 7).length())
             continue;
-        lines[i] = trim(lines[i]);
-        if (cur_label.empty() && lines[i].find(':') != string::npos && lines.size() - 1 != i)
-        {
-            cur_label = filter(filter(lines[i], ':'), empties, 7);
-            idx_line = i;
-        }
+        const string l = trim(lines[i]);
 
-        else if (lines[i].substr(0, 3) == "end" && cur_label.length() && idx_line != -1)
+        if (l.find(":") != string::npos)
         {
-            const string content = join(vector<string>(lines.begin() + idx_line + 1, lines.begin() + i), "\n");
-            _GXA_label_t label = {content, cur_label, (uint32_t)idx_line};
-            cur_label.clear();
+            if (label.name.length())
+            {
+                label.text = label.text.substr(0, label.text.length() - 1);
+                output.push_back(label);
+                label.name.clear();
+                label.text.clear();
+                label.line_idx = 0;
+            }
+            cout << l << " --> found" << '\n';
+
+            if (filter(l, label_filter, 8).empty())
+                continue;
+            label.name = filter(l, label_filter, 8);
+            label.line_idx = i;
+        }
+        else if (l == "end")
+        {
+            label.text = label.text.substr(0, label.text.length() - 1);
             output.push_back(label);
+            label.name.clear();
+            label.text.clear();
+            label.line_idx = 0;
+        }
+        else if (label.name.length() && trim(lines[i]) != "end")
+        {
+            label.text += lines[i] + '\n';
+            cout << lines[i] << " --> added to " << label.name << "!\n";
         }
     }
+    if (label.name.length())
+        output.push_back(label);
+
     return output;
 }
 
@@ -205,6 +229,8 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
         const vector<string> parts = split(temp_line, ' ');
         vector<string> params = parts.size() > 1 ? split(join(vector<string>(parts.begin() + 1, parts.end()), " "), ',') : vector<string>();
         const uint32_t lx = i + line_idx;
+
+        cout << parts[0] << " --> " << lx << "\n";
 
         if (parts[0] == "mov")
         {
@@ -495,23 +521,24 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
             const vector<_GXA_snippet_t> call_out = this->_transpile_(target_label.text, target_label.line_idx);
             output.insert(output.begin(), call_out.begin(), call_out.end());
         }
-        else if (parts[0] == ".transpile")
+        else if (parts[0] == "transpile")
         {
             _GXA_snippet_t snippet;
             for (string s : this->special_vir_regs_name)
             {
-                snippet.push_back(this->vir_regs[find<string>(this->vir_regs_names, s)]);
+                const int idx = find<string>(this->vir_regs_names, s);
+                snippet.push_back(this->vir_regs[idx]);
             }
             output.push_back(snippet);
         }
-        else if (parts[0] == ".reset")
+        else if (parts[0] == "reset")
         {
             for (uint32_t i = 0; i < this->vir_regs.size(); i++)
             {
                 this->vir_regs[i] = 0;
             }
         }
-        else if (parts[0] == ".debug")
+        else if (parts[0] == "debug")
         {
             string text = lines[i].substr(lines[i].find('('), lines[i].find(')') - 1);
             cout << "[.debug, line " << (line_idx + i + 1) << "]: " << text << "\n";
@@ -524,19 +551,24 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
 vector<_GXA_snippet_t> _GXA_::compile()
 {
     const vector<string> lines = split(this->input, '\n');
-    const vector<_GXA_label_t> labels = this->_slice_labels_(this->input);
 
-    for (_GXA_label_t lbl : labels)
+    const vector<_GXA_label_t> labels = this->_slice_labels_(this->input);
+    this->labels = labels;
+    this->_pre_processors_(this->input, vector<uint32_t>());
+
+    for (uint32_t i = 0; i < this->labels.size(); i++)
     {
-        if (lbl.name == this->startLabel.name)
+        cout << "name: " << labels[i].name << "\n";
+        cout << "index: " << labels[i].line_idx << "\n";
+        cout << "text:" << labels[i].text << "\n";
+
+        if (this->startLabel.name == this->labels[i].name)
         {
-            this->startLabel = lbl;
-            break;
+            this->startLabel = this->labels[i];
         }
     }
 
-    this->_pre_processors_(this->input, vector<uint32_t>());
-    this->_transpile_(this->startLabel.name, this->startLabel.line_idx);
+    this->output = this->_transpile_(this->startLabel.text, this->startLabel.line_idx);
 
     return this->output;
 }

@@ -71,20 +71,29 @@ void _GXL_::_merge_files_()
             }
 
             else if (line[0] == '.')
-                this->merge_preprocessor += line + '\n';
+            {
+                this->merge_preprocessor += line;
+                this->merge_preprocessor += "\n";
+            }
             else
-                this->merge_instruction += line + '\n';
+            {
+                this->merge_instruction += line;
+                this->merge_preprocessor += "\n";
+            }
 
             this->merge_instruction = this->merge_instruction.substr(0, this->merge_instruction.length() - 1);
         }
     }
 
-    vector<_GXL_file_t>
-        cpy = this->files;
-    this->files = included_files;
-    this->_merge_files_();
-    this->files = cpy;
-    this->files.insert(this->files.begin(), included_files.begin(), included_files.end());
+    if (included_files.size())
+    {
+        vector<_GXL_file_t>
+            cpy = this->files;
+        this->files = included_files;
+        this->_merge_files_();
+        this->files = cpy;
+        this->files.insert(this->files.begin(), included_files.begin(), included_files.end());
+    }
 }
 
 void _GXL_::_add_libraries_()

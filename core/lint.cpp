@@ -81,6 +81,16 @@ vector<_GXLT_error_t> _GXLT_::check_pre_processors_errors(string filename, strin
                 error = {filename, "'.end' pre-proccessor set does not accepts any arguments!", "CO_PROCCESSOR_INVALID_ARGUMENTS", "syntax", i};
                 errors.push_back(error);
             }
+            else if (tmp_line == ".include" && parts.size() != 2)
+            {
+                error = {parts[1], "'.include' pre-processor arguments are " + string(parts.size() < 2 ? "few" : "much") + string("!"), "CO_PROCESSOR_INVALID_INCLUDE_PATH", "syntax", i};
+                errors.push_back(error);
+            }
+            else if (tmp_line == ".include" && parts.size() == 2 && !fs::exists(parts[1]))
+            {
+                error = {parts[1], "'.include' pre-processor argument '" + parts[1] + "' does not exists as a file!", "CO_PROCESSOR_INVALID_INCLUDE_PATH", "syntax", i};
+                errors.push_back(error);
+            }
             else if (!includes_arr<const string, 7>(valid_preprocessors, parts[0]))
             {
                 error = {filename, string("'") + parts[0] + "' pre-proccessor set isnt valid!", "CO_PROCCESSOR_INVALID_INSTRUCTION", "syntax", i};
@@ -96,7 +106,7 @@ vector<_GXLT_error_t> _GXLT_::check_pre_processors_errors(string filename, strin
 vector<_GXLT_error_t> _GXLT_::check_errors(string filename, string content, uint32_t index)
 {
     vector<_GXLT_error_t> errors;
-    const string valid_instructions[] = {"mov", "add", "sub", "mul", "div", "abs", "ln", "cos", "tan", "sin", "sinh", "ceil", "flr", "rnd", "call", "cmp", "push", "pull", "logi", "shif", "incr", "decr", "exint", "argint", ".transpile", ".debug", ".reset"};
+    const string valid_instructions[] = {"mov", "add", "sub", "mul", "div", "abs", "ln", "cos", "tan", "sin", "sinh", "ceil", "flr", "rnd", "call", "cmp", "push", "pull", "logi", "shif", "incr", "decr", "exint", "argint", "transpile", "debug", "reset"};
     const string three_register_instructions[] = {"add", "sub", "mul", "div", "shif", "logi", "argint", "exint"};
     const string mathmatic_instructions[] = {"add", "sub", "mul", "div"};
     const string mathmatic_two_reg[] = {"abs", "ln", "cos", "tan", "sin", "sinh", "ceil", "flr", "rnd", "cmp"};
@@ -104,7 +114,7 @@ vector<_GXLT_error_t> _GXLT_::check_errors(string filename, string content, uint
     const string one_register_arg_instructions[] = {"pull", "push", "incr", "decr"};
     const string two_one_op_reg_instructions[] = {"shif", "logi"};
     const string one_reg_one_name_instructions[] = {"exint", "argint"};
-    const string no_arg_instructions[] = {".reset", ".transpile"};
+    const string no_arg_instructions[] = {"reset", "transpile"};
 
     vector<string> lines = split(content, '\n');
 

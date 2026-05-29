@@ -21,7 +21,7 @@ void write_chunks(vector<_GXPM_metadata_chunk_t> metadatas, vector<_GXPM_depende
 
     for (uint32_t i = 0; i < metadatas.size(); i++)
     {
-        _GXPM_chunk_header_t header = {'META', sizeof(_GXPM_metadata_chunk_t)};
+        _GXPM_chunk_header_t header = {{'M', 'E', 'T', 'A'}, sizeof(_GXPM_metadata_chunk_t)};
         headers[i] = header;
     }
     for (uint32_t i = 0; i < metadatas.size(); i++)
@@ -34,7 +34,7 @@ void write_chunks(vector<_GXPM_metadata_chunk_t> metadatas, vector<_GXPM_depende
 
     for (uint32_t i = 0; i < dependecies.size(); i++)
     {
-        _GXPM_chunk_header_t header = {'DEPS', sizeof(dependecies[i])};
+        _GXPM_chunk_header_t header = {{'D', 'E', 'P', 'S'}, sizeof(dependecies[i])};
         headers[i] = header;
     }
     for (uint32_t i = 0; i < dependecies.size(); i++)
@@ -215,4 +215,53 @@ bool validate_chunks(string filepath, bool &stat)
     f.close();
 
     return true;
+}
+
+_GXPM_metadata_chunk_t to_metadata_chunk(_GXPM_metadata_t metadata)
+{
+    _GXPM_metadata_chunk_t output;
+
+    for (uint32_t i = 0; i < min(metadata.description.length(), 150); i++)
+    {
+        output.description[i] = metadata.description[i];
+    }
+    for (uint32_t i = 0; i < min(metadata.mainpoint_relative.length(), 150); i++)
+    {
+        output.mainpoint_relative[i] = metadata.mainpoint_relative[i];
+    }
+    for (uint32_t i = 0; i < min(metadata.libname.length(), 150); i++)
+    {
+        output.libname[i] = metadata.libname[i];
+    }
+    for (uint32_t i = 0; i < min(metadata.version.length(), 150); i++)
+    {
+        output.version[i] = metadata.version[i];
+    }
+    for (uint32_t i = 0; i < min(metadata.pathname.length(), 150); i++)
+    {
+        output.pathname[i] = metadata.pathname[i];
+    }
+
+    return output;
+}
+
+_GXPM_repository_chunk_t to_repository_chunk(_GXPM_repository_t repo)
+{
+    _GXPM_repository_chunk_t output;
+
+    for (uint32_t i = 0; i < repo.description.length(); i++)
+    {
+        output.description[i] = repo.description[i];
+    }
+    for (uint32_t i = 0; i < repo.path.length(); i++)
+    {
+        output.pathname[i] = repo.path[i];
+    }
+    for (uint32_t i = 0; i < repo.name.length(); i++)
+    {
+        output.name[i] = repo.name[i];
+    }
+    output.id = repo.id;
+
+    return output;
 }

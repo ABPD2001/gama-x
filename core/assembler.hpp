@@ -32,7 +32,7 @@ class _GXA_
     vector<_GXA_external_argument_t> external_arguments;
     vector<_GXA_external_t> externals;
 
-    _GXA_label_t startLabel;
+    _GXA_label_t startLabel = {"", "", 0};
     string input;
 
     // uint64_t vir_sp = 0; // --- //

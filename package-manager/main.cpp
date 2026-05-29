@@ -1,4 +1,5 @@
 #include "../core/types.hpp"
+#include "../utils/riff.hpp"
 #include "./structures.hpp"
 
 #define HELP "help..."
@@ -166,7 +167,8 @@ void initialize(string init_repo_name, string init_repo_desc, string init_repo_p
         if (!fs::exists(REPOSITORIES_PATH))
         {
             _GXPM_repository_t init_repos = {init_repo_desc, init_repo_path + string("/") + init_repo_name, init_repo_name, 0};
-            write_repos_chunks({init_repos}, REPOSITORIES_PATH, stat);
+
+            write_repos_chunks({to_repository_chunk(init_repos)}, REPOSITORIES_PATH, stat);
             if (!stat)
             {
                 print_error("failed to initalize repositories file!");
@@ -184,7 +186,7 @@ void initialize(string init_repo_name, string init_repo_desc, string init_repo_p
         {
             fs::remove(REPOSITORIES_PATH);
             _GXPM_repository_t init_repos = {init_repo_desc, init_repo_path + string("/") + init_repo_name, init_repo_name, 0};
-            write_repos_chunks({init_repos}, REPOSITORIES_PATH, stat);
+            write_repos_chunks({to_repository_chunk(init_repos)}, REPOSITORIES_PATH, stat);
             if (!stat)
             {
                 print_error("failed to initalize repositories file!");

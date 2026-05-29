@@ -13,4 +13,7 @@ vector<_GXPM_dependecies_t> read_dependecies_chunks(string filepath, bool &stat)
 vector<_GXPM_repository_chunk_t> read_repositories_chunk(string filepath, bool &stat);
 
 bool validate_chunks(string filepath, bool &stat);
+
+_GXPM_metadata_chunk_t to_metadata_chunk(_GXPM_metadata_t metadata);
+_GXPM_repository_chunk_t to_repository_chunk(_GXPM_repository_t repo);
 #endif
