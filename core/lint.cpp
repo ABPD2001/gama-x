@@ -45,7 +45,7 @@ vector<_GXLT_error_t> _GXLT_::check_pre_processors_errors(string filename, strin
 {
     vector<_GXLT_error_t> errors;
     const vector<string> lines = split(input, '\n');
-    const string valid_preprocessors[6] = {".end", ".replace", ".import", ".extern", ".argular", ".main"};
+    const string valid_preprocessors[7] = {".end", ".replace", ".import", ".extern", ".argular", ".main", ".include"};
 
     for (uint32_t i = 0; i < lines.size(); i++)
     {
@@ -81,7 +81,7 @@ vector<_GXLT_error_t> _GXLT_::check_pre_processors_errors(string filename, strin
                 error = {filename, "'.end' pre-proccessor set does not accepts any arguments!", "CO_PROCCESSOR_INVALID_ARGUMENTS", "syntax", i};
                 errors.push_back(error);
             }
-            else if (!includes_arr<const string, 6>(valid_preprocessors, parts[0]))
+            else if (!includes_arr<const string, 7>(valid_preprocessors, parts[0]))
             {
                 error = {filename, string("'") + parts[0] + "' pre-proccessor set isnt valid!", "CO_PROCCESSOR_INVALID_INSTRUCTION", "syntax", i};
                 errors.push_back(error);

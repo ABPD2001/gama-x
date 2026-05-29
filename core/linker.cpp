@@ -19,6 +19,7 @@ void _GXL_::init(vector<_GXL_file_t> files, _GXL_config_t config)
 
 void _GXL_::_merge_files_()
 {
+    vector<_GXL_file_t> included_files;
     _GXLT_error_t error;
 
     for (_GXL_file_t f : this->files)
@@ -46,6 +47,29 @@ void _GXL_::_merge_files_()
 
             if (parts[0] == ".import")
                 this->requested_libraries.push_back(parts[1]);
+            else if (parts[0] == ".include")
+            {
+                fstream f;
+                string content;
+                fs::path p = parts[1];
+                char ch;
+
+                f.open(parts[1], ios::in);
+                if (!f.is_open())
+                {
+                    error = {parts[1], "failed to open included path '" + parts[1] + "'!", "INCLUDE_FILE_FAILURE", "input-output", 0};
+                    this->errors.push_back(error);
+                }
+                while (f.read(&ch, 1))
+                {
+                    content += ch;
+                }
+                f.close();
+
+                _GXL_file_t file = {content, p.filename().string()};
+                included_files.push_back(file);
+            }
+
             else if (line[0] == '.')
                 this->merge_preprocessor += line + '\n';
             else
@@ -54,15 +78,22 @@ void _GXL_::_merge_files_()
             this->merge_instruction = this->merge_instruction.substr(0, this->merge_instruction.length() - 1);
         }
     }
+
+    vector<_GXL_file_t>
+        cpy = this->files;
+    this->files = included_files;
+    this->_merge_files_();
+    this->files = cpy;
+    this->files.insert(this->files.begin(), included_files.begin(), included_files.end());
 }
 
 void _GXL_::_add_libraries_()
 {
-    vector<_GXL_library_metadata_chunk_t> library_metadatas;
-    vector<_GXL_library_dependecy_t> library_dependecies;
+    vector<_GXPM_metadata_chunk_t> library_metadatas;
+    vector<_GXPM_dependecies_t> library_dependecies;
     fstream libraries_config_f;
-    _GXL_library_metadata_chunk_t temp_struct;
-    _GXL_library_metadata_chunk_header_t temp_header;
+    _GXPM_metadata_chunk_t temp_struct;
+    _GXPM_chunk_header_t temp_header;
     _GXLT_error_t error;
 
     const string metadata_path = (this->config.metadata_file_name.length() ? this->config.metadata_file_name : "/metadata.riff");
@@ -102,7 +133,7 @@ void _GXL_::_add_libraries_()
             deps = deps.substr(0, deps.length() - 1); // remove last NULL terminator.
 
             const vector<string> deps_name = split(deps, ',');
-            _GXL_library_dependecy_t dep = {deps_name, dep_id};
+            _GXPM_dependecies_t dep = {deps_name, dep_id};
             library_dependecies.push_back(dep);
         }
         else
@@ -135,14 +166,14 @@ void _GXL_::_add_libraries_()
     {
         bool found = false;
 
-        for (_GXL_library_metadata_chunk_t md : library_metadatas)
+        for (_GXPM_metadata_chunk_t md : library_metadatas)
         {
             if (md.libname == req_lib)
             {
                 fstream lib_f;
                 _GXL_file_t file;
                 const string fpath = this->repository + '/' + md.pathname + '/' + md.mainpoint_relative;
-                string tmp_line;
+                char ch;
 
                 found = true;
 
@@ -155,13 +186,11 @@ void _GXL_::_add_libraries_()
                 }
 
                 file.name = '<' + md.libname + '>';
-                while (getline(lib_f, tmp_line))
+                while (lib_f.read(&ch, 1))
                 {
-                    file.content += tmp_line + '\n';
+                    file.content += ch;
                 }
                 lib_f.close();
-                if (file.content.size())
-                    file.content = file.content.substr(0, file.content.length() - 1);
                 this->files.push_back(file);
             }
         }

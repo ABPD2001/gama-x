@@ -76,7 +76,7 @@ void parse_app_arguments(vector<string> argvv, vector<_GXL_file_t> &files, vecto
 
                 fstream config_file;
                 string content;
-                string templ;
+                char ch;
 
                 config_file.open(value, ios::in);
                 if (!config_file.is_open())
@@ -85,12 +85,10 @@ void parse_app_arguments(vector<string> argvv, vector<_GXL_file_t> &files, vecto
                     exit(1);
                 }
 
-                while (getline(config_file, templ))
+                while (config_file.read(&ch, 1))
                 {
-                    content += templ + '\n';
+                    content += ch;
                 }
-                if (content.length())
-                    content = content.substr(0, content.length() - 1);
                 if (flag == "-c" || flag == "--config")
                 {
                     const vector<argument_t> config_arguments = parse_arguments(content);
@@ -109,7 +107,7 @@ void parse_app_arguments(vector<string> argvv, vector<_GXL_file_t> &files, vecto
             }
             else if (flag == "-r" || flag == "--repository")
             {
-                if (!fs::is_directory(value))
+                if (!fs::exists(value) || !fs::is_directory(value))
                 {
                     print_error("invalid path '" + value + "' as a repository!");
                     exit(1);
@@ -160,7 +158,7 @@ void parse_app_arguments(vector<string> argvv, vector<_GXL_file_t> &files, vecto
             }
             fstream temp_f;
             _GXL_file_t file;
-            string templ;
+            char ch;
 
             temp_f.open(flag, ios::in);
             if (!temp_f.is_open())
@@ -168,14 +166,12 @@ void parse_app_arguments(vector<string> argvv, vector<_GXL_file_t> &files, vecto
                 print_error("failed to open '" + flag + "' !");
                 exit(1);
             }
-            while (getline(temp_f, templ))
+            while (temp_f.read(&ch, 1))
             {
-                file.content += templ + '\n';
+                file.content += ch;
             }
             temp_f.close();
             file.name = fs::path(flag).filename().string();
-            if (file.content.size())
-                file.content = file.content.substr(0, file.content.length() - 1);
             files.push_back(file);
         }
     }

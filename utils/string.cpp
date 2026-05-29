@@ -60,6 +60,18 @@ string toBinary(long int value, uint8_t mode)
 	return output;
 }
 
+bool is_valid_version(string text)
+{
+	const vector<string> parts = split(text, '.');
+	if (parts.size() != 3)
+		return false;
+	if (!(isValidNumber(parts[0]) && isValidNumber(parts[1]) && isValidNumber(parts[2])))
+		return false;
+	if (parts[0].length() > 2 || parts[1].length() > 3 || parts[2].length() > 5)
+		return false;
+	return true;
+}
+
 vector<string> split(string text, char splitter)
 {
 	vector<string> output;

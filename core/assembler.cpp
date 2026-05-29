@@ -86,7 +86,7 @@ void _GXA_::_open_extern_(string path, string name, uint32_t index)
 {
     fstream extern_f;
     string content;
-    string line;
+    char ch;
 
     extern_f.open(path, ios::in);
 
@@ -96,13 +96,10 @@ void _GXA_::_open_extern_(string path, string name, uint32_t index)
         this->runtime_errors.push_back(error);
         return;
     }
-    while (getline(extern_f, line))
+    while (extern_f.read(&ch, 1))
     {
-        content += line + '\n';
+        content += ch;
     }
-
-    if (content.length())
-        content = content.substr(0, content.length() - 1);
 
     _GXA_external_t external = {content, name};
     this->externals.push_back(external);

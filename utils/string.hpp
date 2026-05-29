@@ -18,6 +18,10 @@ struct argument_t
 	string key;
 };
 
+extern bool isValidNumber(string text);
+
+bool is_valid_version(string text);
+
 vector<argument_t> parse_arguments(string content);
 
 vector<string> split(string text, char splitter);

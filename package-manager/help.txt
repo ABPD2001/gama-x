@@ -1,0 +1,35 @@
+usage: gxpm [VERBS]... [OPTIONS]...
+Package manager for Gama-X, manages repositories of Gama-X.
+
+Verbs:
+    init       initializes configurations of Gama-X Package Manger (must run with root premission).
+    merge      merges two or more repositories.
+    mergable   checks if two or more repositories are mergable.
+    help       prints this page.
+    version    prints version of package manager.
+    config     configure Gama-X Package Manager.
+        [-m, --metadata-filename]: set metadata filename of repositories (by default is 'metadata.riff').
+        
+    reset      resets configurations (must run with root premission).
+        [-r, --rage]: deletes global repositories also. 
+
+    remove
+        lib     remove a library from repository.
+        repo    remove a repository.
+
+    lint
+        lib     lints (checks for errors) a library.
+        repo    lints (checks for errors) a full repository.
+
+    add
+        lib     insert a library into a repository.
+        repo    add new repository.
+    
+    list
+        repos   lists available repositories.
+        libs    lists available libraries.
+    
+
+Note: if youre merging repositories, you must becareful of conflicts, package manager cannot solve merging conflicts!
+Note: after rage reset, its required to initialize GXPM again.
+<--- GPXM Version 1.0.0 --->
