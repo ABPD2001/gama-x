@@ -233,11 +233,8 @@ int main(int argc, char *argv[])
 
     _linker_.init(files, linker_config);
     _linker_.merge();
-    cout << "-- LINKER --\n"
-         << _linker_.merged << "\n\n";
     if (_linker_.errors.size())
     {
-        cout << "<--- Gama-X Linker --->" << "\n";
         print_app_error(_linker_.errors, error_format);
         exit(1);
     }
@@ -305,9 +302,10 @@ int main(int argc, char *argv[])
             {
                 output += to_string(sn[i]) + ',';
             }
-            if (output.size())
-                output = output.substr(0, output.length() - 1);
         }
+        if (output.size())
+            output = output.substr(0, output.length() - 1);
+        output += '\n';
     }
     if (output.size())
     {

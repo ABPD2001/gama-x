@@ -111,8 +111,6 @@ vector<_GXA_label_t> _GXA_::_slice_labels_(string content)
     vector<string> lines = split(content, '\n');
     _GXA_label_t label;
 
-    cout << "--- SLICE CONTENTS ---" << content << "\n\n";
-
     int idx_line = -1;
     char label_filter[8] = {'\r', '\n', ' ', '\a', '\b', '\t', '\f', ':'};
     char empties[7] = {'\r', '\n', ' ', '\a', '\b', '\t', '\f'};
@@ -133,7 +131,6 @@ vector<_GXA_label_t> _GXA_::_slice_labels_(string content)
                 label.text.clear();
                 label.line_idx = 0;
             }
-            cout << l << " --> found" << '\n';
 
             if (filter(l, label_filter, 8).empty())
                 continue;
@@ -151,7 +148,6 @@ vector<_GXA_label_t> _GXA_::_slice_labels_(string content)
         else if (label.name.length() && trim(lines[i]) != "end")
         {
             label.text += lines[i] + '\n';
-            cout << lines[i] << " --> added to " << label.name << "!\n";
         }
     }
     if (label.name.length())
@@ -230,15 +226,13 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
         vector<string> params = parts.size() > 1 ? split(join(vector<string>(parts.begin() + 1, parts.end()), " "), ',') : vector<string>();
         const uint32_t lx = i + line_idx;
 
-        cout << parts[0] << " --> " << lx << "\n";
-
         if (parts[0] == "mov")
         {
             short int tar_reg_idx = -1;
 
             tar_reg_idx = find(this->vir_regs_names, params[0]);
             if (params[1][0] == '#')
-                this->vir_regs[tar_reg_idx] = to_autoNumber(trim(params[1]));
+                this->vir_regs[tar_reg_idx] = to_autoNumber(trim(params[1].substr(1)));
             else
             {
                 short int reg2 = find(this->vir_regs_names, params[1]);
@@ -320,68 +314,98 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
         }
         else if (parts[0] == "add")
         {
-            const short int reg_idx = find(this->vir_regs_names, params[0]);
-            long int reg2 = 0;
+            const short int reg_dest_idx = 0;
+            logictype_t reg1 = find(this->vir_regs_names, params[0]);
+            logictype_t reg2 = 0;
 
             if (params[1][0] == '#')
-                reg2 = to_autoNumber(params[1].substr(1, params[1].length()));
+                reg1 = to_autoNumber(params[1].substr(1));
             else
-                reg2 = this->vir_regs[find(this->vir_regs_names, params[1])];
+                reg1 = this->vir_regs[find(this->vir_regs_names, params[1])];
 
-            if (reg_idx > -1)
-                this->vir_regs[reg_idx] += reg2;
+            if (params[2][0] == '#')
+                reg2 = to_autoNumber(params[2].substr(1));
+            else
+                reg2 = this->vir_regs[find(this->vir_regs_names, params[2])];
+
+            if (reg1 > -1)
+                this->vir_regs[reg_dest_idx] = reg1 + reg2;
         }
         else if (parts[0] == "mul")
         {
-            const short int reg_idx = find(this->vir_regs_names, params[0]);
-            long int reg2 = 0;
+            const short int reg_dest_idx = 0;
+            logictype_t reg1 = find(this->vir_regs_names, params[0]);
+            logictype_t reg2 = 0;
 
             if (params[1][0] == '#')
-                reg2 = to_autoNumber(params[1].substr(1, params[1].length()));
+                reg1 = to_autoNumber(params[1].substr(1));
             else
-                reg2 = this->vir_regs[find(this->vir_regs_names, params[1])];
+                reg1 = this->vir_regs[find(this->vir_regs_names, params[1])];
 
-            if (reg_idx > -1)
-                this->vir_regs[reg_idx] *= reg2;
+            if (params[2][0] == '#')
+                reg2 = to_autoNumber(params[2].substr(1));
+            else
+                reg2 = this->vir_regs[find(this->vir_regs_names, params[2])];
+
+            if (reg1 > -1)
+                this->vir_regs[reg_dest_idx] = reg1 * reg2;
         }
         else if (parts[0] == "div")
         {
-            const short int reg_idx = find(this->vir_regs_names, params[0]);
-            long int reg2 = 0;
+            const short int reg_dest_idx = 0;
+            logictype_t reg1 = find(this->vir_regs_names, params[0]);
+            logictype_t reg2 = 0;
 
             if (params[1][0] == '#')
-                reg2 = to_autoNumber(params[1].substr(1, params[1].length()));
+                reg1 = to_autoNumber(params[1].substr(1));
             else
-                reg2 = this->vir_regs[find(this->vir_regs_names, params[1])];
+                reg1 = this->vir_regs[find(this->vir_regs_names, params[1])];
 
-            if (reg_idx > -1)
-                this->vir_regs[reg_idx] /= reg2;
+            if (params[2][0] == '#')
+                reg2 = to_autoNumber(params[2].substr(1));
+            else
+                reg2 = this->vir_regs[find(this->vir_regs_names, params[2])];
+
+            if (reg1 > -1)
+                this->vir_regs[reg_dest_idx] = reg1 / reg2;
         }
         else if (parts[0] == "sub")
         {
-            const short int reg_idx = find(this->vir_regs_names, params[0]);
-            long int reg2 = 0;
+            const short int reg_dest_idx = 0;
+            logictype_t reg1 = find(this->vir_regs_names, params[0]);
+            logictype_t reg2 = 0;
 
             if (params[1][0] == '#')
-                reg2 = to_autoNumber(params[1].substr(1, params[1].length()));
+                reg1 = to_autoNumber(params[1].substr(1));
             else
-                reg2 = this->vir_regs[find(this->vir_regs_names, params[1])];
+                reg1 = this->vir_regs[find(this->vir_regs_names, params[1])];
 
-            if (reg_idx > -1)
-                this->vir_regs[reg_idx] = sqrt(reg2);
+            if (params[2][0] == '#')
+                reg2 = to_autoNumber(params[2].substr(1));
+            else
+                reg2 = this->vir_regs[find(this->vir_regs_names, params[2])];
+
+            if (reg1 > -1)
+                this->vir_regs[reg_dest_idx] = reg1 - reg2;
         }
         else if (parts[0] == "pow")
         {
-            const short int reg_idx = find(this->vir_regs_names, params[0]);
-            long int reg2 = 0;
+            const short int reg_dest_idx = 0;
+            logictype_t reg1 = find(this->vir_regs_names, params[0]);
+            logictype_t reg2 = 0;
 
             if (params[1][0] == '#')
-                reg2 = to_autoNumber(params[1].substr(1, params[1].length()));
+                reg1 = to_autoNumber(params[1].substr(1));
             else
-                reg2 = this->vir_regs[find(this->vir_regs_names, params[1])];
+                reg1 = this->vir_regs[find(this->vir_regs_names, params[1])];
 
-            if (reg_idx > -1)
-                this->vir_regs[reg_idx] = pow(this->vir_regs[reg_idx], reg2);
+            if (params[2][0] == '#')
+                reg2 = to_autoNumber(params[2].substr(1));
+            else
+                reg2 = this->vir_regs[find(this->vir_regs_names, params[2])];
+
+            if (reg1 > -1)
+                this->vir_regs[reg_dest_idx] = pow(reg1, reg2);
         }
         else if (parts[0] == "incr")
         {
@@ -390,18 +414,18 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
                 this->vir_regs[reg_idx]++;
         }
 
-        else if (parts[0] == "sub")
+        else if (parts[0] == "sqrt")
         {
-            const short int reg_idx = find(this->vir_regs_names, params[0]);
-            long int reg2 = 0;
+            const short int reg_dest_idx = 0;
+            logictype_t reg1 = find(this->vir_regs_names, params[0]);
 
             if (params[1][0] == '#')
-                reg2 = to_autoNumber(params[1].substr(1, params[1].length()));
+                reg1 = to_autoNumber(params[1].substr(1));
             else
-                reg2 = this->vir_regs[find(this->vir_regs_names, params[1])];
+                reg1 = this->vir_regs[find(this->vir_regs_names, params[1])];
 
-            if (reg_idx > -1)
-                this->vir_regs[reg_idx] -= reg2;
+            if (reg1 > -1)
+                this->vir_regs[reg_dest_idx] = sqrt(reg1);
         }
 
         else if (parts[0] == "decr")
@@ -479,6 +503,7 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
         }
         else if (parts[0] == "sin")
         {
+
             const uint16_t reg_idx = find<string>(this->vir_regs_names, params[0]);
             this->vir_regs[reg_idx] = (logictype_t)sin(to_autoNumber(params[0]));
         }
@@ -558,10 +583,6 @@ vector<_GXA_snippet_t> _GXA_::compile()
 
     for (uint32_t i = 0; i < this->labels.size(); i++)
     {
-        cout << "name: " << labels[i].name << "\n";
-        cout << "index: " << labels[i].line_idx << "\n";
-        cout << "text:" << labels[i].text << "\n";
-
         if (this->startLabel.name == this->labels[i].name)
         {
             this->startLabel = this->labels[i];

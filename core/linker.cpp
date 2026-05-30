@@ -78,11 +78,10 @@ void _GXL_::_merge_files_()
             else
             {
                 this->merge_instruction += line;
-                this->merge_preprocessor += "\n";
+                this->merge_instruction += "\n";
             }
-
-            this->merge_instruction = this->merge_instruction.substr(0, this->merge_instruction.length() - 1);
         }
+        this->merge_instruction = this->merge_instruction.substr(0, this->merge_instruction.length() - 1);
     }
 
     if (included_files.size())
