@@ -37,7 +37,7 @@ vector<_GXLT_error_t> _GXLT_::check_label_errors(string filename)
         }
     }
 
-    this->total_errors.insert(this->total_errors.begin(), errors.begin(), errors.end());
+    this->total_errors.insert(this->total_errors.end(), errors.begin(), errors.end());
     return errors;
 };
 
@@ -71,9 +71,9 @@ vector<_GXLT_error_t> _GXLT_::check_pre_processors_errors(string filename, strin
                 error = {filename, string("'.") + parts[0] + "' pre-proccessor set invalid argument syntax!", "CO_PROCCESSOR_INVALID_ARGUMENT_SYNTAX", "syntax", i};
                 errors.push_back(error);
             }
-            else if ((tmp_line == ".argular" || tmp_line == ".extern") && (parts.size() != 2 || !fs::exists(parts[1])))
+            else if ((tmp_line == ".argular" || tmp_line == ".extern") && (parts.size() != 2 || !fs::exists(filter(parts[1], '"')) || !fs::is_regular_file(filter(parts[1], '"'))))
             {
-                error = {filename, "'.argular' pre-proccessor set argument isnt exists as a file!", "CO_PROCCESSOR_INVALID_FILE_PATH", "syntax", i};
+                error = {filename, "'" + parts[0] + "' pre-proccessor set argument isnt exists as a file!", "CO_PROCCESSOR_INVALID_FILE_PATH", "syntax", i};
                 errors.push_back(error);
             }
             else if (tmp_line == ".end" && parts.size() != 1)
@@ -99,7 +99,7 @@ vector<_GXLT_error_t> _GXLT_::check_pre_processors_errors(string filename, strin
         }
     }
 
-    this->total_errors.insert(this->total_errors.begin(), errors.begin(), errors.end());
+    this->total_errors.insert(this->total_errors.end(), errors.begin(), errors.end());
     return errors;
 }
 
@@ -107,7 +107,7 @@ vector<_GXLT_error_t> _GXLT_::check_errors(string filename, string content, uint
 {
     vector<_GXLT_error_t> errors;
     const string valid_instructions[] = {"mov", "add", "sub", "mul", "div", "abs", "ln", "cos", "tan", "sin", "sinh", "ceil", "flr", "rnd", "call", "cmp", "push", "pull", "logi", "shif", "incr", "decr", "exint", "argint", "transpile", "debug", "reset"};
-    const string three_register_instructions[] = {"add", "sub", "mul", "div", "shif", "logi", "argint", "exint"};
+    const string three_register_instructions[] = {"add", "sub", "mul", "div", "shif", "logi"};
     const string mathmatic_instructions[] = {"add", "sub", "mul", "div"};
     const string mathmatic_two_reg[] = {"abs", "ln", "cos", "tan", "sin", "sinh", "ceil", "flr", "rnd", "cmp"};
     const string one_argument_instructions[] = {"pull", "push", "incr", "decr", "call"};
@@ -231,6 +231,16 @@ vector<_GXLT_error_t> _GXLT_::check_errors(string filename, string content, uint
         }
         else if (includes_arr<const string, 2>(one_reg_one_name_instructions, parts[0]))
         {
+            if (args.size() != 2)
+            {
+                error = {filename, (args.size() > 2 ? "to much" : "to few") + string(" arguments for '") + parts[0] + string("' instruction!"), args.size() < 3 ? "FEW_ARGUMENTS" : "MUCH_ARGUMENTS", "syntax", index + i};
+                errors.push_back(error);
+            }
+            if (args.size() >= 2 && (args[1].find_first_of('"') == string::npos || args[1].find_first_of('"') == args[0].find_last_of('"')))
+            {
+                error = {filename, "'" + args[0] + "' instruction key/name argument must be in double quoutation mark!", args.size() < 3 ? "FEW_ARGUMENTS" : "MUCH_ARGUMENTS", "syntax", index + i};
+                errors.push_back(error);
+            }
             if (args.size() >= 1 && args[0][0] == '#')
             {
                 error = {filename, "first argument cannot be literal value!", "FIRST_ARGUMENT_LITERAL", "syntax", index + i};
@@ -240,42 +250,6 @@ vector<_GXLT_error_t> _GXLT_::check_errors(string filename, string content, uint
             {
                 error = {filename, "invalid register refrenced '" + args[0] + "'!", "INVALID_REGISTER_REFRENCED", "syntax", index + i};
                 errors.push_back(error);
-            }
-            if (parts[0] == "argint")
-            {
-                bool found = false;
-
-                for (_GXA_external_argument_t arg : this->external_arguments)
-                {
-                    if (arg.name == args[2])
-                    {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found)
-                {
-                    error = {filename, "invalid external argument refrenced '" + args[2] + "'!", "INVALID_EXTERNAL_ARGUMENT_REFRENCED", "syntax", index + i};
-                    errors.push_back(error);
-                }
-            }
-            else if (parts[0] == "exint")
-            {
-                bool found = false;
-
-                for (_GXA_external_t arg : this->externals)
-                {
-                    if (arg.name == args[2])
-                    {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found)
-                {
-                    error = {filename, "invalid external refrenced '" + args[2] + "'!", "INVALID_EXTERNAL_REFRENCED", "syntax", index + i};
-                    errors.push_back(error);
-                }
             }
         }
         else if (parts[0] == "call")
@@ -307,7 +281,7 @@ vector<_GXLT_error_t> _GXLT_::check_errors(string filename, string content, uint
                 errors.push_back(error);
             }
         }
-        else if (parts[0] == ".debug" && (lines[i].find('(') == string::npos || lines[i].find(')') == string::npos))
+        else if (parts[0] == "debug" && (lines[i].find('(') == string::npos || lines[i].find(')') == string::npos))
         {
             error = {filename, "invalid syntax for .debug instruction!", "INVALID_DEBUG_SYNTAX", "syntax", index + i};
             errors.push_back(error);
@@ -315,6 +289,6 @@ vector<_GXLT_error_t> _GXLT_::check_errors(string filename, string content, uint
         }
     }
 
-    this->total_errors.insert(this->total_errors.begin(), errors.begin(), errors.end());
+    this->total_errors.insert(this->total_errors.end(), errors.begin(), errors.end());
     return errors;
 }

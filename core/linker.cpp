@@ -91,7 +91,7 @@ void _GXL_::_merge_files_()
         this->files = included_files;
         this->_merge_files_();
         this->files = cpy;
-        this->files.insert(this->files.begin(), included_files.begin(), included_files.end());
+        this->files.insert(this->files.end(), included_files.begin(), included_files.end());
     }
 }
 
@@ -163,7 +163,7 @@ void _GXL_::_add_libraries_()
             {
                 if (library_dependecies[j].id == library_metadatas[i].dep_id)
                 {
-                    this->requested_libraries.insert(this->requested_libraries.begin(), library_dependecies[j].dependecies.begin(), library_dependecies[j].dependecies.end());
+                    this->requested_libraries.insert(this->requested_libraries.end(), library_dependecies[j].dependecies.begin(), library_dependecies[j].dependecies.end());
                     break;
                 }
             }

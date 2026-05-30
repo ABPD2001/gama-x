@@ -155,11 +155,11 @@ string trim(string text)
 	string output = "";
 	signed long int start = -1;
 	signed long int end = -1;
-	char empties[7] = {'\t', '\r', ' ', '\b', '\f', '\a', '\v'};
+	char empties[8] = {'\n', '\t', '\r', ' ', '\b', '\f', '\a', '\v'};
 
 	for (uint32_t i = 0; i < text.length(); i++)
 	{
-		if (start == -1 && !includes(empties, 7, text[i]))
+		if (start == -1 && !includes(empties, 8, text[i]))
 		{
 			start = i;
 			break;

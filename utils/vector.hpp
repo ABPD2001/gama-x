@@ -11,7 +11,7 @@ using std::vector;
 template <typename T = string>
 int find(vector<T> arr, T elm)
 {
-	for (uint8_t i = 0; i < arr.size(); i++)
+	for (uint32_t i = 0; i < arr.size(); i++)
 	{
 		if (arr[i] == elm)
 			return i;
@@ -45,7 +45,7 @@ bool includes(vector<T> vec, T element)
 {
 	if (!vec.size())
 		return false;
-	for (uint8_t i = 0; i < vec.size(); i++)
+	for (uint32_t i = 0; i < vec.size(); i++)
 	{
 		if (vec[i] == element)
 			return true;

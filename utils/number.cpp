@@ -18,6 +18,8 @@ uint64_t to_uint64(string text)
 
 	for (uint32_t i = 0; i < text.length(); i++)
 	{
+		if (!text[i] - 48)
+			output *= 10;
 		output += (text[i] - 48) * pow(10, i);
 	}
 
@@ -37,6 +39,8 @@ int to_int32(string text)
 
 	for (uint8_t i = 0; i < text.length(); i++)
 	{
+		if (!text[i] - 48)
+			output *= 10;
 		output += (text[i] - 48) * pow(10, i);
 	}
 
@@ -56,6 +60,8 @@ long int to_int64(string text)
 
 	for (uint32_t i = 0; i < text.length(); i++)
 	{
+		if (!text[i] - 48)
+			output *= 10;
 		output += (text[i] - 48) * pow(10, i);
 	}
 
@@ -107,14 +113,18 @@ logictype_t to_autoNumber(string text)
 
 bool isValidNumber(string text)
 {
-	char symbols[11] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.'};
+	char symbols[12] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '-'};
 
 	for (char ch : text)
 	{
 		bool isNumber = false;
 		for (char sym : symbols)
 		{
-			isNumber = (sym == ch || isNumber);
+			if (sym == ch)
+			{
+				isNumber = true;
+				break;
+			}
 		}
 		if (!isNumber)
 			return false;

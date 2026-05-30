@@ -38,20 +38,20 @@ struct _GXLT_error_t
     string message;
     string cause;
     string type;
-    uint32_t line;
+    uint64_t line;
 };
 
 struct _GXA_label_t
 {
     string text;
     string name;
-    uint32_t line_idx;
+    uint64_t line_idx;
 };
 
 struct _GXA_external_argument_t
 {
-    string name;
     string value;
+    string name;
 };
 struct _GXA_external_t
 {

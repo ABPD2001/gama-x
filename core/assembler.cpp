@@ -36,7 +36,7 @@ _GXA_::~_GXA_()
     this->vir_regs.clear();
 }
 
-vector<_GXA_external_argument_t> _GXA_::_parse_argular_(string path, uint32_t index)
+vector<_GXA_external_argument_t> _GXA_::_parse_argular_(string path, uint64_t index)
 {
     vector<_GXA_external_argument_t> output;
     fstream extern_f;
@@ -47,7 +47,7 @@ vector<_GXA_external_argument_t> _GXA_::_parse_argular_(string path, uint32_t in
 
     if (!extern_f.is_open())
     {
-        _GXLT_error_t error = {path, "Failed to open file in '" + path + "'!", "FILE_READ_FAILURE", "input-output", index};
+        _GXLT_error_t error = {"[runtime]", "Failed to open file in '" + path + "'!", "FILE_READ_FAILURE", "input-output", index};
         this->runtime_errors.push_back(error);
         return output;
     }
@@ -58,13 +58,12 @@ vector<_GXA_external_argument_t> _GXA_::_parse_argular_(string path, uint32_t in
 
     for (uint32_t i = 0; i < lines.size(); i++)
     {
-
         for (uint64_t j = 0; j < lines[i].length(); j++)
         {
             if (lines[i][j] == '=')
             {
-                const string value = lines[i].substr(i + 1);
-                const string name = lines[i].substr(0, i);
+                const string value = lines[i].substr(j + 1);
+                const string name = lines[i].substr(0, j);
 
                 if (!isValidNumber(value))
                 {
@@ -73,7 +72,7 @@ vector<_GXA_external_argument_t> _GXA_::_parse_argular_(string path, uint32_t in
                     return output;
                 }
 
-                _GXA_external_argument_t argument = {name, value};
+                _GXA_external_argument_t argument = {value, name};
                 output.push_back(argument);
                 this->external_arguments.push_back(argument);
             }
@@ -82,7 +81,7 @@ vector<_GXA_external_argument_t> _GXA_::_parse_argular_(string path, uint32_t in
     return output;
 }
 
-void _GXA_::_open_extern_(string path, string name, uint32_t index)
+void _GXA_::_open_extern_(string path, string name, uint64_t index)
 {
     fstream extern_f;
     string content;
@@ -156,7 +155,7 @@ vector<_GXA_label_t> _GXA_::_slice_labels_(string content)
     return output;
 }
 
-void _GXA_::_pre_processors_(string &content, vector<uint32_t> ignore_lines)
+void _GXA_::_pre_processors_(string &content, vector<uint32_t> ignore_lines, bool dry)
 {
     vector<string> lines = split(content, '\n');
     char empties[7] = {'\r', '\n', ' ', '\a', '\b', '\t', '\f'};
@@ -196,13 +195,17 @@ void _GXA_::_pre_processors_(string &content, vector<uint32_t> ignore_lines)
         }
         else if (parts[0] == ".argular")
         {
-            vector<_GXA_external_argument_t> arguments = this->_parse_argular_(parts[1].substr(parts[1].find_first_of('"'), parts[1].find_last_of('"') - 1), i);
+            if (dry)
+                continue;
+            vector<_GXA_external_argument_t> arguments = this->_parse_argular_(parts[1].substr(parts[1].find_first_of('"') + 1, parts[1].find_last_of('"') - 1), i);
             this->external_arguments.insert(this->external_arguments.end(), arguments.begin(), arguments.end());
         }
 
         else if (parts[0] == ".extern")
         {
-            this->_open_extern_(parts[1].substr(parts[1].find_first_of('"'), parts[1].find_last_of('"') - 1), parts[2], i);
+            if (dry)
+                continue;
+            this->_open_extern_(parts[1].substr(parts[1].find_first_of('"') + 1, parts[1].find_last_of('"') - 1), parts[2], i);
         }
     }
 }
@@ -232,7 +235,7 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
 
             tar_reg_idx = find(this->vir_regs_names, params[0]);
             if (params[1][0] == '#')
-                this->vir_regs[tar_reg_idx] = to_autoNumber(trim(params[1].substr(1)));
+                this->vir_regs[tar_reg_idx] = to_autoNumber(params[1].substr(1));
             else
             {
                 short int reg2 = find(this->vir_regs_names, params[1]);
@@ -242,20 +245,20 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
         else if (parts[0] == "log")
         {
             short int tar_reg_idx = -1;
-            uint32_t bin1;
-            uint32_t bin2;
+            logictype_t bin1;
+            logictype_t bin2;
 
             tar_reg_idx = find(this->vir_regs_names, params[0]);
-            bin1 = (uint32_t)this->vir_regs[tar_reg_idx];
+            bin1 = (logictype_t)this->vir_regs[tar_reg_idx];
             const uint8_t dest_idx = find(this->vir_regs_names, params[0]);
 
             if (params[1][0] == '#')
-                bin2 = to_uint32(trim(params[1].substr(1, params[1].length())));
+                bin2 = to_autoNumber(params[1].substr(1));
             else
             {
                 tar_reg_idx = find(this->vir_regs_names, params[1]);
                 if (tar_reg_idx > -1)
-                    bin2 = (uint32_t)(this->vir_regs[tar_reg_idx]);
+                    bin2 = (logictype_t)(this->vir_regs[tar_reg_idx]);
             }
             if (params[2] == "AND")
                 this->vir_regs[dest_idx] = bin1 & bin2;
@@ -275,19 +278,19 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
         else if (parts[0] == "shf")
         {
             short int tar_reg_idx = -1;
-            uint32_t val;
-            uint32_t amount;
+            logictype_t val;
+            logictype_t amount;
 
             tar_reg_idx = find(this->vir_regs_names, params[0]);
             val = this->vir_regs[tar_reg_idx];
             if (params[1].size())
             {
                 if (params[1][0] == '#')
-                    amount = to_uint32(trim(params[1].substr(1, params[1].length())));
+                    amount = to_autoNumber(trim(params[1].substr(1)));
                 else
                 {
                     tar_reg_idx = find(this->vir_regs_names, params[1]);
-                    amount = (uint32_t)this->vir_regs[tar_reg_idx];
+                    amount = (logictype_t)this->vir_regs[tar_reg_idx];
                 }
             }
             tar_reg_idx = find(this->vir_regs_names, params[0]);
@@ -436,7 +439,7 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
         else if (parts[0] == "push")
         {
             if (params[0][0] == '#')
-                this->vir_stack.push_back(to_autoNumber(trim(params[0])));
+                this->vir_stack.push_back(to_autoNumber(params[0]));
             else
             {
                 const short int reg = find(this->vir_regs_names, params[0]);
@@ -452,34 +455,49 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
 
         else if (parts[0] == "exint")
         {
-            _GXA_external_t target_external;
-            for (uint32_t i = 0; i < this->externals.size(); i++)
+            string target_content;
+            const string name = params[1].substr(params[1].find_first_of('"') + 1, params[1].find_last_of('"') - 1);
+            bool found = false;
+
+            for (_GXA_external_t ext : this->externals)
             {
-                if (this->externals[i].name == params[1])
+                if (trim(ext.name) == name)
                 {
-                    target_external = this->externals[i];
+                    found = true;
+                    const uint16_t reg_idx = find<string>(this->vir_regs_names, params[0]);
+                    this->vir_regs[reg_idx] = to_autoNumber(filter(ext.content, '\n'));
                     break;
                 }
             }
-
-            const uint16_t reg_idx = find<string>(this->vir_regs_names, params[0]);
-            this->vir_regs[reg_idx] = to_autoNumber(target_external.content);
+            if (!found)
+            {
+                _GXLT_error_t error = {"[runtime]", "invalid external refrenced '" + params[1] + "'!", "INVALID_EXTERNAL_REFRENCED", "syntax", line_idx + i};
+                this->runtime_errors.push_back(error);
+                continue;
+            }
         }
         else if (parts[0] == "argint")
         {
             _GXA_external_argument_t target_argument;
+            const string name = params[1].substr(params[1].find_first_of('"') + 1, params[1].find_last_of('"') - 1);
+            bool found = false;
 
-            for (uint32_t i = 0; i < this->external_arguments.size(); i++)
+            for (_GXA_external_argument_t arg : this->external_arguments)
             {
-                if (this->external_arguments[i].name == params[1])
+                if (arg.name == name)
                 {
-                    target_argument = this->external_arguments[i];
+                    const uint16_t reg_idx = find<string>(this->vir_regs_names, params[0]);
+                    this->vir_regs[reg_idx] = to_autoNumber(trim(arg.value));
+                    found = true;
                     break;
                 }
             }
-
-            const uint16_t reg_idx = find<string>(this->vir_regs_names, params[0]);
-            this->vir_regs[reg_idx] = to_autoNumber(target_argument.value);
+            if (!found)
+            {
+                _GXLT_error_t error = {"[runtime]", "invalid external argument refrenced '" + params[1] + "'!", "INVALID_EXTERNAL_ARGUMENT_REFRENCED", "syntax", line_idx + i};
+                this->runtime_errors.push_back(error);
+                continue;
+            }
         }
         else if (parts[0] == "abs")
         {
@@ -544,7 +562,7 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
             }
 
             const vector<_GXA_snippet_t> call_out = this->_transpile_(target_label.text, target_label.line_idx);
-            output.insert(output.begin(), call_out.begin(), call_out.end());
+            output.insert(output.end(), call_out.begin(), call_out.end());
         }
         else if (parts[0] == "transpile")
         {
@@ -579,7 +597,7 @@ vector<_GXA_snippet_t> _GXA_::compile()
 
     const vector<_GXA_label_t> labels = this->_slice_labels_(this->input);
     this->labels = labels;
-    this->_pre_processors_(this->input, vector<uint32_t>());
+    this->_pre_processors_(this->input, vector<uint32_t>(), true);
 
     for (uint32_t i = 0; i < this->labels.size(); i++)
     {

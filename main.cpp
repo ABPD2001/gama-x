@@ -191,7 +191,7 @@ void print_app_error(vector<_GXLT_error_t> errors, string format)
 
     for (_GXLT_error_t err : errors)
     {
-        const string vals[] = {err.file, err.message, err.cause, err.type, to_string(err.line)};
+        const string vals[] = {err.file, err.message, err.cause, err.type, to_string(err.line + 2)};
         for (uint32_t i = 0; i < 5; i++)
         {
             if (temp.find(forms[i]) == string::npos)
@@ -240,7 +240,6 @@ int main(int argc, char *argv[])
     }
 
     // then, just check errors (linting).
-
     for (_GXL_file_t f : files)
     {
         _assembler_.init(f.content, assembler_config);
@@ -252,7 +251,7 @@ int main(int argc, char *argv[])
         vector<uint32_t> prep_ignlines;
         string content_cpy = f.content;
 
-        _lint_.init(ext_temp, ext_arg_temp, labels, assembler_config.registers_name, assembler_config.register_values);
+        _lint_.init(ext_temp, ext_arg_temp, labels, _assembler_.vir_regs_names, _assembler_.vir_regs);
         prep_errors = _lint_.check_pre_processors_errors(f.name, f.content);
 
         for (_GXLT_error_t err : prep_errors)
@@ -260,7 +259,7 @@ int main(int argc, char *argv[])
             prep_ignlines.push_back(err.line);
         }
 
-        _assembler_._pre_processors_(content_cpy, prep_ignlines);
+        _assembler_._pre_processors_(content_cpy, prep_ignlines, false);
         for (_GXA_label_t lbl : labels)
         {
             vector<_GXLT_error_t> errs = _lint_.check_errors(f.name, lbl.text, lbl.line_idx);
@@ -273,7 +272,6 @@ int main(int argc, char *argv[])
     }
 
     // at the end, if everything was fine, create output.
-
     _assembler_.init(_linker_.merged, assembler_config);
     vector<_GXA_snippet_t> snippets = _assembler_.compile();
     string output;

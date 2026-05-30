@@ -24,9 +24,7 @@ class _GXA_
     vector<_GXA_label_t> labels;
     vector<_GXLT_error_t> runtime_errors;
 
-    vector<logictype_t> vir_regs = {0, 255, 0, 0, 0, 0, 0, 0, 0, 0};
     vector<logictype_t> vir_stack;
-    vector<string> vir_regs_names = {"x", "y", "t", "r0", "r1", "r2", "r3", "r4", "r5"};
     vector<string> special_vir_regs_name = {"t", "x", "y"};
 
     vector<_GXA_external_argument_t> external_arguments;
@@ -39,14 +37,17 @@ class _GXA_
 
     vector<_GXA_snippet_t> _transpile_(string content, uint64_t line_idx);
 
-    vector<_GXA_external_argument_t> _parse_argular_(string path, uint32_t index);
-    void _open_extern_(string path, string name, uint32_t index);
+    vector<_GXA_external_argument_t> _parse_argular_(string path, uint64_t index);
+    void _open_extern_(string path, string name, uint64_t index);
 
 public:
+    vector<logictype_t> vir_regs = {0, 255, 0, 0, 0, 0, 0, 0, 0, 0};
+    vector<string> vir_regs_names = {"x", "y", "t", "r0", "r1", "r2", "r3", "r4", "r5"};
+
     vector<_GXA_snippet_t> output;
     uint8_t status = 0;
 
-    void _pre_processors_(string &content, vector<uint32_t> ignore_lines);
+    void _pre_processors_(string &content, vector<uint32_t> ignore_lines, bool dry);
     vector<_GXA_label_t> _slice_labels_(string content);
 
     _GXA_(string content, _GXA_config_t config);
