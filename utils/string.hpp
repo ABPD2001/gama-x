@@ -30,6 +30,7 @@ string trim(string text);
 string replaceAll(string text, string from, string to);
 string filter(string text, char from);
 string filter(string text, char *chars, uint8_t count);
+bool valid_name(string text);
 
 string toBinary(long int value, uint8_t mode);
 inline string toBinaryu64(uint64_t value)

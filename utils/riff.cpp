@@ -1,6 +1,56 @@
 #include "./riff.hpp"
 
-void write_chunks(vector<_GXPM_metadata_chunk_t> metadatas, vector<_GXPM_dependecies_t> dependecies, string filepath, bool &stat)
+void write_initial_chunk(string filepath, bool append, bool &stat)
+{
+    fstream f;
+
+    if (!fs::exists(filepath) && !append)
+    {
+        stat = false;
+        return;
+    }
+
+    f.open(filepath, ios::out | ios::trunc);
+    _GXPM_chunk_header_t header = {{'I', 'N', 'I', 'T'}, 0};
+    f.write((char *)&header, CHUNK_HEADER_SIZE);
+    f.close();
+}
+
+void write_repos_chunks(vector<_GXPM_repository_chunk_t> repos, string filepath, bool &stat)
+{
+    fstream f;
+    _GXPM_chunk_header_t *headers;
+    headers = new _GXPM_chunk_header_t[repos.size()];
+
+    if (!fs::exists(filepath))
+    {
+        stat = false;
+        return;
+    }
+
+    f.open(filepath, ios::out | ios::binary | ios::trunc);
+    if (!f.is_open())
+    {
+        stat = false;
+        return;
+    }
+
+    for (uint32_t i = 0; i < repos.size(); i++)
+    {
+        _GXPM_chunk_header_t header = {{'M', 'E', 'T', 'A'}, sizeof(_GXPM_repository_chunk_t)};
+        headers[i] = header;
+    }
+    for (uint32_t i = 0; i < repos.size(); i++)
+    {
+        f.write((char *)&headers[i], CHUNK_HEADER_SIZE);
+        f.write((char *)&repos[i], sizeof(_GXPM_repository_chunk_t));
+    }
+
+    f.close();
+    stat = true;
+}
+
+void write_libs_chunks(vector<_GXPM_metadata_chunk_t> metadatas, vector<_GXPM_dependecies_t> dependecies, string filepath, bool &stat)
 {
     fstream f;
     _GXPM_chunk_header_t *headers;
@@ -55,6 +105,53 @@ void write_chunks(vector<_GXPM_metadata_chunk_t> metadatas, vector<_GXPM_depende
     stat = true;
 }
 
+vector<_GXPM_repository_t> read_repositories_chunk(string filepath, bool &stat)
+{
+    vector<_GXPM_repository_t> output;
+    fstream f;
+
+    if (!fs::exists(filepath))
+    {
+        stat = false;
+        return output;
+    }
+    f.open(filepath, ios::in | ios::binary | ios::ate);
+    if (!f.is_open())
+    {
+        stat = false;
+        return output;
+    }
+
+    _GXPM_chunk_header_t temp_header;
+    _GXPM_repository_chunk_t temp_chunk;
+    const uint32_t file_size = f.tellg();
+    f.seekg(0);
+
+    while (file_size - f.tellg() >= CHUNK_HEADER_SIZE)
+    {
+        f.read((char *)&temp_header, CHUNK_HEADER_SIZE);
+        if (string(temp_header.id) == "INIT")
+        {
+            f.close();
+            return output;
+        }
+        if (string(temp_header.id) == "META")
+        {
+            f.read((char *)&temp_chunk, sizeof(_GXPM_repository_t));
+            _GXPM_repository_t repo = {temp_chunk.description, temp_chunk.pathname, temp_chunk.name, temp_chunk.libraries_count};
+            output.push_back(repo);
+        }
+        else
+        {
+            stat = false;
+            return output;
+        }
+    }
+    f.close();
+
+    return output;
+}
+
 vector<_GXPM_metadata_t> read_metadata_chunks(string filepath, bool &stat)
 {
     vector<_GXPM_metadata_t> output;
@@ -80,15 +177,22 @@ vector<_GXPM_metadata_t> read_metadata_chunks(string filepath, bool &stat)
     while (file_size - f.tellg() >= CHUNK_HEADER_SIZE)
     {
         f.read((char *)&temp_header, CHUNK_HEADER_SIZE);
+        if (string(temp_header.id) == "INIT")
+        {
+            f.close();
+            return output;
+        }
         if (string(temp_header.id) == "META")
         {
             f.read((char *)&temp_chunk, sizeof(_GXPM_metadata_chunk_t));
+
             _GXPM_metadata_t metadata = {temp_chunk.description, temp_chunk.mainpoint_relative, temp_chunk.pathname, temp_chunk.libname, temp_chunk.version, temp_chunk.dep_id};
             output.push_back(metadata);
         }
         else
         {
             stat = false;
+            f.close();
             return output;
         }
     }
@@ -121,6 +225,11 @@ vector<_GXPM_dependecies_t> read_dependecies_chunks(string filepath, bool &stat)
     while (file_size - f.tellg() >= CHUNK_HEADER_SIZE)
     {
         f.read((char *)&temp_header, CHUNK_HEADER_SIZE);
+        if (string(temp_header.id) == "INIT")
+        {
+            f.close();
+            return output;
+        }
         if (string(temp_header.id) == "DEPS")
         {
             _GXPM_dependecies_t dependecies;
@@ -141,6 +250,7 @@ vector<_GXPM_dependecies_t> read_dependecies_chunks(string filepath, bool &stat)
         else
         {
             stat = false;
+            f.close();
             return output;
         }
     }
@@ -206,6 +316,14 @@ bool validate_chunks(string filepath, bool &stat)
         else if (string(temp_header.id) == "REPO")
         {
         }
+        else if (string(temp_header.id) == "INIT")
+        {
+            if (temp_header.size_b)
+                return false;
+            if (file_size - f.tellg() >= CHUNK_HEADER_SIZE)
+                return false;
+            return true;
+        }
         else
         {
             stat = true;
@@ -261,7 +379,6 @@ _GXPM_repository_chunk_t to_repository_chunk(_GXPM_repository_t repo)
     {
         output.name[i] = repo.name[i];
     }
-    output.id = repo.id;
 
     return output;
 }

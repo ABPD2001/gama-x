@@ -1,35 +1,55 @@
-usage: gxpm [VERBS]... [OPTIONS]...
+usage: gxpm [OPTIONS]... [VERBS]... [OPTIONS/ARGUMENTS]...
 Package manager for Gama-X, manages repositories of Gama-X.
 
 Verbs:
-    init       initializes configurations of Gama-X Package Manger (must run with root premission).
-    merge      merges two or more repositories.
-    mergable   checks if two or more repositories are mergable.
+    setup      setups configurations of Gama-X Package Manger (must run with root premission).
+    init       initalizes empty repository (create empty metadata file).
     help       prints this page.
     version    prints version of package manager.
+    lint       lints (checks for errors) a full repository.
+    mergable   checks if two or more repositories are mergable.
+    merge      merges two or more repositories.
+        [-n, --name]: name of output repository.
+        [-p, --path]: path of output repository directory.
+
     config     configure Gama-X Package Manager.
         [-m, --metadata-filename]: set metadata filename of repositories (by default is 'metadata.riff').
         
     reset      resets configurations (must run with root premission).
         [-r, --rage]: deletes global repositories also. 
 
-    remove
-        lib     remove a library from repository.
+    edit:       gxpm edit <'lib'/'repo'> <ARGS> <OPTIONS>
+        repo    edits repositories metadata file of package manager.
+        lib     edits metadata file of a repository.
+            [-r, --repository]:     from which repository.
+
+        [-n, --name]:       edit library/repository name.
+        [-p, --path]:       edit library/repository path.
+        [-d, --desciption]: edit library/repository desciption (.txt file path).
+
+    remove:     gxpm remove <'lib'/'repo'> <ARGS> <OPTIONS>
         repo    remove a repository.
-
-    lint
-        lib     lints (checks for errors) a library.
-        repo    lints (checks for errors) a full repository.
-
-    add
-        lib     insert a library into a repository.
+        lib     remove a library from repository.
+            [-r, --repository]:     from which repository.
+             
+  
+    add:    gxpm add <'lib'/'repo'> <ARGS> <OPTIONS>
         repo    add new repository.
-    
-    list
-        repos   lists available repositories.
-        libs    lists available libraries.
-    
+        lib     insert a library into a repository.
+            [-r, --repository]:     to which repository.
+        
+    list:   gxpm list <'lib'/'repo'> <ARGS> <OPTIONS>
+        repo   lists available repositories.
+        lib    lists available libraries (argument required).
 
-Note: if youre merging repositories, you must becareful of conflicts, package manager cannot solve merging conflicts!
+    copy
+        repo    copies a repository into other location.
+        lib    copies libraries from a repository into another repository.
+            [-r, --repository]:     from which repository.
+            [-n, --name]:           by libraries name.
+        
+        [-t, --target]: determine where to copy.
+
+Note: if youre merging repositories, you must becareful of conflicts, package manager cannot solve merging conflicts automatically!
 Note: after rage reset, its required to initialize GXPM again.
-<--- GPXM Version 1.0.0 --->
+<--- GXPM Version 1.0.0 --->

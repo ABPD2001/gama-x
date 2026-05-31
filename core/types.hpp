@@ -85,7 +85,7 @@ struct _GXPM_repository_t // a user-freindly version structure from repository.
     string description; // just for package manager.
     string path;
     string name;
-    uint64_t id; // 16 bytes as id of repository.
+    uint32_t libraries_count; // count of libraries inside repository.
     // string owner_user_id; // 16 bytes as id of owner user.
     // bool access[4];       // bytes --> <read,write,delete,add>.
 };
@@ -111,15 +111,14 @@ struct _GXPM_chunk_header_t // 8 bytes.
     uint32_t size_b; // size by bytes.
 };
 
-struct _GXPM_repository_chunk_t // 244 Bytes => 248 Bytes.
+struct _GXPM_repository_chunk_t // 240 Bytes.
 {
     char description[152]; // just for package manager.
     char pathname[56];     // path of repository.
     char name[32];         // name of repository.
     // char owner_user_id[16]; // 16 bytes as id of owner user.
-    uint64_t id; // 8 bytes as id of repository.
     // bool access[4];         // bytes --> <read,write,delete,add>.
-    char padding[4]; // padding for memory alignment.
+    uint32_t libraries_count; // count of libraries at repository.
 };
 
 struct _GXPM_metadata_chunk_t // 282 Bytes => 288 Bytes.

@@ -203,6 +203,18 @@ string trim(string text)
 	return cpy;
 }
 
+bool valid_name(string text)
+{
+	char label_filter[8] = {'\r', '\n', ' ', '\a', '\b', '\t', '\f', ':'};
+
+	for (char ch : label_filter)
+	{
+		if (text.find(ch) != string::npos)
+			return false;
+	}
+	return true;
+};
+
 string replaceAll(string text, string from, string to)
 {
 	string cpy = text;
