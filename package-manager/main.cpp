@@ -177,6 +177,12 @@ int main(int argc, char *argv[])
         else if (flag == "add")
         {
         }
+        else if (flag == "edit")
+        {
+        }
+        else if (flag == "remove")
+        {
+        }
         else
         {
             print_error("unkown verb '" + flag + "'!");

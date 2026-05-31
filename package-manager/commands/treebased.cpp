@@ -213,3 +213,106 @@ void remove_lib(string lib, string repository)
         }
     }
 }
+
+void edit_repo(_GXPM_repository_t edits, string repo)
+{
+    bool stat = false;
+    vector<_GXPM_repository_t> repos = read_repositories_chunk(REPOSITORIES_PATH, stat);
+    vector<_GXPM_repository_chunk_t> chunks;
+    const fs::path p = repo;
+    bool found = false;
+    if (!stat)
+    {
+        print_error("failed to open repositories data file!");
+        exit(1);
+    }
+    for (_GXPM_repository_t r : repos)
+    {
+        if ((fs::exists(p) && fs::absolute(p) == r.path) || repo == r.name)
+        {
+            if (edits.description.length())
+                r.description = edits.description;
+            if (edits.name.length())
+                r.name = edits.name;
+            if (edits.path.length())
+                r.path = edits.path;
+            if (edits.libraries_count != string::npos)
+                r.path = edits.libraries_count;
+            found = true;
+            break;
+        }
+    }
+    if (!found)
+    {
+        print_error("repository '" + repo + "' not found!");
+        exit(1);
+    }
+    for (_GXPM_repository_t r : repos)
+    {
+        chunks.push_back(to_repository_chunk(r));
+    }
+    write_repos_chunks(chunks, REPOSITORIES_PATH, stat);
+    if (!stat)
+    {
+        print_error("failed to write into repositories data file!");
+        exit(1);
+    }
+    exit(0);
+}
+
+void edit_lib(_GXPM_metadata_t edits, string lib, string repository)
+{
+    const string path = repository + "/" + (configuration.metadata_filename.length() ? configuration.metadata_filename : "metadata.riff");
+    bool stat = false;
+    vector<_GXPM_metadata_t> metadatas = read_metadata_chunks(path, stat);
+    if (!stat)
+    {
+        print_error("failed to open repositories data file!");
+        exit(1);
+    }
+    vector<_GXPM_dependecies_t> deps = read_dependecies_chunks(path, stat);
+    if (!stat)
+    {
+        print_error("failed to open repositories data file!");
+        exit(1);
+    }
+
+    vector<_GXPM_metadata_chunk_t> mchunks;
+    const fs::path p = lib;
+    bool found = false;
+
+    for (_GXPM_metadata_t m : metadatas)
+    {
+        if ((fs::exists(p) && fs::absolute(p) == m.pathname) || m.libname == lib)
+        {
+            if (edits.version.length())
+                m.version = edits.version;
+            if (edits.mainpoint_relative.length())
+                m.mainpoint_relative = edits.mainpoint_relative;
+            if (edits.libname.length())
+                m.libname = edits.libname;
+            if (edits.pathname.length())
+                m.pathname = edits.pathname;
+            if (edits.description.length())
+                m.description = edits.description;
+            found = true;
+            break;
+        }
+    }
+    if (!found)
+    {
+        print_error("library '" + lib + "' at '" + repository + "' repository not found!");
+        exit(1);
+    }
+    for (_GXPM_metadata_t m : metadatas)
+    {
+        mchunks.push_back(to_metadata_chunk(m));
+    }
+    write_libs_chunks(mchunks, deps, path, stat);
+    if (!stat)
+    {
+        print_error("failed to write into '" + repository + "' repository metadata file!");
+        exit(1);
+    }
+    exit(0);
+}
