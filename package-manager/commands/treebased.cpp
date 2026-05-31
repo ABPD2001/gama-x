@@ -56,12 +56,27 @@ void add_repo(string name, string path, string description)
     exit(0);
 }
 
-void add_lib(vector<string> deps, string version, string mainpoint_relative, string name, string description, string path, string target_repo)
+void add_lib(vector<string> deps, string repository, string version, string mainpoint_relative, string name, string description, string path, string target_repo)
 {
     uint32_t lvl = 0;
     char id[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-    const string mpath = path + "/" + (configuration.metadata_filename.length() ? configuration.metadata_filename : "metadata.riff");
     bool stat = false;
+
+    if (!fs::exists(repository))
+    {
+        vector<_GXPM_repository_t> repos = read_repositories_chunk(REPOSITORIES_PATH, stat);
+        if (!stat)
+        {
+            print_error("failed to open repositories data file!");
+            exit(1);
+        }
+        for (_GXPM_repository_t r : repos)
+        {
+            if (r.name == repository)
+                repository = r.path;
+        }
+    }
+    const string mpath = path + "/" + (configuration.metadata_filename.length() ? configuration.metadata_filename : "metadata.riff");
 
     vector<_GXPM_metadata_chunk_t> mchunks;
     vector<_GXPM_metadata_t> metadatas = read_metadata_chunks(mpath, stat);
@@ -108,11 +123,93 @@ void add_lib(vector<string> deps, string version, string mainpoint_relative, str
     }
     mchunks.push_back(to_metadata_chunk(metadata));
 
-    write_libs_chunks(mchunks, lib_deps, mpath, stat);
+    write_libs_chunks(mchunks, lib_deps, repository + "/" + (configuration.metadata_filename.length() ? configuration.metadata_filename : "metadata.riff"), stat);
     if (!stat)
     {
         print_error("failed to write into '" + path + "' library metadata file!");
         exit(1);
     }
     exit(0);
+}
+
+void remove_repo(string repo)
+{
+    bool stat = false;
+    vector<_GXPM_repository_t> repos = read_repositories_chunk(REPOSITORIES_PATH, stat);
+    vector<_GXPM_repository_chunk_t> chunks;
+
+    if (!stat)
+    {
+        print_error("failed to open repositories data file!");
+        exit(1);
+    }
+
+    for (_GXPM_repository_t r : repos)
+    {
+        fs::path p = r.path;
+
+        if (r.name == repo)
+        {
+            if (verbose)
+                cout << "['" << repo << "' at '" << r.path << "' filtered]\n";
+            continue;
+        }
+        else if ((fs::exists(p) && fs::is_regular_file(p)) && r.path == fs::absolute(p))
+        {
+            if (verbose)
+                cout << "['" << repo << "' at '" << r.path << "' filtered]\n";
+
+            continue;
+        }
+        chunks.push_back(to_repository_chunk(r));
+    }
+
+    write_repos_chunks(chunks, REPOSITORIES_PATH, stat);
+    if (!stat)
+    {
+        print_error("failed to write into repositories data file!");
+        exit(1);
+    }
+    exit(0);
+}
+
+void remove_lib(string lib, string repository)
+{
+    bool stat = false;
+    if (!fs::exists(repository))
+    {
+        vector<_GXPM_repository_t> repos = read_repositories_chunk(REPOSITORIES_PATH, stat);
+        if (!stat)
+        {
+            print_error("failed to open repositories data file!");
+            exit(1);
+        }
+        for (_GXPM_repository_t r : repos)
+        {
+            if (r.name == repository)
+                repository = r.path;
+        }
+    }
+    vector<_GXPM_metadata_t> metadatas = read_metadata_chunks(repository + "/" + (configuration.metadata_filename.length() ? configuration.metadata_filename : "metadata.riff"), stat);
+    vector<_GXPM_metadata_chunk_t> mchunks;
+    if (!stat)
+    {
+        print_error("failed to open repository '" + repository + "' metadata file!");
+        exit(1);
+    }
+    for (_GXPM_metadata_t m : metadatas)
+    {
+        if (fs::exists(lib) && fs::is_directory(lib) && fs::absolute(lib) == m.pathname)
+        {
+            if (verbose)
+                cout << "['" << lib << "' library filtered from '" << repository << "' repository]\n";
+            continue;
+        }
+        else if (m.libname == lib)
+        {
+            if (verbose)
+                cout << "['" << lib << "' library filtered from '" << repository << "' repository]\n";
+            continue;
+        }
+    }
 }

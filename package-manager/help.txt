@@ -1,4 +1,4 @@
-usage: gxpm [OPTIONS]... [VERBS]... [OPTIONS/ARGUMENTS]...
+Usage: gxpm [OPTIONS]... [VERBS]... [OPTIONS/ARGUMENTS]...
 Package manager for Gama-X, manages repositories of Gama-X.
 
 Verbs:
@@ -21,7 +21,10 @@ Verbs:
     edit:       gxpm edit <'lib'/'repo'> <ARGS> <OPTIONS>
         repo    edits repositories metadata file of package manager.
         lib     edits metadata file of a repository.
-            [-r, --repository]:     from which repository.
+            [-r, --repository]:         from which repository.
+            [-v, --version]:            set version of library.
+            [-p, --dependecies]:        set dependecies of library.
+            [-m, --mainpoint-relative]: set relative to library directory mainpoint file path.
 
         [-n, --name]:       edit library/repository name.
         [-p, --path]:       edit library/repository path.
@@ -33,20 +36,26 @@ Verbs:
             [-r, --repository]:     from which repository.
              
   
-    add:    gxpm add <'lib'/'repo'> <ARGS> <OPTIONS>
+    add:    gxpm add <'lib'/'repo'> <PATH> <OPTIONS>
         repo    add new repository.
         lib     insert a library into a repository.
-            [-r, --repository]:     to which repository.
+            [-r, --repository]:         to which repository.
+            [-p, --dependecies]:        dependecies of library.
+            [-v, --version]:            version of library.
+            [-m, --mainpoint-relative]: relative to library directory mainpoint file path.
+
+        [-n, --name]:           name of library/repository.
+        [-d, --description]:    description of library/repository.
         
     list:   gxpm list <'lib'/'repo'> <ARGS> <OPTIONS>
-        repo   lists available repositories.
         lib    lists available libraries (argument required).
+        repo   lists available repositories.
+            [-r, --repository]: from which repository.
 
-    copy
+    copy:   gxpm copy <'lib'/'repo'> <ARGS> <OPTIONS>
         repo    copies a repository into other location.
         lib    copies libraries from a repository into another repository.
             [-r, --repository]:     from which repository.
-            [-n, --name]:           by libraries name.
         
         [-t, --target]: determine where to copy.
 
