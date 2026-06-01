@@ -16,6 +16,6 @@ void remove_lib(string lib, string repository);
 void edit_repo(_GXPM_repository_t edits, string repo);
 void edit_lib(_GXPM_metadata_t edits, string lib, string repository);
 
-void copies_repo(vector<string> repositories, string to_path);
-void copies_lib(vector<string> libs, string repository, string target_repo);
+void copy_repos(vector<string> repositories, string to_path);
+void copy_libs(vector<string> libs, string repository, string target_repo);
 #endif

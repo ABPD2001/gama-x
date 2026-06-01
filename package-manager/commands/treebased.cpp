@@ -317,7 +317,7 @@ void edit_lib(_GXPM_metadata_t edits, string lib, string repository)
     exit(0);
 }
 
-void copies_repo(vector<string> repositories, string to_path)
+void copy_repos(vector<string> repositories, string to_path)
 {
     bool stat = false;
     vector<_GXPM_repository_t> repos = read_repositories_chunk(REPOSITORIES_PATH, stat);
@@ -356,7 +356,7 @@ void copies_repo(vector<string> repositories, string to_path)
     exit(0);
 }
 
-void copies_lib(vector<string> libs, string repository, string target_repo)
+void copy_libs(vector<string> libs, string repository, string target_repo)
 {
     bool stat = false;
     const vector<_GXPM_repository_t> repositories = read_repositories_chunk(REPOSITORIES_PATH, stat);
