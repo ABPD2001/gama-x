@@ -13,9 +13,13 @@
 using std::cout;
 using std::string;
 
+extern _GXPM_config_t configuration;
+
 void print_error(string text);
 void _wrtie_config_(_GXPM_config_t config);
 bool _validate_config_(string content);
 bool create_8byte_id(char bytes[8], uint32_t &lvl);
 bool repository_exists(string name, string path, bool &stat);
+bool library_exists(string name, string path, string repository, bool &stat);
+_GXPM_repository_t find_repository(string name, string path, bool &found, bool &stat);
 #endif

@@ -105,10 +105,11 @@ bool create_8byte_id(char bytes[8], uint32_t &lvl)
 
 bool repository_exists(string name, string path, bool &stat)
 {
-    for (_GXPM_repository_t r : read_repositories_chunk(REPOSITORIES_PATH, stat))
+    vector<_GXPM_repository_t> repos = read_repositories_chunk(REPOSITORIES_PATH, stat);
+    if (!stat)
+        return false;
+    for (_GXPM_repository_t r : repos)
     {
-        if (!stat)
-            return false;
         if (name.length())
         {
             if (r.name == name)
@@ -120,5 +121,78 @@ bool repository_exists(string name, string path, bool &stat)
                 return true;
         }
     }
+    return false;
+}
+_GXPM_repository_t find_repository(string name, string path, bool &found, bool &stat)
+{
+    const _GXPM_repository_t null_repo = {"", "", "", 0};
+    for (_GXPM_repository_t r : read_repositories_chunk(REPOSITORIES_PATH, stat))
+    {
+        if (!stat)
+        {
+            print_error("failed to open repositories data file!");
+            exit(1);
+        }
+        if (name.length())
+        {
+            if (r.name == name)
+            {
+                found = true;
+                return r;
+            }
+        }
+        else if (path.length() && fs::exists(path))
+        {
+            if (r.path == fs::absolute(path))
+            {
+                found = true;
+                return r;
+            }
+        }
+    }
+    found = false;
+    if (!stat)
+    {
+        print_error("failed to open repositories data file!");
+        exit(1);
+    }
+    return null_repo;
+}
+
+bool library_exists(string name, string path, string repository, bool &stat)
+{
+    bool found = false;
+    fs::path p;
+    p = find_repository(repository, repository, found, stat).path;
+    if (!stat)
+    {
+        print_error("failed to open repositories data file!");
+        exit(1);
+    }
+    if (!found)
+    {
+        print_error("repository '" + repository + "' not found!");
+        exit(1);
+    }
+    const string mpath = fs::absolute(p).string() + "/" + (configuration.metadata_filename.length() ? configuration.metadata_filename : "metadata.riff");
+
+    for (_GXPM_metadata_t m : read_metadata_chunks(mpath, stat))
+    {
+        if (!stat)
+        {
+            print_error("failed to open repositories data file!");
+            exit(1);
+        }
+        if (m.libname == name || (fs::exists(path) && m.pathname == fs::absolute(path)))
+        {
+            return true;
+        }
+    }
+    if (!stat)
+    {
+        print_error("failed to open repositories data file!");
+        exit(1);
+    }
+
     return false;
 }

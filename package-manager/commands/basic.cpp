@@ -10,7 +10,6 @@ void reset(bool rage)
         if (rage)
         {
             fs::remove_all(GXPM_PATH);
-            fs::create_directory(GXPM_PATH);
         }
         else
         {
@@ -65,7 +64,7 @@ void configure(string filepath)
     _wrtie_config_(configuration);
 }
 
-void initialize(string path, string name)
+void initialize(string path)
 {
     fstream f;
     bool stat;
@@ -92,27 +91,8 @@ void initialize(string path, string name)
         exit(1);
     }
     _GXPM_chunk_header_t header = {{'I', 'N', 'I', 'T'}, 0};
-    f.write((char *)&header, CHUNK_HEADER_SIZE);
+    f.write((char *)&header, sizeof(_GXPM_chunk_header_t));
     f.close();
-
-    vector<_GXPM_repository_chunk_t> chunks;
-    vector<_GXPM_repository_t> repos = read_repositories_chunk(REPOSITORIES_PATH, stat);
-    if (!stat)
-    {
-        print_error("failed to open repositories data file!");
-        exit(1);
-    }
-    _GXPM_repository_t repo = {"", path, name, 0};
-    for (_GXPM_repository_t r : repos)
-    {
-        chunks.push_back(to_repository_chunk(r));
-    }
-    write_repos_chunks(chunks, REPOSITORIES_PATH, stat);
-    if (!stat)
-    {
-        print_error("failed to write into repositories data file!");
-        exit(1);
-    }
 }
 
 void setup()
@@ -153,7 +133,12 @@ void setup()
             f << DEFAULT_CONFIG_FORMAT;
             f.close();
 
-            exit(1);
+            write_initial_chunk(REPOSITORIES_PATH, true, stat);
+            if (!stat)
+            {
+                print_error("failed to initialize metadata file of repositories '" + string(REPOSITORIES_PATH) + "' !");
+                exit(1);
+            }
             write_repos_chunks(default_repos, REPOSITORIES_PATH, stat);
             if (!stat)
             {
@@ -195,7 +180,7 @@ void setup()
             const bool repositories_metdata_valid = validate_chunks(REPOSITORIES_PATH, stat);
             if (!stat)
             {
-                print_error("failed to validate global repository metadata file '" + glob_repo_metadata + "'!");
+                print_error("failed to validate repositories data file '" + glob_repo_metadata + "'!");
                 exit(1);
             }
             if (!repositories_metdata_valid)
@@ -242,6 +227,7 @@ void setup()
         print_error("failed to initialize, error from '" + err.path1().string() + "', " + string(err.what()) + '!');
         exit(1);
     }
+    exit(0);
 }
 
 vector<_GXPM_conflict_t> mergable(vector<string> repositories, bool dry, bool &stat)
@@ -376,7 +362,7 @@ void merge(vector<string> repositories, _GXPM_repository_t output)
                     exit(1);
                 }
 
-                for (_GXPM_metadata_t m : metadatas)
+                for (_GXPM_metadata_t &m : metadatas)
                 {
                     for (_GXPM_dependecies_t d : deps)
                     {

@@ -118,12 +118,12 @@ void _GXL_::_add_libraries_()
     const uint32_t file_size = libraries_config_f.tellg();
 
     libraries_config_f.seekg(0);
-    while (file_size - libraries_config_f.tellg() > CHUNK_HEADER_SIZE)
+    while (file_size - libraries_config_f.tellg() > sizeof(_GXPM_chunk_header_t))
     {
-        libraries_config_f.read((char *)&temp_header, CHUNK_HEADER_SIZE);
+        libraries_config_f.read((char *)&temp_header, sizeof(_GXPM_chunk_header_t));
         if (temp_header.id == "META")
         {
-            libraries_config_f.read((char *)&temp_struct, META_CHUNK_SIZE);
+            libraries_config_f.read((char *)&temp_struct, sizeof(_GXPM_metadata_chunk_t));
             library_metadatas.push_back(temp_struct);
         }
         else if (temp_header.id == "DEPS")
@@ -133,12 +133,12 @@ void _GXL_::_add_libraries_()
             char ch;
 
             libraries_config_f.read(dep_id, 8); // read 8 bytes as dependecy id.
-            while (ch || deps.empty())
+            while (libraries_config_f.read(&ch, 1))
             {
-                libraries_config_f.read(&ch, 1);
+                if (!ch)
+                    break;
                 deps += ch;
             }
-            deps = deps.substr(0, deps.length() - 1); // remove last NULL terminator.
 
             const vector<string> deps_name = split(deps, ',');
             _GXPM_dependecies_t dep = {deps_name, dep_id};

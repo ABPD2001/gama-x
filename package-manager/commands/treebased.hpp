@@ -5,10 +5,10 @@
 #include "./common.hpp"
 
 extern _GXPM_config_t configuration;
-bool verbose;
+extern bool verbose;
 
 void add_repo(string name, string path, string description);
-void add_lib(vector<string> deps, string repository, string version, string mainpoint_relative, string name, string description, string path, string target_repo);
+void add_lib(string deps_txt, string repository, string version, string mainpoint_relative, string name, string description, string path, string target_repo);
 
 void remove_repo(string repo);
 void remove_lib(string lib, string repository);

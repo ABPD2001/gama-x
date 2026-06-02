@@ -6,7 +6,7 @@
 #define HELP "help..."
 #define VERSION "V1.0.0"
 
-_GXPM_config_t configuration;
+_GXPM_config_t configuration = {"metadata.riff"};
 bool verbose = false;
 
 int main(int argc, char *argv[]);
@@ -14,6 +14,29 @@ int main(int argc, char *argv[]);
 int main(int argc, char *argv[])
 {
     const string treebased_verbs[5] = {"add", "list", "remove", "copy"};
+    if (fs::exists(CONFIGURATION_PATH) && fs::is_regular_file(CONFIGURATION_PATH))
+    {
+        fstream cnf_f;
+        string content;
+        char ch;
+
+        cnf_f.open(CONFIGURATION_PATH, ios::in);
+        while (cnf_f.read(&ch, 1))
+        {
+            content += ch;
+        }
+        const vector<argument_t> args = parse_arguments(content);
+        for (argument_t a : args)
+        {
+            if (a.key == "metadata_filename")
+                configuration.metadata_filename = a.value;
+            else
+            {
+                print_error("invalid configurtion file!\nnote: its fixable by 'reset' verb.");
+                exit(1);
+            }
+        }
+    }
 
     for (uint32_t i = 1; i < argc; i++)
     {
@@ -36,9 +59,9 @@ int main(int argc, char *argv[])
         }
         else if (flag == "start")
         {
-            if (argc - i - 1 != 2)
+            if (argc - i - 1 != 1)
             {
-                print_error(string(argc - i - 1 > 2 ? "to much" : "to few") + "arguments for 'init'!");
+                print_error(string(argc - i - 1 > 1 ? "to much" : "to few") + " arguments for 'init'!");
                 exit(1);
             }
             if (!fs::exists(argv[i + 1]) || !fs::is_directory(argv[i + 1]))
@@ -46,8 +69,8 @@ int main(int argc, char *argv[])
                 print_error("invalid repository path '" + string(argv[i + 1]) + "'!");
                 exit(1);
             }
+            initialize(argv[i + 1]);
             i += 2;
-            initialize(argv[i + 1], argv[i + 2]);
             exit(0);
         }
         else if (flag == "reset")
@@ -179,9 +202,9 @@ int main(int argc, char *argv[])
             cout << VERSION << '\n';
             exit(0);
         }
-        else if (flag == "add" || flag == "remove" || flag == "edit")
+        else if (flag == "copy" || flag == "add" || flag == "remove" || flag == "edit")
         {
-            string argument, name, description, deps, repository, version, mainpoint_relative, target_repo;
+            string argument, name, description, deps, repository, version, mainpoint_relative, target;
             if (argc - i - 1 < 1)
             {
                 print_error("target type of 'add' verb missed!");
@@ -194,52 +217,88 @@ int main(int argc, char *argv[])
                 exit(1);
             }
 
-            for (uint32_t j = 1; j < argc - i - 1; j++)
+            for (uint32_t j = i + 2; j < argc; j++)
             {
-                const string param = string(argv[i + 1 + j]);
-                if (param == "-n" || param == "--name")
+                const string param = string(argv[j]);
+                if (param == "-t" || param == "--target")
                 {
-                    if (!argc - i - j - 1)
+                    if (j == argc - 1)
+                    {
+                        print_error("'-t, --target' argument flag missed!");
+                        exit(1);
+                    }
+                    target = argv[j + 1];
+                    j++;
+                }
+                else if (param == "-r" || param == "--repository")
+                {
+                    if (j == argc - 1)
+                    {
+                        print_error("'-r, --repository' argument flag missed!");
+                        exit(1);
+                    }
+                    repository = argv[j + 1];
+                    j++;
+                }
+                else if (param == "-m" || param == "--mainpoint-relative")
+                {
+                    if (j == argc - 1)
+                    {
+                        print_error("'-m, --mainpoint-relative' argument flag missed!");
+                        exit(1);
+                    }
+                    mainpoint_relative = argv[j + 1];
+                    j++;
+                }
+                else if (param == "-n" || param == "--name")
+                {
+                    if (j == argc - 1)
                     {
                         print_error("'-n, --name' argument flag missed!");
                         exit(1);
                     }
-                    name = argv[i + j + 1];
+                    name = argv[j + 1];
+                    j++;
                 }
                 else if (param == "-d" || param == "--description")
                 {
-                    if (!argc - i - j - 1)
+                    if (j == argc - 1)
                     {
                         print_error("'-d, --description' argument flag missed!");
                         exit(1);
                     }
-                    description = argv[i + j + 1];
+                    description = argv[j + 1];
+                    j++;
                 }
                 else if (param == "p" || param == "--dependecies")
                 {
-                    if (!argc - i - j - 1)
+                    if (j == argc - 1)
                     {
                         print_error("'-p, --dependecies' argument flag missed!");
                         exit(1);
                     }
-                    deps = argv[i + j + 1];
+                    deps = argv[j + 1];
+                    j++;
                 }
                 else if (param == "-V" || param == "--lib-version")
                 {
-                    if (!argc - i - j - 1)
+                    if (j == argc - 1)
                     {
                         print_error("'-V, --lib-version' argument flag missed!");
                         exit(1);
                     }
-                    version = argv[i + j + 1];
+                    version = argv[j + 1];
+                    j++;
                 }
                 else if (argument.empty())
                 {
-                    argument = argv[i + j + 1];
+                    argument = argv[j];
+                    if (flag == "copy")
+                        argument += ',';
                 }
                 else
                 {
-                    print_error("invalid argument '" + string(argv[i + j + 1]) + "' for 'add' verb!");
+                    print_error("invalid argument '" + string(argv[j]) + "' for 'add' verb!");
                     exit(1);
                 }
             }
@@ -253,16 +312,16 @@ int main(int argc, char *argv[])
                         print_error("name, path and description of repository are required!");
                         exit(1);
                     }
-                    add_repo(argument, name, description);
+                    add_repo(name, argument, description);
                 }
                 else
                 {
-                    if (!(argument.length() && deps.length() && repository.length() && version.length() && mainpoint_relative.length() && name.length() && argument.length()))
+                    if (!(argument.length() && repository.length() && version.length() && mainpoint_relative.length() && name.length() && argument.length()))
                     {
-                        print_error("name, target repository, mainpoint relative path, desciption, path and version of library are required!");
+                        print_error("name, target repository, mainpoint relative path, description, path and version of library are required!");
                         exit(1);
                     }
-                    add_lib(split(deps, ','), repository, version, mainpoint_relative, name, description, argument, repository);
+                    add_lib(deps, repository, version, mainpoint_relative, name, description, argument, repository);
                 }
                 exit(0);
             }
@@ -284,7 +343,7 @@ int main(int argc, char *argv[])
                     }
                     remove_repo(argument);
                 }
-                else
+                else if (flag == "remove")
                 {
                     bool stat = false;
                     const bool exists = repository_exists(repository, repository, stat);
@@ -308,12 +367,56 @@ int main(int argc, char *argv[])
                 }
                 exit(0);
             }
-            else
+            else if (flag == "copy")
             {
+                if (is_repo_based)
+                {
+                    const vector<string> repos = split(argument.substr(0, argument.length() - 1), ',');
+                    bool valid = true;
+                    bool stat = false;
+
+                    if (!argument.length() || !target.length())
+                    {
+                        print_error("repositories to copy and target path are required!");
+                        exit(1);
+                    }
+                    copy_repos(repos, target);
+                }
+                else
+                {
+                    if (!argument.length() || !target.length() || !repository.length())
+                    {
+                        print_error("libraries to copy and target repository and libraries repository are requied!");
+                        exit(1);
+                    }
+                    const vector<string> libs = split(argument.substr(0, argument.length() - 1), ',');
+                    bool stat = false;
+                    bool valid = true;
+                    const bool exists = repository_exists(target, target, stat);
+                    if (!stat)
+                    {
+                        print_error("repository '" + target + "' not found!");
+                        exit(1);
+                    }
+                    for (string l : libs)
+                    {
+                        const bool libexists = library_exists(l, l, repository, stat);
+                        if (!stat)
+                        {
+                            print_error("failed to open '" + repository + "' metadata file!");
+                            exit(1);
+                        }
+                        if (!libexists)
+                        {
+                            valid = false;
+                            print_error("library '" + l + "' from does not exists at '" + repository + "' repository!");
+                        }
+                    }
+                    if (!valid)
+                        exit(1);
+                    copy_libs(libs, repository, target);
+                }
             }
-        }
-        else if (flag == "copy")
-        {
         }
         else
         {

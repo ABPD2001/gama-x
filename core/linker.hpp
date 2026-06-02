@@ -2,9 +2,6 @@
 #define LINKER_HPP
 #include "./types.hpp"
 
-#define META_CHUNK_SIZE 280
-#define CHUNK_HEADER_SIZE 8
-
 class _GXL_
 {
     vector<_GXL_file_t> files;

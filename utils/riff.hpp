@@ -2,7 +2,6 @@
 #define RIFF_HPP
 
 #include "../core/types.hpp"
-#define CHUNK_HEADER_SIZE 8
 
 void write_libs_chunks(vector<_GXPM_metadata_chunk_t> metadatas, vector<_GXPM_dependecies_t> dependecies, string filepath, bool &stat);
 void write_repos_chunks(vector<_GXPM_repository_chunk_t> repos, string filename, bool &stat);

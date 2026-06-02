@@ -3,10 +3,11 @@ Package manager for Gama-X, manages repositories of Gama-X.
 
 Verbs:
     setup               setups configurations of Gama-X Package Manger (must run with root premission).
-    init                initalizes empty repository (create empty metadata file).
+    start               initalizes empty repository (create empty metadata file).
     help                prints this page.
     version             prints version of package manager.
-    lint                lints (checks for errors) a full repository.
+    validate            validates (checks for chunk segmention errors) a full repository.
+    lint                lints (checks for application syntax errors) detemined location.
     create-mainpoint:   creates mainpoint for a library.
     mergable            checks if two or more repositories are mergable.
     merge               merges two or more repositories.

@@ -8,7 +8,7 @@ extern _GXPM_config_t configuration;
 extern bool verbose;
 
 void setup();
-void initialize(string path, string name);
+void initialize(string path);
 void reset(bool rage);
 void configure(string filepath);
 vector<_GXPM_conflict_t> mergable(vector<string> repositories, bool dry, bool &stat);

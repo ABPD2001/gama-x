@@ -111,7 +111,7 @@ struct _GXPM_chunk_header_t // 8 bytes.
     uint32_t size_b; // size by bytes.
 };
 
-struct _GXPM_repository_chunk_t // 240 Bytes.
+struct _GXPM_repository_chunk_t // 244 Bytes.
 {
     char description[152]; // just for package manager.
     char pathname[56];     // path of repository.
@@ -121,15 +121,14 @@ struct _GXPM_repository_chunk_t // 240 Bytes.
     uint32_t libraries_count; // count of libraries at repository.
 };
 
-struct _GXPM_metadata_chunk_t // 282 Bytes => 288 Bytes.
+struct _GXPM_metadata_chunk_t // 288 Bytes
 {
-    char description[150];       // just for package manager.
-    char mainpoint_relative[48]; // xxxx/xxxxx .
-    char pathname[32];           // name where stores with it on directory.
-    char libname[32];            // name where called with '.import'.
-    char version[12];            // just for package manager, XX.XXX.XXXXX .
+    char description[152];       // just for package manager.
+    char mainpoint_relative[49]; // xxxx/xxxxx .
+    char pathname[33];           // name where stores with it on directory.
+    char libname[33];            // name where called with '.import'.
+    char version[13];            // just for package manager, XX.XXX.XXXXX .
     char dep_id[8];              // id of dependecies chunk.
-    char padding[6];             // padding for memory alignment.
 };
 
 // for dependecies, for id, 8 byte is allocated, for dependecies names, size is dynamic.
