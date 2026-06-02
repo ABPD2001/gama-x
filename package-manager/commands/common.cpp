@@ -143,7 +143,7 @@ _GXPM_repository_t find_repository(string name, string path, bool &found, bool &
         }
         else if (path.length() && fs::exists(path))
         {
-            if (r.path == fs::absolute(path))
+            if (r.path == absolute_path(path))
             {
                 found = true;
                 return r;
@@ -174,7 +174,7 @@ bool library_exists(string name, string path, string repository, bool &stat)
         print_error("repository '" + repository + "' not found!");
         exit(1);
     }
-    const string mpath = fs::absolute(p).string() + "/" + (configuration.metadata_filename.length() ? configuration.metadata_filename : "metadata.riff");
+    const string mpath = absolute_path(p.string()) + "/" + (configuration.metadata_filename.length() ? configuration.metadata_filename : "metadata.riff");
 
     for (_GXPM_metadata_t m : read_metadata_chunks(mpath, stat))
     {
@@ -183,7 +183,7 @@ bool library_exists(string name, string path, string repository, bool &stat)
             print_error("failed to open repositories data file!");
             exit(1);
         }
-        if (m.libname == name || (fs::exists(path) && m.pathname == fs::absolute(path)))
+        if (m.libname == name || (fs::exists(path) && m.pathname == absolute_path(path)))
         {
             return true;
         }

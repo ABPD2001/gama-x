@@ -113,19 +113,19 @@ struct _GXPM_chunk_header_t // 8 bytes.
 
 struct _GXPM_repository_chunk_t // 244 Bytes.
 {
-    char description[152]; // just for package manager.
-    char pathname[56];     // path of repository.
-    char name[32];         // name of repository.
+    char description[1025]; // just for package manager.
+    char pathname[56];      // path of repository.
+    char name[32];          // name of repository.
     // char owner_user_id[16]; // 16 bytes as id of owner user.
     // bool access[4];         // bytes --> <read,write,delete,add>.
     uint32_t libraries_count; // count of libraries at repository.
 };
 
-struct _GXPM_metadata_chunk_t // 288 Bytes
+struct _GXPM_metadata_chunk_t
 {
+    char pathname[1025];         // name where stores with it on directory.
     char description[152];       // just for package manager.
     char mainpoint_relative[49]; // xxxx/xxxxx .
-    char pathname[33];           // name where stores with it on directory.
     char libname[33];            // name where called with '.import'.
     char version[13];            // just for package manager, XX.XXX.XXXXX .
     char dep_id[8];              // id of dependecies chunk.

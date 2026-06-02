@@ -8,7 +8,6 @@ void add_repo(string name, string path, string description)
     fstream f;
     _GXPM_repository_t repo;
     string content;
-    fs::path p = path;
     char ch;
 
     if (!fs::exists(description) || !fs::is_regular_file(description))
@@ -22,7 +21,7 @@ void add_repo(string name, string path, string description)
         exit(1);
     }
 
-    vector<_GXPM_metadata_t> repo_metadatas = read_metadata_chunks(p.string() + "/" + (configuration.metadata_filename.length() ? configuration.metadata_filename : "metadata.riff"), stat);
+    vector<_GXPM_metadata_t> repo_metadatas = read_metadata_chunks(absolute_path(path) + "/" + (configuration.metadata_filename.length() ? configuration.metadata_filename : "metadata.riff"), stat);
     if (!stat)
     {
         print_error("failed to open '" + path + "' repository metadata file!");
@@ -30,7 +29,7 @@ void add_repo(string name, string path, string description)
     }
     repo.name = name;
     repo.libraries_count = repo_metadatas.size();
-    repo.path = fs::absolute(p).string();
+    repo.path = absolute_path(path);
 
     f.open(description, ios::in);
     while (f.read(&ch, 1))
@@ -140,7 +139,7 @@ void add_lib(string deps_txt, string repository, string version, string mainpoin
         mchunks.push_back(to_metadata_chunk(m));
     }
     cout << mchunks.size() << " " << lib_deps.size() << "\n";
-
+    cout << mpath << "\n";
     write_libs_chunks(mchunks, lib_deps, mpath, stat);
     if (!stat)
     {
@@ -172,7 +171,7 @@ void remove_repo(string repo)
                 cout << "['" << repo << "' at '" << r.path << "' filtered]\n";
             continue;
         }
-        else if ((fs::exists(p) && fs::is_regular_file(p)) && r.path == fs::absolute(p))
+        else if ((fs::exists(p) && fs::is_regular_file(p)) && r.path == absolute_path(p.string()))
         {
             if (verbose)
                 cout << "['" << repo << "' at '" << r.path << "' filtered]\n";
@@ -217,7 +216,7 @@ void remove_lib(string lib, string repository)
     }
     for (_GXPM_metadata_t m : metadatas)
     {
-        if (fs::exists(lib) && fs::is_directory(lib) && fs::absolute(lib) == m.pathname)
+        if (fs::exists(lib) && fs::is_directory(lib) && absolute_path(lib) == m.pathname)
         {
             if (verbose)
                 cout << "['" << lib << "' library filtered from '" << repository << "' repository]\n";
@@ -246,7 +245,7 @@ void edit_repo(_GXPM_repository_t edits, string repo)
     }
     for (_GXPM_repository_t r : repos)
     {
-        if ((fs::exists(p) && fs::absolute(p) == r.path) || repo == r.name)
+        if ((fs::exists(p) && absolute_path(p.string()) == r.path) || repo == r.name)
         {
             if (edits.description.length())
                 r.description = edits.description;
@@ -301,7 +300,7 @@ void edit_lib(_GXPM_metadata_t edits, string lib, string repository)
 
     for (_GXPM_metadata_t m : metadatas)
     {
-        if ((fs::exists(p) && fs::absolute(p) == m.pathname) || m.libname == lib)
+        if ((fs::exists(p) && absolute_path(p.string()) == m.pathname) || m.libname == lib)
         {
             if (edits.version.length())
                 m.version = edits.version;
@@ -358,7 +357,7 @@ void copy_repos(vector<string> repositories, string to_path)
         }
         for (_GXPM_repository_t r : repos)
         {
-            if ((fs::exists(rp) && (fs::absolute(p) == r.path)) || r.name == rp)
+            if ((fs::exists(rp) && (absolute_path(p.string()) == r.path)) || r.name == rp)
             {
                 target_repos.push_back(r);
             }
@@ -399,11 +398,11 @@ void copy_libs(vector<string> libs, string repository, string target_repo)
     {
         if (from_repo.name.length() && to_repo.name.length())
             break;
-        if ((fs::exists(pf) && fs::absolute(pf) == r.path) || r.name == repository)
+        if ((fs::exists(pf) && absolute_path(pf.string()) == r.path) || r.name == repository)
         {
             from_repo = r;
         }
-        if ((fs::exists(pt) && fs::absolute(pt) == r.path) || r.name == repository)
+        if ((fs::exists(pt) && absolute_path(pt.string()) == r.path) || r.name == repository)
         {
             to_repo = r;
         }
@@ -441,7 +440,7 @@ void copy_libs(vector<string> libs, string repository, string target_repo)
         const fs::path p = l;
         for (_GXPM_metadata_t m : metadatas_from)
         {
-            if ((fs::exists(p) && fs::absolute(p) == m.pathname) || l == m.libname)
+            if ((fs::exists(p) && absolute_path(p.string()) == m.pathname) || l == m.libname)
             {
                 target_libs.push_back(m);
 

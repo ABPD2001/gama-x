@@ -412,9 +412,9 @@ void merge(vector<string> repositories, _GXPM_repository_t output)
                                 for (_GXPM_metadata_t m : merged_metadatas)
                                 {
                                     const fs::path p = m.pathname;
-                                    if (fs::absolute(i.path()) == fs::absolute(p))
+                                    if (absolute_path(i.path().string()) == absolute_path(p.string()))
                                     {
-                                        fs::copy(fs::absolute(i.path()), fs::absolute(output.path));
+                                        fs::copy(absolute_path(i.path().string()), absolute_path(output.path));
                                     }
                                 }
                             }

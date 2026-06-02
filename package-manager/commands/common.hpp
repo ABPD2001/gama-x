@@ -22,4 +22,10 @@ bool create_8byte_id(char bytes[8], uint32_t &lvl);
 bool repository_exists(string name, string path, bool &stat);
 bool library_exists(string name, string path, string repository, bool &stat);
 _GXPM_repository_t find_repository(string name, string path, bool &found, bool &stat);
+
+inline string absolute_path(string path)
+{
+    const fs::path p = path;
+    return fs::absolute(p).string();
+}
 #endif

@@ -452,11 +452,11 @@ _GXPM_metadata_chunk_t to_metadata_chunk(_GXPM_metadata_t metadata)
         output.version[metadata.version.length() + i] = 0;
     }
 
-    for (uint32_t i = 0; i < min(metadata.pathname.length(), 32); i++)
+    for (uint32_t i = 0; i < min(metadata.pathname.length(), 1024); i++)
     {
         output.pathname[i] = metadata.pathname[i];
     }
-    for (uint32_t i = 0; i < 33 - min(metadata.pathname.length(), 32); i++)
+    for (uint32_t i = 0; i < 1025 - min(metadata.pathname.length(), 1024); i++)
     {
         output.pathname[metadata.pathname.length() + i] = 0;
     }
@@ -481,11 +481,11 @@ _GXPM_repository_chunk_t to_repository_chunk(_GXPM_repository_t repo)
         output.description[repo.description.length() + i] = 0;
     }
 
-    for (uint32_t i = 0; i < min(repo.path.length(), 31); i++)
+    for (uint32_t i = 0; i < min(repo.path.length(), 1024); i++)
     {
         output.pathname[i] = repo.path[i];
     }
-    for (uint32_t i = 0; i < 56 - min(repo.path.length(), 55); i++)
+    for (uint32_t i = 0; i < 1025 - min(repo.path.length(), 1024); i++)
     {
         output.pathname[repo.path.length() + i] = 0;
     }
