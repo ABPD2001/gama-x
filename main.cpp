@@ -5,8 +5,8 @@
 #include "./core/assembler.hpp"
 #include "./core/linker.hpp"
 #include "./core/lint.hpp"
+#include "./help.hpp"
 #define VERSION "v2.0.0"
-#define HELP "help..."
 
 using std::cout;
 using std::fstream;
@@ -36,7 +36,7 @@ void parse_app_arguments(vector<string> argvv, vector<_GXL_file_t> &files, vecto
         }
         else if (flag == "-h" || flag == "--help")
         {
-            cout << HELP << "\n";
+            cout << help << "\n";
             exit(0);
         }
         else if (flag == "-i" || flag == "--ignore-repository")

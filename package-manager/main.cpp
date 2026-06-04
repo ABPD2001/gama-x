@@ -2,8 +2,8 @@
 #include "./commands/basic.hpp"
 #include "./commands/treebased.hpp"
 #include "./commands/common.hpp"
+#include "./help.hpp"
 
-#define HELP "help..."
 #define VERSION "V1.0.0"
 
 bool verbose = false;
@@ -295,7 +295,7 @@ int main(int argc, char *argv[])
         }
         else if (flag == "help")
         {
-            cout << HELP << '\n';
+            cout << help << '\n';
             exit(0);
         }
         else if (flag == "version")

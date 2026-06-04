@@ -359,7 +359,6 @@ void edit_lib(_GXPM_metadata_t edits, string lib, string repository)
 
     vector<_GXPM_metadata_chunk_t> mchunks;
     const fs::path p = lib;
-    bool found = false;
 
     for (_GXPM_metadata_t &m : metadatas)
     {

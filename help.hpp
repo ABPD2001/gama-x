@@ -1,0 +1,34 @@
+#ifndef HELP_HPP
+#define HELP_HPP
+
+constexpr char help[] = R"(Usage: gx [FILES]... [OPTION]...
+Transpile Gama-X files to raw output file (text, binary or anything else...).
+
+Avaiable options:
+    [-o, --output] (required):                                          output file path.
+    [-r, --repository]:                                                 repository path for libraries, by default, this is set to '/usr/lib/gamax'
+    [-v, --values]:                                                     set initial value for custom registers of Gama-X.
+    [-g, --registers]:                                                  set custom registers for Gama-X.
+    [-b, --binary]:                                                     output a binary file instead of text.
+    [-l, --binary-logics]:                                              set value type for output binary parameters.
+    [-e, --error-format]:                                               set format of output errors (file path).
+    [-i, --ignore-repository]:                                          do not use any repository.
+    [-d, --ignore-dependecies]:                                         do not check any dependecy of any imported library.
+    [-m, --metadata-filename]:                                          set custom name for metadata file of custom repository.
+    [-V, --version]:                                                    show version of Gama-X.
+    [-c, --config]:                                                     use config to set arguments.
+    [-s, --special-registers] (required if '-g, --registers' valued):   name of special registers.
+    [-h, --help]: print this page.
+
+For '--error-format' argument, here is a exmaple format:
+    Error: <MESSAGE>
+    Type: <TYPE>
+    FILE: <FILE>
+    Line: <LINE>
+    CAUSE: <CAUSE>
+
+Also, for '--metadata-file-name' argument, value must be a name, not a file path!
+Note: config argument must be a .cnf file.
+
+<--- Gama-X Version 1.0.0 --->)";
+#endif

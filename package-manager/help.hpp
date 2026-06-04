@@ -1,4 +1,6 @@
-Usage: gxpm [OPTIONS]... [VERBS]... [ARGUMENTS/OPTIONS]...
+#ifndef HELP_HPP
+#define HELP_HPP
+constexpr const char help[] = R"(Usage: gxpm [OPTIONS]... [VERBS]... [ARGUMENTS/OPTIONS]...
 Package manager for Gama-X, manages repositories of Gama-X.
 
 Verbs:
@@ -69,4 +71,6 @@ Verbs:
 Note: if youre merging repositories, you must becareful of conflicts, package manager cannot solve merging conflicts automatically!
 Note: after rage reset, its required to initialize GXPM again.
 
-<--- GXPM Version 1.0.0 --->
+<--- GXPM Version 1.0.0 --->)";
+
+#endif
