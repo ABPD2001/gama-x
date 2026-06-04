@@ -1,0 +1,9 @@
+<-- Gama-X Assembler -->
+
+Usage: gxa [*.s files...] [-o, -h, -v...]
+Flags:
+	[-h, --help]: print this catalog.
+	[-v, --version]: show version and exit.
+	[-i, --initial-registers]: set initial value for registers [note: it can seperated by comma, also its dependent to -r flag].
+	[-r, --registers-count]: set count of working registers, number cannot be negetive.
+	[-b, --binary]: output binary instead of text.

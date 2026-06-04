@@ -1,0 +1,7 @@
+<-- Gama-X Linker -->
+
+Usage: gxl [*.s files...] [-o, -h, -v...]
+Flags:
+	[-h, --help]: print this catalog.
+	[-v, --version]: show version and exit.
+	[-o, --output]: assembly output file.
