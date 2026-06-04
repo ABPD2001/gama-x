@@ -1,4 +1,4 @@
-# Gama-X Programming language
+# Gama-X Programming language (v0.1.0)
 
 A powerful replacement for traditional, logic-less **DSLs** (_Domain static language_). **Gama-X** is a _fast_, _lightweight_, and _logic-driven_ intermediate language that combines low-level efficiency with the ease of high-level programming.
 
