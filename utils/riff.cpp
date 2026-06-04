@@ -497,6 +497,7 @@ _GXPM_repository_chunk_t to_repository_chunk(_GXPM_repository_t repo)
     {
         output.name[repo.name.length() + i] = 0;
     }
+    output.libraries_count = repo.libraries_count;
 
     return output;
 }

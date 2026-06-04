@@ -21,7 +21,7 @@ void add_repo(string name, string path, string description)
         exit(1);
     }
 
-    vector<_GXPM_metadata_t> repo_metadatas = read_metadata_chunks(absolute_path(path) + "/" + (configuration.metadata_filename.length() ? configuration.metadata_filename : "metadata.riff"), stat);
+    vector<_GXPM_metadata_t> repo_metadatas = read_metadata_chunks(absolute_path(path) + "/metadata.riff", stat);
     if (!stat)
     {
         print_error("failed to open '" + path + "' repository metadata file!");
@@ -68,6 +68,13 @@ void add_lib(string deps_txt, string repository, string version, string mainpoin
     if (deps_txt.length())
         deps = split(deps_txt, ',');
 
+    vector<_GXPM_repository_t> repos = read_repositories_chunk(REPOSITORIES_PATH, stat);
+    vector<_GXPM_repository_chunk_t> rchunks;
+    if (!stat)
+    {
+        print_error("failed to open repositories data file!");
+        exit(1);
+    }
     _GXPM_repository_t r = find_repository(repository, repository, found, stat);
     if (!stat)
     {
@@ -91,7 +98,7 @@ void add_lib(string deps_txt, string repository, string version, string mainpoin
     }
     id[0] = 0;
 
-    const string mpath = r.path + "/" + (configuration.metadata_filename.length() ? configuration.metadata_filename : "metadata.riff");
+    const string mpath = r.path + "/metadata.riff";
 
     vector<_GXPM_metadata_chunk_t> mchunks;
     vector<_GXPM_metadata_t> metadatas = read_metadata_chunks(mpath, stat);
@@ -119,33 +126,50 @@ void add_lib(string deps_txt, string repository, string version, string mainpoin
         }
         d.id = id;
     }
-    create_8byte_id(id, lvl);
 
     metadata.libname = name;
     metadata.pathname = path;
     metadata.version = version;
     metadata.mainpoint_relative = mainpoint_relative;
-    metadata.dep_id = id;
     metadata.description = content;
 
-    dependecies.dependecies = deps;
-    dependecies.id = id;
+    if (deps_txt.length())
+    {
+        create_8byte_id(id, lvl);
+        metadata.dep_id = id;
+        dependecies.dependecies = deps;
+        dependecies.id = id;
 
-    lib_deps.push_back(dependecies);
+        lib_deps.push_back(dependecies);
+    }
+    else
+        metadata.dep_id = "";
+
     metadatas.push_back(metadata);
+    for (_GXPM_repository_t &rep : repos)
+    {
+        if (rep.name == r.name)
+            rep.libraries_count++;
+        rchunks.push_back(to_repository_chunk(rep));
+    }
 
     for (_GXPM_metadata_t m : metadatas)
     {
         mchunks.push_back(to_metadata_chunk(m));
     }
-    cout << mchunks.size() << " " << lib_deps.size() << "\n";
-    cout << mpath << "\n";
     write_libs_chunks(mchunks, lib_deps, mpath, stat);
     if (!stat)
     {
         print_error("failed to write into '" + repository + "' repository metadata file!");
         exit(1);
     }
+    write_repos_chunks(rchunks, REPOSITORIES_PATH, stat);
+    if (!stat)
+    {
+        print_error("failed to write into repositories data file!");
+        exit(1);
+    }
+
     exit(0);
 }
 
@@ -192,6 +216,7 @@ void remove_repo(string repo)
 
 void remove_lib(string lib, string repository)
 {
+    string path;
     bool stat = false;
     if (!fs::exists(repository))
     {
@@ -204,16 +229,26 @@ void remove_lib(string lib, string repository)
         for (_GXPM_repository_t r : repos)
         {
             if (r.name == repository)
-                repository = r.path;
+                path = r.path + "/metadata.riff";
         }
     }
-    vector<_GXPM_metadata_t> metadatas = read_metadata_chunks(repository + "/" + (configuration.metadata_filename.length() ? configuration.metadata_filename : "metadata.riff"), stat);
+
+    vector<_GXPM_metadata_t> metadatas = read_metadata_chunks(path, stat);
     vector<_GXPM_metadata_chunk_t> mchunks;
+    vector<_GXPM_dependecies_t> dchunks;
+    _GXPM_metadata_t tlib;
     if (!stat)
     {
         print_error("failed to open repository '" + repository + "' metadata file!");
         exit(1);
     }
+    vector<_GXPM_dependecies_t> deps = read_dependecies_chunks(path, stat);
+    if (!stat)
+    {
+        print_error("failed to open repository '" + repository + "' metadata file!");
+        exit(1);
+    }
+
     for (_GXPM_metadata_t m : metadatas)
     {
         if (fs::exists(lib) && fs::is_directory(lib) && absolute_path(lib) == m.pathname)
@@ -226,9 +261,25 @@ void remove_lib(string lib, string repository)
         {
             if (verbose)
                 cout << "['" << lib << "' library filtered from '" << repository << "' repository]\n";
+            tlib = m;
             continue;
         }
+        mchunks.push_back(to_metadata_chunk(m));
     }
+    for (_GXPM_dependecies_t d : deps)
+    {
+        if (d.id == tlib.dep_id)
+            continue;
+        dchunks.push_back(d);
+    }
+
+    write_libs_chunks(mchunks, dchunks, path, stat);
+    if (!stat)
+    {
+        print_error("failed to write into '" + repository + "' repository metadata!");
+        exit(1);
+    }
+    exit(0);
 }
 
 void edit_repo(_GXPM_repository_t edits, string repo)
@@ -243,7 +294,7 @@ void edit_repo(_GXPM_repository_t edits, string repo)
         print_error("failed to open repositories data file!");
         exit(1);
     }
-    for (_GXPM_repository_t r : repos)
+    for (_GXPM_repository_t &r : repos)
     {
         if ((fs::exists(p) && absolute_path(p.string()) == r.path) || repo == r.name)
         {
@@ -279,18 +330,30 @@ void edit_repo(_GXPM_repository_t edits, string repo)
 
 void edit_lib(_GXPM_metadata_t edits, string lib, string repository)
 {
-    const string path = repository + "/" + (configuration.metadata_filename.length() ? configuration.metadata_filename : "metadata.riff");
     bool stat = false;
-    vector<_GXPM_metadata_t> metadatas = read_metadata_chunks(path, stat);
+    bool found = false;
+    _GXPM_repository_t repo = find_repository(repository, repository, found, stat);
     if (!stat)
     {
         print_error("failed to open repositories data file!");
         exit(1);
     }
+    if (!found)
+    {
+        print_error("'" + repository + "' not found!");
+        exit(1);
+    }
+    const string path = repo.path + "/metadata.riff";
+    vector<_GXPM_metadata_t> metadatas = read_metadata_chunks(path, stat);
+    if (!stat)
+    {
+        print_error("failed to '" + path + "'data file!");
+        exit(1);
+    }
     vector<_GXPM_dependecies_t> deps = read_dependecies_chunks(path, stat);
     if (!stat)
     {
-        print_error("failed to open repositories data file!");
+        print_error("failed to '" + path + "'data file!");
         exit(1);
     }
 
@@ -298,7 +361,7 @@ void edit_lib(_GXPM_metadata_t edits, string lib, string repository)
     const fs::path p = lib;
     bool found = false;
 
-    for (_GXPM_metadata_t m : metadatas)
+    for (_GXPM_metadata_t &m : metadatas)
     {
         if ((fs::exists(p) && absolute_path(p.string()) == m.pathname) || m.libname == lib)
         {
@@ -367,7 +430,18 @@ void copy_repos(vector<string> repositories, string to_path)
     {
         for (_GXPM_repository_t r : target_repos)
         {
-            fs::copy(r.path, to_path);
+            if (!fs::exists(to_path + "/" + r.name))
+            {
+                fs::create_directory(to_path + "/" + r.name);
+            }
+            else if (!fs::is_directory(to_path + "/" + r.name))
+            {
+                print_error("invalid target path '" + to_path + "'!");
+                exit(1);
+            }
+            if (verbose)
+                cout << "['" << r.path << "' copied into '" << to_path << "']\n";
+            fs::copy(r.path, to_path + "/" + r.name, fs::copy_options::recursive | fs::copy_options::overwrite_existing);
         }
     }
     catch (const fs::filesystem_error &err)
@@ -408,8 +482,8 @@ void copy_libs(vector<string> libs, string repository, string target_repo)
         }
     }
 
-    const string fpath = from_repo.path + "/" + (configuration.metadata_filename.length() ? configuration.metadata_filename : "metadata.riff");
-    const string tpath = to_repo.path + "/" + (configuration.metadata_filename.length() ? configuration.metadata_filename : "metadata.riff");
+    const string fpath = from_repo.path + "/metadata.riff";
+    const string tpath = to_repo.path + "/metadata.riff";
     const vector<_GXPM_metadata_t> metadatas_from = read_metadata_chunks(fpath, stat);
     if (!stat)
     {
@@ -541,5 +615,69 @@ void copy_libs(vector<string> libs, string repository, string target_repo)
         exit(1);
     }
 
+    exit(0);
+}
+
+void list_repos(bool local_only)
+{
+    bool stat = false;
+    vector<_GXPM_repository_t> repos = read_repositories_chunk(REPOSITORIES_PATH, stat);
+    if (!stat)
+    {
+        print_error("failed to open repositories data file!");
+        exit(1);
+    }
+    for (_GXPM_repository_t r : repos)
+    {
+        if (r.name == "global" && local_only)
+            continue;
+        cout << "['" << r.name << "', " << r.libraries_count << " librarires] (" << r.path << "): " << r.description << "\n";
+    }
+    exit(0);
+}
+
+void list_libs(string repository)
+{
+    bool stat = false;
+    bool found = false;
+    _GXPM_repository_t repo = find_repository(repository, repository, found, stat);
+
+    if (!stat)
+    {
+        print_error("failed to open repositories data file!");
+        exit(1);
+    }
+    if (!found)
+    {
+        print_error("'" + repository + "' does not exists!");
+        exit(1);
+    }
+
+    vector<_GXPM_metadata_t> libs = read_metadata_chunks(repo.path + "/metadata.riff", stat);
+    if (!stat)
+    {
+        print_error("failed to open '" + repository + "' repository metadata file!");
+        exit(1);
+    }
+    vector<_GXPM_dependecies_t> deps = read_dependecies_chunks(repo.path + "/metadata.riff", stat);
+    if (!stat)
+    {
+        print_error("failed to open '" + repository + "' repository metadata file!");
+        exit(1);
+    }
+
+    for (_GXPM_metadata_t l : libs)
+    {
+        uint32_t deps_count = 0;
+        for (_GXPM_dependecies_t d : deps)
+        {
+            if (d.id == l.dep_id)
+            {
+                deps_count = d.dependecies.size();
+                break;
+            }
+        }
+        cout << "[" << l.libname << "  V" << l.version << ", " << deps_count << " dependecies] (" << repo.name << " repository): " << l.pathname << ", " << l.mainpoint_relative << "\n";
+    }
     exit(0);
 }

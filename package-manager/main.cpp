@@ -6,37 +6,13 @@
 #define HELP "help..."
 #define VERSION "V1.0.0"
 
-_GXPM_config_t configuration = {"metadata.riff"};
 bool verbose = false;
 
 int main(int argc, char *argv[]);
 
 int main(int argc, char *argv[])
 {
-    const string treebased_verbs[5] = {"add", "list", "remove", "copy"};
-    if (fs::exists(CONFIGURATION_PATH) && fs::is_regular_file(CONFIGURATION_PATH))
-    {
-        fstream cnf_f;
-        string content;
-        char ch;
-
-        cnf_f.open(CONFIGURATION_PATH, ios::in);
-        while (cnf_f.read(&ch, 1))
-        {
-            content += ch;
-        }
-        const vector<argument_t> args = parse_arguments(content);
-        for (argument_t a : args)
-        {
-            if (a.key == "metadata_filename")
-                configuration.metadata_filename = a.value;
-            else
-            {
-                print_error("invalid configurtion file!\nnote: its fixable by 'reset' verb.");
-                exit(1);
-            }
-        }
-    }
+    const string treebased_verbs[6] = {"add", "list", "remove", "copy", "edit"};
 
     for (uint32_t i = 1; i < argc; i++)
     {
@@ -49,19 +25,37 @@ int main(int argc, char *argv[])
         }
         if (flag == "setup")
         {
-            if (argc - i - 1)
+            bool local = false;
+            bool local_ignore = false;
+
+            if (argc - i - 1 > 2)
             {
-                print_error("'setup' verb does not accept any arguments!");
+                print_error("to much arguments for 'setup'!");
                 exit(1);
             }
-            setup();
+            for (uint32_t j = i + 1; j < argc; j++)
+            {
+                const string param = string(argv[j]);
+                if (param == "-l" || param == "--local")
+                    local = true;
+                else if (param == "-nl" || param == "--skip-locals")
+                    local_ignore = true;
+
+                else
+                {
+                    print_error("invalid argument '" + param + "' for 'setup' verb!");
+                    exit(1);
+                }
+            }
+
+            setup(local, local_ignore);
             exit(0);
         }
         else if (flag == "start")
         {
             if (argc - i - 1 != 1)
             {
-                print_error(string(argc - i - 1 > 1 ? "to much" : "to few") + " arguments for 'init'!");
+                print_error(string(argc - i - 1 > 1 ? "to much" : "to few") + " arguments for 'start'!");
                 exit(1);
             }
             if (!fs::exists(argv[i + 1]) || !fs::is_directory(argv[i + 1]))
@@ -75,45 +69,152 @@ int main(int argc, char *argv[])
         }
         else if (flag == "reset")
         {
+            const string param = argv[i + 1];
             bool rage = false;
-            if (argc - i - 1 >= 1)
+            bool local_affected = false;
+            if (argc - i - 1 > 2)
             {
-                if (argc - i - 1 > 1)
-                {
-                    print_error("to much arguments for 'reset' verb!");
-                    exit(1);
-                }
-                else if (string(argv[i + 1]) == "-r" || string(argv[i + 1]) == "--rage")
+                print_error("to much arguments for 'reset' verb!");
+                exit(1);
+            }
+
+            for (uint32_t j = i + 1; j < argc; j++)
+            {
+
+                if (param == "-r" || param == "--rage")
                 {
                     rage = true;
                 }
+                else if (param == "-l" || param == "--affect-local")
+                {
+                    local_affected = true;
+                }
                 else
                 {
-                    print_error("invalid flag '" + string(argv[i + 1]) + "' for 'reset' verb!");
+                    print_error("invalid flag '" + param + "' for 'reset' verb!");
                     exit(1);
                 }
             }
-            reset(rage);
+
+            reset(rage, local_affected);
             exit(0);
         }
-        else if (flag == "config")
+        else if (flag == "create-mainpoint")
         {
-            if (argc - i - 1 != 1)
+            string path;
+            string output, repository = "global";
+            bool ignore_dependecies, ignore_repository;
+
+            if (i == argc - 1)
             {
-                if (argc - i - 1 > 1)
+                print_error("path to create main point missed!");
+                exit(1);
+            }
+            path = argv[i + 1];
+            if (argc - i - 1 > 6)
+            {
+                print_error("to much argument 'create-mainpoint'!");
+                exit(1);
+            }
+            for (uint32_t j = i + 2; j < argc; j++)
+            {
+                const string param = argv[j];
+                if (param == "-r" || param == "--repository")
                 {
-                    print_error("to much arguments for 'config' verb!");
-                    exit(1);
+                    if (j == argc - 1)
+                    {
+                        print_error("'-r, --repository' argument value missed!");
+                        exit(1);
+                    }
+                    repository = argv[j + 1];
                 }
-                else if (!argc - i - 1)
+                else if (param == "-o" || param == "--output")
                 {
-                    print_error("arguments for 'config' verb missed!");
+                    if (j == argc - 1)
+                    {
+                        print_error("'-o, --output' argument value missed!");
+                        exit(1);
+                    }
+                    output = argv[j + 1];
+                }
+                else if (param == "-nd" || param == "--ignore-dependecies")
+                    ignore_dependecies = true;
+                else if (param == "-nr" || param == "--ignore-repository")
+                    ignore_repository = true;
+            }
+            if (verbose && repository == "global")
+                cout << "[using global repository]\n";
+            create_mainpoint(path, output, repository, ignore_dependecies, ignore_repository);
+        }
+        else if (flag == "list")
+        {
+            string target_type;
+            string repository;
+            bool local_only = false;
+
+            if (i == argc - 1)
+            {
+                print_error("target type missed for 'list' verb!");
+                exit(1);
+            }
+            if (argc - i - 1 > 5)
+            {
+                print_error("to much arguments for 'list' verb!");
+                exit(1);
+            }
+
+            target_type = argv[i + 1];
+            if (target_type != "lib" && target_type != "repo")
+            {
+                print_error("invalid target type '" + target_type + "' instead of 'repo'/'lib' for 'list' verb!");
+                exit(1);
+            }
+            for (uint32_t j = i + 2; j < argc; j++)
+            {
+                const string param = argv[j];
+                if ((param == "-r" || param == "--repository") && target_type == "lib")
+                {
+                    if (j == argc - 1)
+                    {
+                        print_error("'-r, --repository' argument value missed!");
+                        exit(1);
+                    }
+                    repository = argv[j + 1];
+                }
+                else if ((param == "-l" || param == "--locally") && target_type == "repo")
+                    local_only = true;
+                else
+                {
+                    print_error("invalid argument '" + param + "' for 'list " + target_type + "' verb!");
                     exit(1);
                 }
             }
-            i += 1;
-            configure(argv[i + 1]);
-            exit(0);
+            if (target_type == "lib" && !repository.length())
+            {
+                print_error("repository name for 'list lib' is required!");
+                exit(1);
+            }
+
+            if (target_type == "lib")
+                list_libs(repository);
+            else
+                list_repos(local_only);
+        }
+        else if (flag == "validate")
+        {
+            string repository;
+            if (i == argc - 1)
+            {
+                print_error("repository to validate missed!");
+                exit(1);
+            }
+            if (argc - i - 1 > 1)
+            {
+                print_error("to much arguments for 'validate' verb!");
+                exit(1);
+            }
+            repository = argv[i + 1];
+            validate_repository(repository);
         }
         else if (flag == "merge")
         {
@@ -204,7 +305,7 @@ int main(int argc, char *argv[])
         }
         else if (flag == "copy" || flag == "add" || flag == "remove" || flag == "edit")
         {
-            string argument, name, description, deps, repository, version, mainpoint_relative, target;
+            string argument, name, description, deps, repository, version, path, mainpoint_relative, target;
             if (argc - i - 1 < 1)
             {
                 print_error("target type of 'add' verb missed!");
@@ -228,6 +329,16 @@ int main(int argc, char *argv[])
                         exit(1);
                     }
                     target = argv[j + 1];
+                    j++;
+                }
+                else if (param == "-p" || param == "--path")
+                {
+                    if (j == argc - 1)
+                    {
+                        print_error("'-p, --path' argument flag missed!");
+                        exit(1);
+                    }
+                    path = argv[j + 1];
                     j++;
                 }
                 else if (param == "-r" || param == "--repository")
@@ -270,7 +381,7 @@ int main(int argc, char *argv[])
                     description = argv[j + 1];
                     j++;
                 }
-                else if (param == "p" || param == "--dependecies")
+                else if (param == "-dp" || param == "--dependecies")
                 {
                     if (j == argc - 1)
                     {
@@ -415,6 +526,26 @@ int main(int argc, char *argv[])
                     if (!valid)
                         exit(1);
                     copy_libs(libs, repository, target);
+                }
+            }
+            else
+            {
+                if (is_repo_based)
+                {
+                    _GXPM_repository_t edits = {description, path, name};
+                    edit_repo(edits, argument);
+                    exit(0);
+                }
+                else
+                {
+                    if (repository.empty())
+                    {
+                        print_error("repository of library is required!");
+                        exit(1);
+                    }
+                    _GXPM_metadata_t lib = {description, mainpoint_relative, path, name, version};
+                    edit_lib(lib, argument, repository);
+                    exit(0);
                 }
             }
         }

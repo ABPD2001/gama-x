@@ -2,32 +2,38 @@ Usage: gxpm [OPTIONS]... [VERBS]... [ARGUMENTS/OPTIONS]...
 Package manager for Gama-X, manages repositories of Gama-X.
 
 Verbs:
-    setup               setups configurations of Gama-X Package Manger (must run with root premission).
     start               initalizes empty repository (create empty metadata file).
     help                prints this page.
     version             prints version of package manager.
     validate            validates (checks for chunk segmention errors) a full repository.
-    lint                lints (checks for application syntax errors) detemined location.
-    create-mainpoint:   creates mainpoint for a library.
     mergable            checks if two or more repositories are mergable.
+    create-mainpoint:   creates mainpoint for a library.
+        [-r, --repository]:          repository to use for including dependecies and librarires.
+        [-nd, --ignore-dependecies]: skips process of navigating dependecies.
+        [-nr, --ignore-repository]:  skips process of adding libraries from repository.
+        [-o, --output]:              output file.
+
+    setup               setups configurations of Gama-X Package Manger (must run with root premission).
+        [-l, --local]: setup locally.
+        [-nl, --skip-locals]: skip local configurations and setups.
+        
     merge               merges two or more repositories.
         [-n, --name]: name of output repository.
         [-p, --path]: path of output repository directory.
 
-    config     configure Gama-X Package Manager.
-        [-m, --metadata-filename]: set metadata filename of repositories (by default is 'metadata.riff').
-        
     reset      resets configurations (must run with root premission).
-        [-r, --rage]: deletes global repositories also. 
+        [-r, --rage]:           deletes global repositories also.
+        [-l, --affect-local]:   empties local repositories bank also.
 
     edit:       gxpm edit <'lib'/'repo'> <ARGS> <OPTIONS>
         repo    edits repositories metadata file of package manager.
         lib     edits metadata file of a repository.
             [-r, --repository]:         from which repository.
             [-V, --version]:            set version of library.
-            [-p, --dependecies]:        set dependecies of library.
+            [-dp, --dependecies]:        set dependecies of library.
             [-m, --mainpoint-relative]: set relative to library directory mainpoint file path.
 
+        [-p, --path]:       edit library/repository path (note: doesnt move automatically, just registers).
         [-n, --name]:       edit library/repository name.
         [-d, --desciption]: edit library/repository desciption (.txt file path).
 

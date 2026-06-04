@@ -113,9 +113,9 @@ struct _GXPM_chunk_header_t // 8 bytes.
 
 struct _GXPM_repository_chunk_t // 244 Bytes.
 {
-    char description[1025]; // just for package manager.
-    char pathname[56];      // path of repository.
-    char name[32];          // name of repository.
+    char pathname[1025];   // path of repository.
+    char description[152]; // just for package manager.
+    char name[32];         // name of repository.
     // char owner_user_id[16]; // 16 bytes as id of owner user.
     // bool access[4];         // bytes --> <read,write,delete,add>.
     uint32_t libraries_count; // count of libraries at repository.

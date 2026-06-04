@@ -27,4 +27,4 @@ For '--error-format' argument, here is a exmaple format:
 Also, for '--metadata-file-name' argument, value must be a name, not a file path!
 Note: config argument must be a .cnf file.
 
-<--- Gama-X Version 2.0.0 --->
+<--- Gama-X Version 1.0.0 --->

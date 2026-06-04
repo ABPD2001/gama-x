@@ -4,44 +4,6 @@ void print_error(string text)
 {
     cout << "GXPM: " << text << '\n';
 }
-bool _validate_config_(string content)
-{
-    vector<argument_t> args = parse_arguments(content);
-    const string valid_args[1] = {"metadata_filename"};
-
-    for (argument_t a : args)
-    {
-        if (!includes_arr<const string, 1>(valid_args, a.key))
-        {
-            return false;
-        }
-        if (a.key == "metadata_filename" && !valid_name(a.value))
-        {
-            return false;
-        }
-    }
-    return true;
-}
-void _wrtie_config_(_GXPM_config_t config)
-{
-    fstream cnf_f;
-    if (!fs::exists(CONFIGURATION_PATH))
-    {
-        print_error("configuration file does not exists!");
-        exit(1);
-    }
-    cnf_f.open(CONFIGURATION_PATH, ios::out | ios::trunc);
-    if (!cnf_f.is_open())
-    {
-        print_error("failed to open configuration file!");
-        exit(1);
-    }
-
-    string format = "metadata_filename=<METADATAFILENAME>";
-    format.replace(format.find("<METADATAFILENAME>"), string("<METADATAFILENAME>").length(), config.metadata_filename);
-    cnf_f << format;
-    cnf_f.close();
-}
 
 bool create_8byte_id(char bytes[8], uint32_t &lvl)
 {
@@ -105,11 +67,10 @@ bool create_8byte_id(char bytes[8], uint32_t &lvl)
 
 bool repository_exists(string name, string path, bool &stat)
 {
-    vector<_GXPM_repository_t> repos = read_repositories_chunk(REPOSITORIES_PATH, stat);
-    if (!stat)
-        return false;
-    for (_GXPM_repository_t r : repos)
+    for (_GXPM_repository_t r : read_repositories_chunk(REPOSITORIES_PATH, stat))
     {
+        if (!stat)
+            return false;
         if (name.length())
         {
             if (r.name == name)
@@ -117,7 +78,7 @@ bool repository_exists(string name, string path, bool &stat)
         }
         else if (path.length())
         {
-            if (r.path == path)
+            if (r.path == absolute_path(path))
                 return true;
         }
     }
@@ -141,9 +102,9 @@ _GXPM_repository_t find_repository(string name, string path, bool &found, bool &
                 return r;
             }
         }
-        else if (path.length() && fs::exists(path))
+        else if (path.length())
         {
-            if (r.path == absolute_path(path))
+            if (r.path == path)
             {
                 found = true;
                 return r;
@@ -174,7 +135,7 @@ bool library_exists(string name, string path, string repository, bool &stat)
         print_error("repository '" + repository + "' not found!");
         exit(1);
     }
-    const string mpath = absolute_path(p.string()) + "/" + (configuration.metadata_filename.length() ? configuration.metadata_filename : "metadata.riff");
+    const string mpath = fs::absolute(p).string() + "/metadata.riff";
 
     for (_GXPM_metadata_t m : read_metadata_chunks(mpath, stat))
     {
@@ -183,7 +144,7 @@ bool library_exists(string name, string path, string repository, bool &stat)
             print_error("failed to open repositories data file!");
             exit(1);
         }
-        if (m.libname == name || (fs::exists(path) && m.pathname == absolute_path(path)))
+        if (m.libname == name || (fs::exists(path) && m.pathname == fs::absolute(path)))
         {
             return true;
         }
@@ -195,4 +156,64 @@ bool library_exists(string name, string path, string repository, bool &stat)
     }
 
     return false;
+}
+
+vector<_GXL_file_t> read_files(string path)
+{
+    vector<_GXL_file_t> files;
+
+    for (auto &item : fs::directory_iterator(path))
+    {
+        if (item.is_regular_file() && item.path().string().find(".s") != string::npos)
+        {
+            fstream f;
+            _GXL_file_t file;
+            char ch;
+
+            file.name = absolute_path(item.path().string());
+            if (verbose)
+                cout << "[processing '" << file.name << "' ...]\n";
+
+            f.open(file.name, ios::in);
+            if (!f.is_open())
+            {
+                print_error("failed to open file '" + file.name + "'!");
+                exit(1);
+            }
+            while (f.read(&ch, 1))
+            {
+                file.content += ch;
+            }
+            f.close();
+            files.push_back(file);
+        }
+        if (item.is_directory())
+        {
+            vector<_GXL_file_t> tmp = read_files(path);
+            files.insert(files.end(), tmp.begin(), tmp.end());
+        }
+    }
+    return files;
+}
+
+void print_linker_errors(vector<_GXLT_error_t> errors)
+{
+    string cpy = "Error in <FILE> at line <LINE>: <MESSAGE>\ntype <TYPE>, cause <CAUSE>";
+    ;
+    string temp = cpy;
+    const string forms[] = {"<FILE>", "<MESSAGE>", "<CAUSE>", "<TYPE>", "<LINE>"};
+
+    for (_GXLT_error_t err : errors)
+    {
+        const string vals[] = {err.file, err.message, err.cause, err.type, to_string(err.line + 2)};
+        for (uint32_t i = 0; i < 5; i++)
+        {
+            if (temp.find(forms[i]) == string::npos)
+                continue;
+            temp.replace(temp.find(forms[i]), forms[i].length(), vals[i]);
+        }
+
+        cout << temp << "\n";
+        temp = cpy;
+    }
 }
