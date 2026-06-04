@@ -78,7 +78,7 @@ This makes it particularly suitable for:
 
 To learn the language fundamentals, start with:
 
-https://github.com/ABPD2001/gama-x/tree/main/wiki/basic.md
+https://github.com/ABPD2001/gama-x/tree/main/wiki/basics.md
 
 ## License
 
