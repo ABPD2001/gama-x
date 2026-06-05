@@ -155,8 +155,8 @@ _main:
 
 ## Next Step
 
-if you still didnt check how to use `gx` (Gama-X binary file), read [wiki/gx-command]().
-also you can check how to use `gxpm` (Gama-X Package manager), read [wiki/gxpm-command]().
+if you still didnt check how to use `gx` (Gama-X binary file), read [wiki/gx-command](https://github.com/ABPD2001/gama-x/blob/main/wiki/gx-command.md).
+also you can check how to use `gxpm` (Gama-X Package manager), read [wiki/gxpm-command](https://github.com/ABPD2001/gama-x/blob/main/wiki/gxpm-command.md).
 
 ## Author
 

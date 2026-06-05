@@ -86,7 +86,7 @@ _start:
 
 ## Next step
 
-check [wiki/instruction-set](https://github.com/ABPD2001/gama-x/blob/main/wiki/instruction-set.md) for instruction set of Gama-X.
+check [wiki/instruction-set](https://github.com/ABPD2001/gama-x/blob/main/wiki/instruction-set.md) for instruction set.
 
 ## Author
 
