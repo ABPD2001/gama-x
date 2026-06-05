@@ -106,15 +106,16 @@ vector<_GXLT_error_t> _GXLT_::check_pre_processors_errors(string filename, strin
 vector<_GXLT_error_t> _GXLT_::check_errors(string filename, string content, uint32_t index)
 {
     vector<_GXLT_error_t> errors;
-    const string valid_instructions[] = {"mov", "add", "sub", "mul", "div", "abs", "ln", "cos", "tan", "sin", "sinh", "ceil", "flr", "rnd", "call", "cmp", "push", "pull", "logi", "shif", "incr", "decr", "exint", "argint", "transpile", "debug", "reset"};
+    const string valid_instructions[] = {"mov", "add", "sub", "mul", "div", "abs", "ln", "cos", "tan", "sin", "sinh", "tanh", "cosh", "ceil", "flr", "rnd", "call", "jmp", "cmp", "push", "pull", "logi", "shif", "incr", "decr", "exint", "argint", "transpile", "debug", "reset"};
     const string three_register_instructions[] = {"add", "sub", "mul", "div", "shif", "logi"};
     const string mathmatic_instructions[] = {"add", "sub", "mul", "div"};
-    const string mathmatic_two_reg[] = {"abs", "ln", "cos", "tan", "sin", "sinh", "ceil", "flr", "rnd", "cmp"};
-    const string one_argument_instructions[] = {"pull", "push", "incr", "decr", "call"};
+    const string mathmatic_two_reg[] = {"abs", "ln", "cos", "tan", "sin", "sinh", "ceil", "cosh", "tanh", "flr", "rnd", "cmp"};
+    const string one_argument_instructions[] = {"pull", "push", "incr", "decr", "reset"};
     const string one_register_arg_instructions[] = {"pull", "push", "incr", "decr"};
-    const string two_one_op_reg_instructions[] = {"shif", "logi"};
+    const string three_one_op_reg_instructions[] = {"shif", "logi"};
     const string one_reg_one_name_instructions[] = {"exint", "argint"};
-    const string no_arg_instructions[] = {"reset", "transpile"};
+    const string no_arg_instructions[] = {"transpile"};
+    const string control_flow_instructions[] = {"call", "jmp"};
 
     vector<string> lines = split(content, '\n');
 
@@ -142,12 +143,12 @@ vector<_GXLT_error_t> _GXLT_::check_errors(string filename, string content, uint
             }
         }
 
-        if (!includes_arr<const string, 27>(valid_instructions, parts[0]))
+        if (!includes_arr<const string, 30>(valid_instructions, parts[0]))
         {
             error = {filename, "invalid instruction '" + parts[0] + string("'!"), "INVALID_INSTRUCTION", "syntax", index + i};
             errors.push_back(error);
         }
-        else if (includes_arr<const string, 10>(mathmatic_two_reg, parts[0]))
+        else if (includes_arr<const string, 12>(mathmatic_two_reg, parts[0]))
         {
             if (args.size() != 2)
             {
@@ -171,6 +172,36 @@ vector<_GXLT_error_t> _GXLT_::check_errors(string filename, string content, uint
             }
         }
 
+        else if (includes_arr<const string, 2>(three_one_op_reg_instructions, parts[0]))
+        {
+            if (args.size() != 4)
+            {
+                error = {filename, (args.size() < 4 ? "to few" : "to much") + string(" arguments for '") + parts[0] + string("' instruction!"), args.size() < 3 ? "FEW_ARGUMENTS" : "MUCH_ARGUMENTS", "syntax", index + i};
+                errors.push_back(error);
+            }
+            if (args.size() >= 1 && args[0][0] == '#')
+            {
+                error = {filename, "destination argument (first argument) cannot be a literal value!", "FIRST_ARGUMENT_LITERAL", "syntax", index + i};
+                errors.push_back(error);
+            }
+
+            for (uint8_t j = 1; j < 3; j++)
+            {
+                if (args.size() >= j + 1)
+                {
+                    if (args[j][0] != '#' && !includes<string>(this->vir_regs_names, args[j]))
+                    {
+                        error = {filename, "invalid register refrenced '" + args[j] + "'!", "INVALID_REGISTER_REFRENCED", "syntax", index + i};
+                        errors.push_back(error);
+                    }
+                    if (args[j][0] != '#' && !includes<string>(this->vir_regs_names, args[j]))
+                    {
+                        error = {filename, string(j == 2 ? "second" : "third") + " argumnet isnt a valid number!", "INVALID_ARGUMENT_SYNTAX", "syntax", index + i};
+                        errors.push_back(error);
+                    }
+                }
+            }
+        }
         else if (includes_arr<const string, 8>(three_register_instructions, parts[0]))
         {
             if (args.size() != 3)
@@ -186,22 +217,22 @@ vector<_GXLT_error_t> _GXLT_::check_errors(string filename, string content, uint
                 error = {filename, "first argument cannot be a literal value!", "FIRST_ARGUMENT_LITERAL", "syntax", index + i};
                 errors.push_back(error);
             }
-            if (args.size() >= 2 && args[1][0] == '#' && !isValidNumber(args[1].substr(1)))
+
+            for (uint8_t j = 1; j < 3; j++)
             {
-                error = {filename, "second argumnet isnt a valid number!", "INVALID_ARGUMENT_SYNTAX", "syntax", index + i};
-                errors.push_back(error);
-            }
-            if (args.size() >= 3 && args[2][0] == '#' && !isValidNumber(args[2].substr(1)))
-            {
-                error = {filename, "third argumnet isnt a valid number!", "INVALID_ARGUMENT_SYNTAX", "syntax", index + i};
-                errors.push_back(error);
-            }
-            for (uint8_t j = 0; j < 3; j++)
-            {
-                if (args[j][0] != '#' && !includes<string>(this->vir_regs_names, args[j]))
+                if (args.size() >= j + 1)
                 {
-                    error = {filename, "invalid register refrenced '" + args[j] + "'!", "INVALID_REGISTER_REFRENCED", "syntax", index + i};
-                    errors.push_back(error);
+                    if (args[j][0] == '#' && !isValidNumber(args[j].substr(1)))
+                    {
+                        error = {filename, string(j == 2 ? "second" : "third") + " argumnet isnt a valid number!", "INVALID_ARGUMENT_SYNTAX", "syntax", index + i};
+                        errors.push_back(error);
+                    }
+
+                    if (args[j][0] != '#' && !includes<string>(this->vir_regs_names, args[j]))
+                    {
+                        error = {filename, "invalid register refrenced '" + args[j] + "'!", "INVALID_REGISTER_REFRENCED", "syntax", index + i};
+                        errors.push_back(error);
+                    }
                 }
             }
         }
@@ -212,6 +243,16 @@ vector<_GXLT_error_t> _GXLT_::check_errors(string filename, string content, uint
                 error = {filename, (args.size() > 1 ? "to much" : "to few") + string(" arguments for '") + parts[0] + string("' instruction!"), args.size() < 3 ? "FEW_ARGUMENTS" : "MUCH_ARGUMENTS", "syntax", index + i};
                 errors.push_back(error);
             }
+            else if (parts[0] == "reset")
+            {
+                const string actions[] = {"general", "specials", "stack", "all"};
+
+                if (!includes_arr<const string, 4>(actions, args[0]))
+                {
+                    error = {filename, "invalid action asked '" + args[0] + "'!", "INVALID_RESET_ACTION", "syntax", index + i};
+                    errors.push_back(error);
+                }
+            }
         }
         else if (includes_arr<const string, 4>(one_register_arg_instructions, parts[0]))
         {
@@ -221,7 +262,36 @@ vector<_GXLT_error_t> _GXLT_::check_errors(string filename, string content, uint
                 errors.push_back(error);
             }
         }
-        else if (includes_arr<const string, 2>(no_arg_instructions, parts[0]))
+        else if (includes_arr<const string, 2>(control_flow_instructions, parts[0]))
+        {
+            const string valid_conditions[] = {"LE", "LS", "EQ", "NE", "GE", "GT"};
+            bool found = false;
+
+            if (args.size() < 1 || args.size() > 2)
+            {
+                error = {filename, (args.size() > 2 ? "to much" : "to few") + string(" arguments for '") + parts[0] + string("' instruction!"), args.size() < 3 ? "FEW_ARGUMENTS" : "MUCH_ARGUMENTS", "syntax", index + i};
+                errors.push_back(error);
+            }
+
+            for (uint32_t j = 0; j < this->labels.size(); j++)
+            {
+                if (this->labels[j].name == args[0])
+                    found = true;
+            }
+
+            if (!found)
+            {
+                error = {filename, "invalid label '" + args[0] + "' refrenced!", "INVALID_LABEL_REFRENCED", "syntax", index + i};
+                errors.push_back(error);
+            }
+
+            if (args.size() == 2 && !includes_arr<const string, 6>(valid_conditions, args[1]))
+            {
+                error = {filename, "invalid condition '" + args[1] + "' refrenced!", "INVALID_CONDITION_REFRENCED", "syntax", index + i};
+                errors.push_back(error);
+            }
+        }
+        else if (includes_arr<const string, 1>(no_arg_instructions, parts[0]))
         {
             if (args.size() >= 1 && !args[0].empty())
             {
@@ -249,35 +319,6 @@ vector<_GXLT_error_t> _GXLT_::check_errors(string filename, string content, uint
             if (args.size() >= 1 && !includes(this->vir_regs_names, args[0]))
             {
                 error = {filename, "invalid register refrenced '" + args[0] + "'!", "INVALID_REGISTER_REFRENCED", "syntax", index + i};
-                errors.push_back(error);
-            }
-        }
-        else if (parts[0] == "call")
-        {
-            const string valid_conditions[] = {"LE", "LS", "EQ", "NE", "GE", "GT"};
-            bool found = false;
-
-            if (args.size() < 1 || args.size() > 2)
-            {
-                error = {filename, (args.size() > 2 ? "to much" : "to few") + string(" arguments for '") + parts[0] + string("' instruction!"), args.size() < 3 ? "FEW_ARGUMENTS" : "MUCH_ARGUMENTS", "syntax", index + i};
-                errors.push_back(error);
-            }
-
-            for (uint32_t j = 0; j < this->labels.size(); j++)
-            {
-                if (this->labels[j].name == args[0])
-                    found = true;
-            }
-
-            if (!found)
-            {
-                error = {filename, "invalid label '" + args[0] + "' refrenced!", "INVALID_LABEL_REFRENCED", "syntax", index + i};
-                errors.push_back(error);
-            }
-
-            if (args.size() == 2 && !includes_arr<const string, 6>(valid_conditions, args[1]))
-            {
-                error = {filename, "invalid condition '" + args[1] + "' refrenced!", "INVALID_CONDITION_REFRENCED", "syntax", index + i};
                 errors.push_back(error);
             }
         }

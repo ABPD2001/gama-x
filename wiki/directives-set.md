@@ -77,6 +77,9 @@ there is directives table:
 
 .end
 @ end of directive instructions (no directive after this instruction allowed).
+
+_start:
+  @ body of label.
 ```
 
 ---

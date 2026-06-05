@@ -231,53 +231,61 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
 
         if (parts[0] == "mov")
         {
-            short int tar_reg_idx = -1;
+            int tar_reg_idx = -1;
 
             tar_reg_idx = find(this->vir_regs_names, params[0]);
             if (params[1][0] == '#')
                 this->vir_regs[tar_reg_idx] = to_autoNumber(params[1].substr(1));
             else
             {
-                short int reg2 = find(this->vir_regs_names, params[1]);
+                int reg2 = find(this->vir_regs_names, params[1]);
                 this->vir_regs[tar_reg_idx] = this->vir_regs[reg2];
             }
         }
-        else if (parts[0] == "log")
+        else if (parts[0] == "logi")
         {
-            short int tar_reg_idx = -1;
-            logictype_t bin1;
-            logictype_t bin2;
+            int tar_reg_idx = -1;
+            logictype_t bin1 = 0;
+            logictype_t bin2 = 0;
 
-            tar_reg_idx = find(this->vir_regs_names, params[0]);
             bin1 = (logictype_t)this->vir_regs[tar_reg_idx];
-            const uint8_t dest_idx = find(this->vir_regs_names, params[0]);
+            const uint32_t dest_idx = find(this->vir_regs_names, params[0]);
 
             if (params[1][0] == '#')
-                bin2 = to_autoNumber(params[1].substr(1));
+                bin1 = to_autoNumber(params[1].substr(1));
             else
             {
                 tar_reg_idx = find(this->vir_regs_names, params[1]);
                 if (tar_reg_idx > -1)
+                    bin1 = (logictype_t)(this->vir_regs[tar_reg_idx]);
+            }
+            if (params[2][0] == '#')
+                bin2 = to_autoNumber(params[2].substr(1));
+            else
+            {
+                tar_reg_idx = find(this->vir_regs_names, params[2]);
+                if (tar_reg_idx > -1)
                     bin2 = (logictype_t)(this->vir_regs[tar_reg_idx]);
             }
-            if (params[2] == "AND")
+
+            if (params[3] == "AND")
                 this->vir_regs[dest_idx] = bin1 & bin2;
-            else if (params[2] == "ORR")
+            else if (params[3] == "ORR")
                 this->vir_regs[dest_idx] = bin1 | bin2;
-            else if (params[2] == "XOR")
+            else if (params[3] == "XOR")
                 this->vir_regs[dest_idx] = bin1 ^ bin2;
-            else if (params[2] == "NOR")
+            else if (params[3] == "NOR")
                 this->vir_regs[dest_idx] = ~(bin1 | bin2);
-            else if (params[2] == "NAND")
+            else if (params[3] == "NAND")
                 this->vir_regs[dest_idx] = ~(bin1 & bin2);
-            else if (params[2] == "NXOR")
+            else if (params[3] == "NXOR")
                 this->vir_regs[dest_idx] = (bin1 ^ bin2);
-            else if (params[2] == "NOT")
+            else if (params[3] == "NOT")
                 this->vir_regs[dest_idx] = ~bin1;
         }
-        else if (parts[0] == "shf")
+        else if (parts[0] == "shif")
         {
-            short int tar_reg_idx = -1;
+            int tar_reg_idx = -1;
             logictype_t val;
             logictype_t amount;
 
@@ -317,7 +325,7 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
         }
         else if (parts[0] == "add")
         {
-            const short int reg_dest_idx = 0;
+            int reg_dest_idx = 0;
             logictype_t reg1 = find(this->vir_regs_names, params[0]);
             logictype_t reg2 = 0;
 
@@ -336,7 +344,7 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
         }
         else if (parts[0] == "mul")
         {
-            const short int reg_dest_idx = 0;
+            int reg_dest_idx = 0;
             logictype_t reg1 = find(this->vir_regs_names, params[0]);
             logictype_t reg2 = 0;
 
@@ -355,7 +363,7 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
         }
         else if (parts[0] == "div")
         {
-            const short int reg_dest_idx = 0;
+            int reg_dest_idx = 0;
             logictype_t reg1 = find(this->vir_regs_names, params[0]);
             logictype_t reg2 = 0;
 
@@ -374,7 +382,7 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
         }
         else if (parts[0] == "sub")
         {
-            const short int reg_dest_idx = 0;
+            int reg_dest_idx = 0;
             logictype_t reg1 = find(this->vir_regs_names, params[0]);
             logictype_t reg2 = 0;
 
@@ -393,7 +401,7 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
         }
         else if (parts[0] == "pow")
         {
-            const short int reg_dest_idx = 0;
+            int reg_dest_idx = 0;
             logictype_t reg1 = find(this->vir_regs_names, params[0]);
             logictype_t reg2 = 0;
 
@@ -412,14 +420,14 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
         }
         else if (parts[0] == "incr")
         {
-            const short int reg_idx = find(this->vir_regs_names, params[0]);
+            int reg_idx = find(this->vir_regs_names, params[0]);
             if (reg_idx > -1)
                 this->vir_regs[reg_idx]++;
         }
 
         else if (parts[0] == "sqrt")
         {
-            const short int reg_dest_idx = 0;
+            int reg_dest_idx = 0;
             logictype_t reg1 = find(this->vir_regs_names, params[0]);
 
             if (params[1][0] == '#')
@@ -433,7 +441,7 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
 
         else if (parts[0] == "decr")
         {
-            const short int reg_idx = find(this->vir_regs_names, params[0]);
+            int reg_idx = find(this->vir_regs_names, params[0]);
             this->vir_regs[reg_idx]--;
         }
         else if (parts[0] == "push")
@@ -442,7 +450,7 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
                 this->vir_stack.push_back(to_autoNumber(params[0]));
             else
             {
-                const short int reg = find(this->vir_regs_names, params[0]);
+                const int reg = find(this->vir_regs_names, params[0]);
                 this->vir_stack.push_back(this->vir_regs[reg]);
             }
         }
@@ -501,44 +509,187 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
         }
         else if (parts[0] == "abs")
         {
+            int tar_reg_idx = -1;
+            logictype_t val = 0;
+            if (params[1][0] == '#')
+                val = to_autoNumber(params[1].substr(1));
+            else
+            {
+                tar_reg_idx = find(this->vir_regs_names, params[1]);
+                if (tar_reg_idx > -1)
+                    val = this->vir_regs[tar_reg_idx];
+            }
+
             const uint16_t reg_idx = find<string>(this->vir_regs_names, params[0]);
-            this->vir_regs[reg_idx] = (logictype_t)abs(to_autoNumber(params[0]));
+            this->vir_regs[reg_idx] = (logictype_t)abs(val);
         }
         else if (parts[0] == "ceil")
         {
+
+            int tar_reg_idx = -1;
+            logictype_t val = 0;
+            if (params[1][0] == '#')
+                val = to_autoNumber(params[1].substr(1));
+            else
+            {
+                tar_reg_idx = find(this->vir_regs_names, params[1]);
+                if (tar_reg_idx > -1)
+                    val = this->vir_regs[tar_reg_idx];
+            }
+
             const uint16_t reg_idx = find<string>(this->vir_regs_names, params[0]);
-            this->vir_regs[reg_idx] = (logictype_t)ceil(to_autoNumber(params[0]));
+            this->vir_regs[reg_idx] = (logictype_t)ceil(val);
         }
         else if (parts[0] == "flr")
         {
+            int tar_reg_idx = -1;
+            logictype_t val = 0;
+            if (params[1][0] == '#')
+                val = to_autoNumber(params[1].substr(1));
+            else
+            {
+                tar_reg_idx = find(this->vir_regs_names, params[1]);
+                if (tar_reg_idx > -1)
+                    val = this->vir_regs[tar_reg_idx];
+            }
+
             const uint16_t reg_idx = find<string>(this->vir_regs_names, params[0]);
-            this->vir_regs[reg_idx] = (logictype_t)floor(to_autoNumber(params[0]));
+            this->vir_regs[reg_idx] = (logictype_t)floor(val);
         }
         else if (parts[0] == "rnd")
         {
+
+            int tar_reg_idx = -1;
+            logictype_t val = 0;
+            if (params[1][0] == '#')
+                val = to_autoNumber(params[1].substr(1));
+            else
+            {
+                tar_reg_idx = find(this->vir_regs_names, params[1]);
+                if (tar_reg_idx > -1)
+                    val = this->vir_regs[tar_reg_idx];
+            }
+
             const uint16_t reg_idx = find<string>(this->vir_regs_names, params[0]);
-            this->vir_regs[reg_idx] = (logictype_t)round(to_autoNumber(params[0]));
+            this->vir_regs[reg_idx] = (logictype_t)round(val);
+        }
+        else if (parts[0] == "tan")
+        {
+
+            int tar_reg_idx = -1;
+            logictype_t val = 0;
+            if (params[1][0] == '#')
+                val = to_autoNumber(params[1].substr(1));
+            else
+            {
+                tar_reg_idx = find(this->vir_regs_names, params[1]);
+                if (tar_reg_idx > -1)
+                    val = this->vir_regs[tar_reg_idx];
+            }
+
+            const uint16_t reg_idx = find<string>(this->vir_regs_names, params[0]);
+            this->vir_regs[reg_idx] = (logictype_t)tan(val);
         }
         else if (parts[0] == "sin")
         {
+            int tar_reg_idx = -1;
+            logictype_t val = 0;
+            if (params[1][0] == '#')
+                val = to_autoNumber(params[1].substr(1));
+            else
+            {
+                tar_reg_idx = find(this->vir_regs_names, params[1]);
+                if (tar_reg_idx > -1)
+                    val = this->vir_regs[tar_reg_idx];
+            }
 
             const uint16_t reg_idx = find<string>(this->vir_regs_names, params[0]);
-            this->vir_regs[reg_idx] = (logictype_t)sin(to_autoNumber(params[0]));
+            this->vir_regs[reg_idx] = (logictype_t)sin(val);
         }
         else if (parts[0] == "cos")
         {
+
+            int tar_reg_idx = -1;
+            logictype_t val = 0;
+            if (params[1][0] == '#')
+                val = to_autoNumber(params[1].substr(1));
+            else
+            {
+                tar_reg_idx = find(this->vir_regs_names, params[1]);
+                if (tar_reg_idx > -1)
+                    val = this->vir_regs[tar_reg_idx];
+            }
+
             const uint16_t reg_idx = find<string>(this->vir_regs_names, params[0]);
-            this->vir_regs[reg_idx] = (logictype_t)cos(to_autoNumber(params[0]));
+            this->vir_regs[reg_idx] = (logictype_t)cos(val);
+        }
+        else if (parts[0] == "cosh")
+        {
+
+            int tar_reg_idx = -1;
+            logictype_t val = 0;
+            if (params[1][0] == '#')
+                val = to_autoNumber(params[1].substr(1));
+            else
+            {
+                tar_reg_idx = find(this->vir_regs_names, params[1]);
+                if (tar_reg_idx > -1)
+                    val = this->vir_regs[tar_reg_idx];
+            }
+
+            const uint16_t reg_idx = find<string>(this->vir_regs_names, params[0]);
+            this->vir_regs[reg_idx] = (logictype_t)cosh(val);
         }
         else if (parts[0] == "sinh")
         {
+
+            int tar_reg_idx = -1;
+            logictype_t val = 0;
+            if (params[1][0] == '#')
+                val = to_autoNumber(params[1].substr(1));
+            else
+            {
+                tar_reg_idx = find(this->vir_regs_names, params[1]);
+                if (tar_reg_idx > -1)
+                    val = this->vir_regs[tar_reg_idx];
+            }
+
             const uint16_t reg_idx = find<string>(this->vir_regs_names, params[0]);
-            this->vir_regs[reg_idx] = (logictype_t)sin(to_autoNumber(params[0]));
+            this->vir_regs[reg_idx] = (logictype_t)sin(val);
+        }
+        else if (parts[0] == "tanh")
+        {
+
+            int tar_reg_idx = -1;
+            logictype_t val = 0;
+            if (params[1][0] == '#')
+                val = to_autoNumber(params[1].substr(1));
+            else
+            {
+                tar_reg_idx = find(this->vir_regs_names, params[1]);
+                if (tar_reg_idx > -1)
+                    val = this->vir_regs[tar_reg_idx];
+            }
+
+            const uint16_t reg_idx = find<string>(this->vir_regs_names, params[0]);
+            this->vir_regs[reg_idx] = (logictype_t)tanh(val);
         }
         else if (parts[0] == "ln")
         {
+
+            int tar_reg_idx = -1;
+            logictype_t val = 0;
+            if (params[1][0] == '#')
+                val = to_autoNumber(params[1].substr(1));
+            else
+            {
+                tar_reg_idx = find(this->vir_regs_names, params[1]);
+                if (tar_reg_idx > -1)
+                    val = this->vir_regs[tar_reg_idx];
+            }
+
             const uint16_t reg_idx = find<string>(this->vir_regs_names, params[0]);
-            this->vir_regs[reg_idx] = (logictype_t)log(to_autoNumber(params[0]));
+            this->vir_regs[reg_idx] = (logictype_t)log(val);
         }
         else if (parts[0] == "call")
         {
@@ -564,6 +715,31 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
             const vector<_GXA_snippet_t> call_out = this->_transpile_(target_label.text, target_label.line_idx);
             output.insert(output.end(), call_out.begin(), call_out.end());
         }
+        else if (parts[0] == "jmp")
+        {
+            _GXA_label_t target_label;
+            for (uint32_t i = 0; i < this->labels.size(); i++)
+            {
+                if (this->labels[i].name == params[0])
+                    target_label = this->labels[i];
+            }
+
+            if (params.size() == 2)
+            {
+                if (params[1] == "EQ" && cmp != 0)
+                    continue;
+                else if (params[1] == "LE" && cmp >= 0)
+                    continue;
+                else if (params[1] == "GE" && cmp <= 0)
+                    continue;
+                else if (params[1] == "NE" && !cmp)
+                    continue;
+            }
+
+            const vector<_GXA_snippet_t> call_out = this->_transpile_(target_label.text, target_label.line_idx);
+            output.insert(output.end(), call_out.begin(), call_out.end());
+            break;
+        }
         else if (parts[0] == "transpile")
         {
             _GXA_snippet_t snippet;
@@ -576,15 +752,54 @@ vector<_GXA_snippet_t> _GXA_::_transpile_(string content, uint64_t line_idx)
         }
         else if (parts[0] == "reset")
         {
-            for (uint32_t i = 0; i < this->vir_regs.size(); i++)
+            if (parts[1] == "general")
             {
-                this->vir_regs[i] = 0;
+                for (uint32_t j = 0; j < this->vir_regs.size(); j++)
+                {
+                    bool skip = false;
+                    for (uint32_t k = 0; k < this->special_vir_regs_name.size(); k++)
+                    {
+                        if (this->vir_regs_names[j] == this->special_vir_regs_name[k])
+                        {
+                            skip = true;
+                            break;
+                        }
+                        if (skip)
+                            continue;
+                        this->vir_regs[j] = 0;
+                    }
+                }
+            }
+            else if (parts[1] == "specials")
+            {
+                for (uint32_t j = 0; j < this->vir_regs.size(); j++)
+                {
+                    for (uint32_t k = 0; k < this->special_vir_regs_name.size(); k++)
+                    {
+                        if (this->vir_regs_names[j] == this->special_vir_regs_name[k])
+                        {
+                            this->vir_regs[j] = 0;
+                            break;
+                        }
+                    }
+                }
+            }
+            else if (parts[1] == "all")
+            {
+                for (uint32_t j = 0; j < this->vir_regs.size(); j++)
+                {
+                    this->vir_regs[j] = 0;
+                }
+            }
+            else if (parts[1] == "stack")
+            {
+                this->vir_stack = vector<logictype_t>();
             }
         }
         else if (parts[0] == "debug")
         {
             string text = lines[i].substr(lines[i].find('('), lines[i].find(')') - 1);
-            cout << "[.debug, line " << (line_idx + i + 1) << "]: " << text << "\n";
+            cout << "[debug, line " << (line_idx + i + 1) << "]: " << text << "\n";
         }
     }
 
