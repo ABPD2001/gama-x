@@ -22,7 +22,7 @@ int main(int argc, char *argv[]);
 
 void parse_app_arguments(vector<string> argvv, vector<_GXL_file_t> &files, vector<string> &config_args, vector<string> &binary_logics, _GXA_config_t &assembler_config, _GXL_config_t &linker_config, string &error_format, string &output_filepath, bool &binary_output)
 {
-    const string valid_valuar_flags[] = {"-c", "--config", "-m", "--metadata-filename", "-e", "--error-format", "-l", "--binary-logics", "-v", "--values", "-g", "--registers", "-r", "--repository", "-o", "--output"};
+    const string valid_valuar_flags[] = {"-c", "--config", "-e", "--error-format", "-l", "--binary-logics", "-s", "--special-registers", "-v", "--values", "-g", "--registers", "-r", "--repository", "-o", "--output"};
     const string valid_file_flags[] = {"-c", "--config", "-o", "--output", "-e", "--error-format"};
 
     for (uint64_t i = 0; i < argvv.size(); i++)
@@ -89,6 +89,7 @@ void parse_app_arguments(vector<string> argvv, vector<_GXL_file_t> &files, vecto
                 {
                     content += ch;
                 }
+                config_file.close();
                 if (flag == "-c" || flag == "--config")
                 {
                     const vector<argument_t> config_arguments = parse_arguments(content);
@@ -100,10 +101,6 @@ void parse_app_arguments(vector<string> argvv, vector<_GXL_file_t> &files, vecto
                 }
                 else if (flag == "-e" || flag == "--error-format")
                     error_format = content;
-                else if (flag == "-m" || flag == "--metadata-filename")
-                {
-                    linker_config.metadata_file_name = value;
-                }
             }
             else if (flag == "-r" || flag == "--repository")
             {

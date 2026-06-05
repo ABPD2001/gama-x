@@ -109,7 +109,7 @@ vector<_GXLT_error_t> _GXLT_::check_errors(string filename, string content, uint
     const string valid_instructions[] = {"mov", "add", "sub", "mul", "div", "abs", "ln", "cos", "tan", "sin", "sinh", "tanh", "cosh", "ceil", "flr", "rnd", "call", "jmp", "cmp", "push", "pull", "logi", "shif", "incr", "decr", "exint", "argint", "transpile", "debug", "reset"};
     const string three_register_instructions[] = {"add", "sub", "mul", "div", "shif", "logi"};
     const string mathmatic_instructions[] = {"add", "sub", "mul", "div"};
-    const string mathmatic_two_reg[] = {"abs", "ln", "cos", "tan", "sin", "sinh", "ceil", "cosh", "tanh", "flr", "rnd", "cmp"};
+    const string mathmatic_two_reg[] = {"abs", "ln", "cos", "tan", "sin", "sinh", "ceil", "cosh", "tanh", "flr", "rnd", "mov"};
     const string one_argument_instructions[] = {"pull", "push", "incr", "decr", "reset"};
     const string one_register_arg_instructions[] = {"pull", "push", "incr", "decr"};
     const string three_one_op_reg_instructions[] = {"shif", "logi"};
@@ -165,7 +165,7 @@ vector<_GXLT_error_t> _GXLT_::check_errors(string filename, string content, uint
                 error = {filename, "second argumnet isnt a valid number!", "INVALID_ARGUMENT_SYNTAX", "syntax", index + i};
                 errors.push_back(error);
             }
-            else if (args.size() >= 2 && !includes<string>(this->vir_regs_names, args[1]))
+            else if (args.size() >= 2 && args[1][0] != '#' && !includes<string>(this->vir_regs_names, args[1]))
             {
                 error = {filename, "invalid register refrenced '" + args[1] + "'!", "INVALID_REGISTER_REFRENCED", "syntax", index + i};
                 errors.push_back(error);
@@ -194,7 +194,7 @@ vector<_GXLT_error_t> _GXLT_::check_errors(string filename, string content, uint
                         error = {filename, "invalid register refrenced '" + args[j] + "'!", "INVALID_REGISTER_REFRENCED", "syntax", index + i};
                         errors.push_back(error);
                     }
-                    if (args[j][0] != '#' && !includes<string>(this->vir_regs_names, args[j]))
+                    if (args[j][0] == '#' && !isValidNumber(args[j].substr(1)))
                     {
                         error = {filename, string(j == 2 ? "second" : "third") + " argumnet isnt a valid number!", "INVALID_ARGUMENT_SYNTAX", "syntax", index + i};
                         errors.push_back(error);
@@ -327,6 +327,34 @@ vector<_GXLT_error_t> _GXLT_::check_errors(string filename, string content, uint
             error = {filename, "invalid syntax for .debug instruction!", "INVALID_DEBUG_SYNTAX", "syntax", index + i};
             errors.push_back(error);
             continue;
+        }
+        else if (parts[0] == "cmp")
+        {
+            if (args.size() != 2)
+            {
+                error = {filename, (args.size() < 2 ? "to few" : "to much") + string(" arguments for '") + parts[0] + string("' instruction!"), args.size() < 3 ? "FEW_ARGUMENTS" : "MUCH_ARGUMENTS", "syntax", index + i};
+                errors.push_back(error);
+            }
+            if (args.size() >= 1 && args[0][0] == '#' && !isValidNumber(args[0].substr(1)))
+            {
+                error = {filename, "second argumnet isnt a valid number!", "INVALID_ARGUMENT_SYNTAX", "syntax", index + i};
+                errors.push_back(error);
+            }
+            else if (args.size() >= 1 && args[0][0] != '#' && !includes<string>(this->vir_regs_names, args[0]))
+            {
+                error = {filename, "invalid register refrenced '" + args[1] + "'!", "INVALID_REGISTER_REFRENCED", "syntax", index + i};
+                errors.push_back(error);
+            }
+            else if (args.size() >= 2 && args[1][0] == '#' && !isValidNumber(args[1].substr(1)))
+            {
+                error = {filename, "second argumnet isnt a valid number!", "INVALID_ARGUMENT_SYNTAX", "syntax", index + i};
+                errors.push_back(error);
+            }
+            else if (args.size() >= 2 && args[1][0] != '#' && !includes<string>(this->vir_regs_names, args[1]))
+            {
+                error = {filename, "invalid register refrenced '" + args[1] + "'!", "INVALID_REGISTER_REFRENCED", "syntax", index + i};
+                errors.push_back(error);
+            }
         }
     }
 
