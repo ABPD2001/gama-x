@@ -68,7 +68,7 @@ Similar to ARM Assembly, this language distinguishes between two primary types o
 
 ## Next step
 
-check [wiki/instruction-set.md](https://github.com/ABPD2001/gama-x/tree/main/wiki/instruction-set.md) for instruction set.
+check [wiki/instruction-set.md](https://github.com/ABPD2001/gama-x/tree/main/wiki/directives-set.md) for directives set.
 
 ## Author
 

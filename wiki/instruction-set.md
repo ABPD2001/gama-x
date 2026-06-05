@@ -19,6 +19,7 @@ In Gama-X, processing instructions are classified into the following categories:
 ## Quick menu
 
 - **[Arithmetic Instructions](#arithmetic-instructions)**
+
 - **[Logical Instructions](#logical-instructions)**
   - **[`shf` Instruction](#shf-instruction)**
   - **[`log` Instruction](#log-instruction)**
@@ -405,7 +406,7 @@ test_label:
 
 ## Next step
 
-check [wiki/advanced-features.md]() for adavnced features.
+check [wiki/advanced-features.md](https://github.com/ABPD2001/gama-x/blob/main/wiki/advanced-features.md) for adavnced features.
 
 ## Author
 

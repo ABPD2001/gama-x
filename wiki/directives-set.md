@@ -43,16 +43,16 @@ In a typical large-scale project, the workflow follows these steps:
 
 there is directives table:
 
-| Directive  | Syntax                    | Description                                                                                                                                          | Limit                                                                                        |
-| :--------- | :------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------- |
-| `.main`    | `.main <label>`           | Used to specify the program's execution starting point.                                                                                              | only _labels_ are accepted.                                                                  |
-| `.module`  | `.module`                 | Used to declare this is a dependent code snippet, or in other words, it doesnt have main point to start. point.                                      | no limitation, just for more reliability dont call it more than once.                        |
-| `.replace` | `.replace <name> <value>` | Used to replace a name (_macro_) with a specific value throughout the code.                                                                          | no limitation, anything accepted but space betwen _directive_ and _arguments_ are sensetive. |
-| `.include` | `.include "<path>"`       | It links a code snippet from another file into the program during compilation.                                                                       | path must be a valid file.                                                                   |
-| `.import`  | `.import <library>`       | imports a library from specefied user interface defined repository, then links it to application at compile time.                                    | library must be a valid library based on specefied repository.                               |
-| `.argular` | `.argular "<path>"`       | Read a file-based argument and parse it. It is used together with its corresponding instruction [`argint`]("/") to read argument values from a file. | the path must be a valid argument based file.                                                |
-| `.extern`  | `.extern "<path>" <name>` | Read contents of a file. It is used together with its corresponding instruction [`exint`]("/") to read numeric value of file (by using its name).    | the path must be a numeric-value based file and name must be unique.                         |
-| `.end`     | `.end`                    | Used to signal the end of directive processing.                                                                                                      | no limitation, just its better to not call it more than once.                                |
+| Directive  | Syntax                    | Description                                                                                                                                         | Limit                                                                                        |
+| :--------- | :------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------- |
+| `.main`    | `.main <label>`           | Used to specify the program's execution starting point.                                                                                             | only _labels_ are accepted.                                                                  |
+| `.module`  | `.module`                 | Used to declare this is a dependent code snippet, or in other words, it doesnt have main point to start. point.                                     | no limitation, just for more reliability dont call it more than once.                        |
+| `.replace` | `.replace <name> <value>` | Used to replace a name (_macro_) with a specific value throughout the code.                                                                         | no limitation, anything accepted but space betwen _directive_ and _arguments_ are sensetive. |
+| `.include` | `.include "<path>"`       | It links a code snippet from another file into the program during compilation.                                                                      | path must be a valid file.                                                                   |
+| `.import`  | `.import <library>`       | imports a library from specefied user interface defined repository, then links it to application at compile time.                                   | library must be a valid library based on specefied repository.                               |
+| `.argular` | `.argular "<path>"`       | Read a argument-based input file and parse it. It is used together with its corresponding instruction `argint` to read argument values from a file. | the path must be a valid argument based file.                                                |
+| `.extern`  | `.extern "<path>" <name>` | Read contents of a input file. It is used together with its corresponding instruction `exint` to read numeric value of file (by using its name).    | the path must be a numeric-value based file and name must be unique.                         |
+| `.end`     | `.end`                    | Used to signal the end of directive processing.                                                                                                     | no limitation, just its better to not call it more than once.                                |
 
 ```armasm
 @ Examples
@@ -85,6 +85,8 @@ _start:
 ---
 
 ## Next step
+
+check [wiki/instruction-set](https://github.com/ABPD2001/gama-x/blob/main/wiki/instruction-set.md) for instruction set of Gama-X.
 
 ## Author
 
