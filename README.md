@@ -1,4 +1,4 @@
-# Gama-X Programming Language (1.0.0)
+# Gama-X Programming Language (V1.0.0)
 
 Gama-X is a modern intermediate programming language designed as a powerful alternative to traditional logic-less **DSLs (Domain-Specific Languages)** used in industrial automation and machine control systems.
 
