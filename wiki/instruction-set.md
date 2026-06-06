@@ -124,7 +124,7 @@ Parameters:
 
 ```armasm
 @ Example
-shf r0,#2,LEFT
+shif r0,#2,LEFT
 @ Description: shift register r0 with amount of 2 and direction of left.
 ```
 
@@ -133,7 +133,7 @@ shf r0,#2,LEFT
 This instruction is used for the implementation of binary operations. The syntax and usage are as follows:
 
 ```armasm
-log Rd,Ra,Rb,Op1
+logi Rd,Ra,Rb,Op1
 ```
 
 Parameters:
@@ -161,19 +161,19 @@ _Important:_ in `NOT` operation `Rb` does not effects on operation and its recom
 ```armasm
 @ Examples
 
-log r0,#0,NOT
+logi r0,#0,NOT
 @ r0 = ~r0
-log r0,r1,AND
+logi r0,r1,AND
 @ r0 = r0&r1
-log r0,#2,AND
+logi r0,#2,AND
 @ r0 = r0&2
-log r0,r1,ORR
+logi r0,r1,ORR
 @ r0 = r0|r1
-log r0,r1,XOR
+logi r0,r1,XOR
 @ r0 = r0^r1
-log r0,r1,NAND
+logi r0,r1,NAND
 @ r0 = ~(r0&r1)
-log r0,r1,NXOR
+logi r0,r1,NXOR
 @ r0 = ~(r0^r1)
 ```
 
@@ -189,10 +189,11 @@ Branch instructions are used to redirect the execution flow from one point to an
 
 ### Instruction table
 
-| Instruction | Syntax                      | Limit        | Description                                      |
-| :---------- | :-------------------------- | :----------- | :----------------------------------------------- |
-| `call`      | `call <label>,<conditiond>` | only labels. | change execution flow (_and return_) to a label. |
-| `jmp`       | `jmp <label>,<condition>`   | only labels. | change exection flow (_no return_) to a label    |
+| Instruction | Syntax                      | Limit                                           | Description                                      |
+| :---------- | :-------------------------- | :---------------------------------------------- | :----------------------------------------------- |
+| `call`      | `call <label>,<conditiond>` | only labels.                                    | change execution flow (_and return_) to a label. |
+| `jmp`       | `jmp <label>,<condition>`   | only labels.                                    | change exection flow (_no return_) to a label    |
+| `jmp`       | `cmp Ra,Rb`                 | `Ra` and `Rb` can be literal value or register. | sets condition flags                             |
 
 ### `call` Instruction
 
@@ -208,6 +209,18 @@ Paramters:
 The `jmp` instruction is specifically designed to jump on a label (like `call`), but it doesnt back to label where came from.
 
 > _Note:_ explained more at examples.
+
+### `cmp` Instruction
+
+The `cmp` instruction sets flags of condition by comparing two values, _(flags = value1-value2)_.
+
+```armasm
+@ syntax
+cmp Ra,Rb
+```
+
+- **`Ra`**: first register _(value1)_.
+- **`Rb`**: second register _(value2)_.
 
 ### List of conditions
 
