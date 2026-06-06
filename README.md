@@ -76,7 +76,19 @@ This makes it particularly suitable for:
 
 ## Getting Started
 
-To learn the language fundamentals, start with:
+Build language with this command:
+
+```bash
+make build
+```
+
+or if you want to build the package manager:
+
+```bash
+make buildPM
+```
+
+to learn the language fundamentals, start with:
 
 https://github.com/ABPD2001/gama-x/tree/main/wiki/basics.md
 
