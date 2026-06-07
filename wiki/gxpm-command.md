@@ -4,14 +4,40 @@ The Gama-X package manager is responsible for managing local offline repositorie
 
 ## Quick Menu
 
-- **[Basics and Structures]()**
-- **[Configuration and Initializtaion]()**
+- **[Basics and Structures](#basics-and-structures)**
+  - **[Hierarchy of Structures](#hierarchy-of-structures)**
+  - **[Management of Structures](#management-of-structures)**
+  - **[Management of Repositories](#management-of-repositoires)**
+
+- **[Configuration and Initializtaion](#configuration-and-initialization)**
+  - **[Setting up](#setting-up)**
+  - **[Reseting Configurations](#reseting-configurations)**
+
+- **[Repository and Library Configuration and Management](#repository-and-library-configuration-and-management)**
+  - **[Editing a Repository or Library](#editing-a-repository-or-library)**
+  - **[Repository Initialization](#repository-initialization)**
+  - **[Registering and De-registering Repoisitory and Library](#registering-and-de-registering-repoisitory-and-library)**
+    - **[Registering](#registering)**
+
+    - **[De-registering](#de-registering)**
+
+  - **[Listing Repositories and Libraries](#listing-repositories-and-libraries)**
+  - **[Exporting Repositories and Librarie](#exporting-repositories-and-libraries)**
+
+  - **[Merging Repositories](#merging-repositories)**
+  - **[Validating Repository](#validating-repository)**
+  - **[Creating Library's New Mainpoint File](#creating-librarys-new-mainpoint-file)**
+
+- **[Package Manager Infos](#package-manager-infos)**
+
+- **[Next Step](#next-step)**
+- **[Author](#author)**
 
 ## Basics and Structures
 
 Before using the package manager effectively, it is important to understand several core concepts and structures. We will begin by exploring the library organization model and the hierarchy used for library management.
 
-### Hierarchy of Libraries
+### Hierarchy of Structures
 
 There is two main measurement:
 
@@ -46,7 +72,7 @@ graph TD
     A --> D[rest of libraries...]
 ```
 
-### Management of Structure
+### Management of Structures
 
 In addition to the hierarchy structure, there are several rules and conventions for managing repositories. We begin with the following constraints:
 
@@ -216,7 +242,7 @@ gxpm add repo ./my-repo -n my-repo -d ./my-repo/description.txt
 gxpm add lib ./my-repo/my-lib -n my-lib -r my-repo -V 1.0.0 -dp dep1,dep2 -m ./main.s
 ```
 
-### De-registering
+#### De-registering
 
 `gxpm remove <'repo'/'lib'> <argument>` is the syntax:
 
@@ -274,4 +300,59 @@ gxpm copy lib lib1,lib2 -r my-repo -t ./copy-destination
 
 ### Merging Repositories
 
-Repositories can also be merged together to create a new repository. However, the resulting repository must be registered manually before it can be used by the package manager.
+Repositories can also be merged together to create a new repository. However, the resulting repository must be edited manually most of time, because merging creates new repository and registers it automatically, `gxpm merge <arguments> -n <repository name>` is the syntax:
+
+- `<arguments>`: repositories to merge.
+- `-n, --name`: name of output repository.
+
+> **Important:** you can check repositories that are suitable with each other or not, this is possible with `gxpm mergable <arguments>`.
+
+```bash
+# Example
+gxpm merge repo1,repo2,repo3 -n repo-out
+# or
+gxpm mergable repo1,repo2,repo3
+```
+
+### Validating Repository
+
+one of most ways to which repository is making problem, it's to check if is repository valid with `gxpm validate` command, `gxpm validate <argument>` is the syntax:
+
+- `<argument>`: path or name of repository to validate.
+
+```bash
+# Example
+gxpm validate my-repo
+gxpm validate ./my-repo
+```
+
+### Creating Library's New Mainpoint File
+
+for those pepole where they need to customize their libraries manually, there is a way to updated library after applying changes on library's codes, `gxpm create-mainpoint` is the way, `gxpm create-mainpoint <argument> <options>` is the syntax:
+
+- `<argument>`: path of directory to work with it.
+- `-o, --output`: path of output file _(main point file)_.
+- `-r, --repository`: if the library code itself is using other libraries, then it is required to set which repository to use it.
+- `-nr, --ignore-repository`: do not use any repository for creating main point.
+- `-nd, --ignore-dependecies`: do not process dependecies (if using any repository).
+
+> _Note:_ if library codes does not use any external library (or in other words, _it is in-dependent_), then `-nr` flag must be used.
+
+```bash
+# Example
+gxpm create-mainpoint ./my-repo/my-lib -o ./my-repo/my-lib/main.s -nr
+gxpm create-mainpoint ./my-repo/my-lib -o ./my-repo/my-lib/main.s -r repo1
+gxpm create-mainpoint ./my-repo/my-lib -o ./my-repo/my-lib/main.s -r repo1 -nd
+```
+
+## Package Manager Infos
+
+at the end, use `gxpm version` to get version of package manager, and `gxpm help` to print package manager help message.
+
+## Next Step
+
+this is end of this documention, but you can check `gx` binary file at [wiki/gx-command](https://github.com/ABPD2001/gama-x/blob/main/wiki/gx-command.md) or Gama-X Language itself at [wiki/basics.md](https://github.com/ABPD2001/gama-x/blob/main/wiki/basics.md).
+
+## Author
+
+by _Abolfazl Pourtetemadi_.

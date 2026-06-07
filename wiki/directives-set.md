@@ -7,6 +7,7 @@ _Directives_ are special instructions used to communicate directly with the **As
 ## Quick menu
 
 - **[Quick menu](#quick-menu)**
+
 - **[The Build Process: Linker & Assembler](#the-build-process-linker--assembler)**
   - **[The Build Process: Linker & Assembler](#the-build-process-linker--assembler)**
   - **[The Linker](#1-the-linker)**

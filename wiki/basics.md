@@ -4,7 +4,6 @@ To begin learning **Gama-X**, start here. This page provides a comprehensive bre
 
 ## Quick menu
 
-- **[Quick menu](#quick-menu)**
 - **[Prerequisites](#prerequisites)**
 - **[Getting Started with Syntax](#getting-started-with-syntax)**
 - **[Next step](#next-step)**

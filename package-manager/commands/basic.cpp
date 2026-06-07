@@ -274,7 +274,7 @@ void merge(vector<string> repositories, _GXPM_repository_t output)
 {
     bool stat;
 
-    const vector<_GXPM_repository_t> repositories_data = read_repositories_chunk(REPOSITORIES_PATH, stat);
+    vector<_GXPM_repository_t> repositories_data = read_repositories_chunk(REPOSITORIES_PATH, stat);
     if (!stat)
     {
         print_error("failed to read repositories data file!");
@@ -394,6 +394,18 @@ void merge(vector<string> repositories, _GXPM_repository_t output)
             print_error("failed to write into metadata file!");
             if (fs::exists(output.path))
                 fs::remove(output.path);
+            exit(1);
+        }
+        vector<_GXPM_repository_chunk_t> rchunks;
+        repositories_data.push_back(output);
+        for (_GXPM_repository_t r : repositories_data)
+        {
+            rchunks.push_back(to_repository_chunk(r));
+        }
+        write_repos_chunks(rchunks, REPOSITORIES_PATH, stat);
+        if (!stat)
+        {
+            print_error("failed to open repositories data file!");
             exit(1);
         }
     }
