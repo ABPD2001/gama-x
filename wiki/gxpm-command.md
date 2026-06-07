@@ -133,4 +133,145 @@ levels of reset:
 - When a complete reinitialization of the system is required.
 - When you need to ensure that no previous configurations have been applied to the system.
 
-## Repository Configuration and Management
+## Repository and Library Configuration and Management
+
+Each repository can be modified in several ways, including changing its properties, adding or removing libraries, validating its binary file, and performing other repository management operations, this is same with libraries.
+
+### Editing a Repository or Library
+
+The `gxpm edit <'repo'/'lib'>` command can be used to modify the properties of a library or repository.
+
+options of `gxpm edit <'repo'/'lib'> <argument>` are:
+
+- **Repository:** `repo`
+  - `<argument>` is name or path of repository.
+  - `-p, --path`: change path of repository.
+  - `-n, --name`: change name of repository.
+  - `-d, --description`: change descriptions of repository, (.txt file path).
+
+- **Library:** `lib`
+  - `<argument>` is name or path of library.
+  - `-r, --repository`: repository of library (required).
+  - `-V, --version`: change version of library (required).
+  - `-p, --path`: change path of library.
+  - `-n, --name`: change name of library.
+  - `-d, --description`: change descriptions of library (.txt file path).
+  - `-m, --mainpoint`: change relative path of main point of library.
+  - `-dp, --dependecies`: change dependecies of library.
+
+```bash
+# Examples
+gxpm edit repo my-repo -d ./new-description.txt
+gxpm edit repo ./my-repos/my-repo -n repo-test
+gxpm edit repo my-repo -n repo-test -d ./new-description.txt
+
+gxpm edit lib my-lib -V 1.1.1 -dp dep1,dep2 -r my-repo
+gxpm edit lib ../my-repo/my-lib -V 1.1.1 -m ./main.s -dp dep1,dep5,dep2 -r my-repo
+```
+
+> _Note:_ `-dp, --dependecies` is a array based argument.
+
+### Repository Initialization
+
+It is important to note that before a repository can be used, it must first be initialized using the `gxpm start` command. Until initialization is completed, the repository cannot be used because its configuration has not yet been set up; `gxpm start <argument>` is the syntax:
+
+- `<argument>`: path of repository to initialize.
+
+```bash
+# Example
+gxpm start ./my-repo
+```
+
+> _Better to know:_ `gxpm start ...` command just creates a binary file named `metadata.riff` at asked path, it doesnt register repository automatically and registering the repository must done with other commands.
+
+### Registering and De-registering Repoisitory and Library
+
+For the package manager to recognize and manage repositories and libraries, newly created items must be registered whenever they are added. This can be done using the `gxpm add` command. Likewise, repositories and libraries can be unregistered using the `gxpm remove` command.
+
+#### Registering
+
+`gxpm add <'repo'/'lib'> <argument>` is the syntax:
+
+- `<'repo'/'lib'>`: select repository or library to work with it.
+- `<argument>`: path of repository or library to register.
+
+if target is a repository:
+
+- `-n, --name`: name of repository to register.
+- `-d, --description`: description of repository to register (.txt file path).
+
+but if it is a library, then:
+
+- `-n, --name`: name of library to register.
+- `-d, --description`: description of library to register (.txt file path).
+- `-V, --version`: version of library to register.
+- `-r, --repository`: repository to register library into it.
+- `-dp, --dependecies`: dependecies of library.
+- `-m, --mainpoint-relative`: relative path to main point of library to register it.
+
+```bash
+# Examples
+gxpm add repo ./my-repo -n my-repo -d ./my-repo/description.txt
+# or
+gxpm add lib ./my-repo/my-lib -n my-lib -r my-repo -V 1.0.0 -dp dep1,dep2 -m ./main.s
+```
+
+### De-registering
+
+`gxpm remove <'repo'/'lib'> <argument>` is the syntax:
+
+- `<'repo'/'lib'>`: select repository or library to work with it.
+- `<argument>`: path or name of repository/library.
+
+if it was a library to remove (de-register) it:
+
+- `-r, --repository`: from which repository.
+
+```bash
+# Examples
+gxpm remove repo my-repo
+# or
+gxpm remove my-lib -r my-repo
+```
+
+### Listing Repositories and Libraries
+
+In addition to modification operations, repositories can be listed, and the libraries contained within a repository can also be displayed, to achieve this, `gxpm list <'repo'/'lib'>` command must be used.
+
+if you're listing repositories:
+
+- `-l, --local`: list local repositories only (means global repository would'nt show).
+
+but, if you're listing libraries:
+
+- `-r, --repository`: which repository to list its libraries (it's requied).
+
+```bash
+gxpm list repo
+gxpm list repo -l
+# or
+gxpm list lib -r my-repo
+```
+
+### Exporting Repositories and Libraries
+
+By exporting, we simply mean copying the selected libraries or repositories to the specified destination, it is possible to acheive with `gxpm copy <'repo'/'lib'> <argument>`:
+
+- `<'repo'/'lib'>`: select repository or library to work with it.
+- `<argument>`: path or name of repositories/libraries.
+- `-t, --target`: destination path.
+
+if you're copying libraries:
+
+- `-r, --repository`: from which repository.
+
+```bash
+# Examples
+gxpm copy repo my-repo,repo2 -t ./copy-destination
+# or
+gxpm copy lib lib1,lib2 -r my-repo -t ./copy-destination
+```
+
+### Merging Repositories
+
+Repositories can also be merged together to create a new repository. However, the resulting repository must be registered manually before it can be used by the package manager.
