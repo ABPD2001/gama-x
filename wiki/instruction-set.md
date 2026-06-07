@@ -21,11 +21,12 @@ In Gama-X, processing instructions are classified into the following categories:
 - **[Arithmetic Instructions](#arithmetic-instructions)**
 
 - **[Logical Instructions](#logical-instructions)**
-  - **[`shf` Instruction](#shf-instruction)**
-  - **[`log` Instruction](#log-instruction)**
+  - **[`shif` Instruction](#shf-instruction)**
+  - **[`logi` Instruction](#log-instruction)**
 - **[Control Flow Instructions](#control-flow-branch-instructions)**
   - **[`call` Instruction](#call-instruction)**
   - **[`jmp` Instruction](#jmp-instruction)**
+  - **[`cmp` Instruction](#cmp-instruction)**
   - **[List of conditions](#list-of-conditions)**
 - **[Input Processing Instructions](#input-processing-instructions)**
   - **[`argint` Instruction](#argint-instruction)**
