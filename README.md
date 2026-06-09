@@ -94,7 +94,9 @@ https://github.com/ABPD2001/gama-x/tree/main/wiki/basics.md
 
 ## License
 
-See the repository for licensing information.
+LICENSE IS OUT-OF-VALIDATION, GAMA-X IS A PRIVATE PROJECT FOR NOW, ABOLFAZL POURETEMADI.
+
+<!-- See the repository for licensing information. -->
 
 ---
 
