@@ -28,6 +28,7 @@ here is options:
 - `-d --ignore-dependecies`: do not use any dependecy for libraries.
 - `-V --version`: print version of _Gama-X_.
 - `-c --config`: use config file instead of passing arguments and flags via command line.
+- `-L --linker`: output a linker output file (result of merging code snippets).
 - `-h --help`: prints help text.
 
 ## Manually Setting Registers
@@ -70,7 +71,14 @@ gx -g r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,x,y
 
 in this example, `r0 ~ r14` registers set as _general-purpose_ registers, `x` and `y` set as _special registers_, all initial value set to `0`.
 
-## Configuring Binary output
+## Configuring Output
+
+there is two type of output:
+
+- **Linker output**: merged output of code snippets, designed for exporting application for human-readable purposes.
+- **Raw output**: actual output where target driver can read it.
+
+### Binary Output
 
 using binary output is one of the most important and effective ways to reduce output size and improve readability for industrial and embedded machines. For this reason, Gama-X provides the ability to generate binary output files.
 
@@ -94,6 +102,53 @@ each element in `-l, --binary-logic` argument, must be a logic state, logic stat
 - `s8`: signed 8-bits.
 
 **order of `-l, --binary-logic` elements must be suitable to `-s, --special-registers` elements**.
+
+### Linker Output
+
+Linker output is result of merging all input files into one file, or in other words, all application in one file, this includes libraries and their dependecies _(if library or dependecy importation enabled)_ and application files.
+
+```bash
+# Example
+gx ... -L -o merged.s
+```
+
+and output file would be something like this:
+
+```armasm
+@ <- file 1 ->
+.module
+.end
+
+my_label:
+  mov r0,#1
+
+
+@ <- file 2 ->
+.main
+.end
+
+test_label:
+  mov r1,#2
+
+_start:
+  call my_label
+  call test_label
+
+
+@ <--- merged result --->
+.main
+.end
+
+test_label:
+  mov r1,#2
+
+my_label:
+  mov r0,#1
+
+_start:
+  call my_label
+  call test_label
+```
 
 ## Error Formatting
 

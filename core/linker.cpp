@@ -72,6 +72,8 @@ void _GXL_::_merge_files_()
 
             else if (line[0] == '.')
             {
+                if (line == ".end" || line == ".module")
+                    continue;
                 this->merge_preprocessor += line;
                 this->merge_preprocessor += "\n";
             }
@@ -222,7 +224,7 @@ bool _GXL_::merge()
 
     if (this->errors.size())
         return false;
-    this->merged = this->merge_preprocessor + this->merge_instruction;
+    this->merged = this->merge_preprocessor + ".end\n" + this->merge_instruction;
 
     return true;
 }
