@@ -6,9 +6,10 @@
 
 ## Quick Menu
 
+- **[Configuring Output](#configuring-output)**
+  - **[Binary Output](#binary-output)**
+  - **[Linker Output](#linker-output)**
 - **[Manually Setting Registers](#manually-setting-registers)**
-
-- **[Configuring Binary Output](#configuring-binary-output)**
   - **[Format of setting registers manually](#format-of-setting-registers-manually)**
   - **[Example](#example)**
 - **[Error Formatting](#error-formatting)**
