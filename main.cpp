@@ -17,10 +17,10 @@ namespace fs = std::filesystem;
 
 void print_error(string text);
 void print_app_error(vector<_GXLT_error_t> errors, string format);
-void parse_app_arguments(vector<string> argvv, vector<_GXL_file_t> &files, vector<string> &config_args, vector<string> &binary_logics, _GXA_config_t &assembler_config, _GXL_config_t &linker_config, string &error_format, string &output_filepath, bool &binary_output);
+void parse_app_arguments(vector<string> argvv, vector<_GXL_file_t> &files, vector<string> &config_args, vector<string> &binary_logics, _GXA_config_t &assembler_config, _GXL_config_t &linker_config, string &error_format, string &output_filepath, bool &binary_output, bool &linker_output);
 int main(int argc, char *argv[]);
 
-void parse_app_arguments(vector<string> argvv, vector<_GXL_file_t> &files, vector<string> &config_args, vector<string> &binary_logics, _GXA_config_t &assembler_config, _GXL_config_t &linker_config, string &error_format, string &output_filepath, bool &binary_output)
+void parse_app_arguments(vector<string> argvv, vector<_GXL_file_t> &files, vector<string> &config_args, vector<string> &binary_logics, _GXA_config_t &assembler_config, _GXL_config_t &linker_config, string &error_format, string &output_filepath, bool &binary_output, bool &linker_output)
 {
     const string valid_valuar_flags[] = {"-c", "--config", "-e", "--error-format", "-l", "--binary-logics", "-s", "--special-registers", "-v", "--values", "-g", "--registers", "-r", "--repository", "-o", "--output"};
     const string valid_file_flags[] = {"-c", "--config", "-o", "--output", "-e", "--error-format"};
@@ -50,6 +50,9 @@ void parse_app_arguments(vector<string> argvv, vector<_GXL_file_t> &files, vecto
         else if (flag == "-b" || flag == "--binary")
         {
             binary_output = true;
+        }
+        else if (flag == "-L" || flag == "--linker-output")
+        {
         }
 
         else if (includes_arr<const string, 16>(valid_valuar_flags, flag))
@@ -213,15 +216,15 @@ int main(int argc, char *argv[])
 
     string error_format;
     string output_filepath;
-    bool binary_output = false;
+    bool binary_output = false, linker_output = false;
 
     for (uint32_t i = 1; i < argc; i++)
     {
         argvv.push_back(string(argv[i]));
     }
 
-    parse_app_arguments(argvv, files, config_args, binary_logics, assembler_config, linker_config, error_format, output_filepath, binary_output);
-    parse_app_arguments(config_args, files, config_args, binary_logics, assembler_config, linker_config, error_format, output_filepath, binary_output);
+    parse_app_arguments(argvv, files, config_args, binary_logics, assembler_config, linker_config, error_format, output_filepath, binary_output, linker_output);
+    parse_app_arguments(config_args, files, config_args, binary_logics, assembler_config, linker_config, error_format, output_filepath, binary_output, linker_output);
 
     // first link files.
     _GXA_ _assembler_;
@@ -269,38 +272,44 @@ int main(int argc, char *argv[])
     }
 
     // at the end, if everything was fine, create output.
-    _assembler_.init(_linker_.merged, assembler_config);
-    vector<_GXA_snippet_t> snippets = _assembler_.compile();
+
     string output;
-
-    for (_GXA_snippet_t sn : snippets)
+    if (linker_output)
+        string output = _linker_.merged;
+    else
     {
-        for (uint32_t i = 0; i < sn.size(); i++)
-        {
-            if (binary_output)
-            {
-                if (binary_logics.size() != sn.size())
-                {
-                    print_error("binary logics count does not match with the output snippet size!");
-                    exit(1);
-                }
+        _assembler_.init(_linker_.merged, assembler_config);
+        vector<_GXA_snippet_t> snippets = _assembler_.compile();
 
-                const string modes_name[] = {"s64", "u32", "s32", "u16", "s16", "u8", "s8"};
-                if (binary_logics[i] != "u64")
+        for (_GXA_snippet_t sn : snippets)
+        {
+            for (uint32_t i = 0; i < sn.size(); i++)
+            {
+                if (binary_output)
                 {
-                    output += toBinary(sn[i], find_arr<const string, 7>(modes_name, binary_logics[i]));
+                    if (binary_logics.size() != sn.size())
+                    {
+                        print_error("binary logics count does not match with the output snippet size!");
+                        exit(1);
+                    }
+
+                    const string modes_name[] = {"s64", "u32", "s32", "u16", "s16", "u8", "s8"};
+                    if (binary_logics[i] != "u64")
+                    {
+                        output += toBinary(sn[i], find_arr<const string, 7>(modes_name, binary_logics[i]));
+                    }
+                    else
+                        output += toBinaryu64(sn[i]);
                 }
                 else
-                    output += toBinaryu64(sn[i]);
+                {
+                    output += to_string(sn[i]) + ',';
+                }
             }
-            else
-            {
-                output += to_string(sn[i]) + ',';
-            }
+            if (output.size())
+                output = output.substr(0, output.length() - 1);
+            output += '\n';
         }
-        if (output.size())
-            output = output.substr(0, output.length() - 1);
-        output += '\n';
     }
     if (output.size())
     {

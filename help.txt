@@ -15,6 +15,7 @@ Avaiable options:
     [-c, --config]:                                                     use config to set arguments.
     [-s, --special-registers] (required if '-g, --registers' valued):   name of special registers.
     [-h, --help]: print this page.
+    [-L, --linker-output]:                                              output a full linked code snippet intead of actual output.
 
 For '--error-format' argument, here is a exmaple format:
     Error: <MESSAGE>

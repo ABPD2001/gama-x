@@ -14,11 +14,11 @@ Avaiable options:
     [-e, --error-format]:                                               set format of output errors (file path).
     [-i, --ignore-repository]:                                          do not use any repository.
     [-d, --ignore-dependecies]:                                         do not check any dependecy of any imported library.
-    [-m, --metadata-filename]:                                          set custom name for metadata file of custom repository.
     [-V, --version]:                                                    show version of Gama-X.
     [-c, --config]:                                                     use config to set arguments.
     [-s, --special-registers] (required if '-g, --registers' valued):   name of special registers.
     [-h, --help]: print this page.
+    [-L, --linker-output]:                                              output a full linked code snippet intead of actual output.
 
 For '--error-format' argument, here is a exmaple format:
     Error: <MESSAGE>
