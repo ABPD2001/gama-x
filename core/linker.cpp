@@ -79,7 +79,13 @@ void _GXL_::_merge_files_()
             }
             else
             {
-                this->merge_instruction += line;
+                if (line[0] == '@')
+                    continue;
+                else if (line.find('@') != string::npos)
+                    this->merge_instruction += split(line, '@')[0];
+                else
+                    this->merge_instruction += line;
+
                 this->merge_instruction += "\n";
             }
         }
