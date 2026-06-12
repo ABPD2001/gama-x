@@ -37,6 +37,22 @@ The Gama-X package manager is responsible for managing local offline repositorie
 
 Before using the package manager effectively, it is important to understand several core concepts and structures. We will begin by exploring the library organization model and the hierarchy used for library management.
 
+basic syntax of command is:
+
+```bash
+gxpm [FLAGS]... [VERBS]... [OPTIONS/ARGUMENTS]...
+```
+
+there is two flags must know before continue:
+`-u, --username`: if youre running `gxpm` command with admin permision, then this flag is required, because _gxpm_ cannot find local paths.
+`-v, --verbose`: verbose mode.
+
+```bash
+# Examples
+gxpm -u abpd2001 ....
+gxpm -v ....
+```
+
 ### Hierarchy of Structures
 
 There is two main measurement:
@@ -149,9 +165,7 @@ levels of reset:
 
 - `-r, --rage`: this reset level removes everything from the installation. In other words, after performing this reset, you must run `gxpm setup ...` again to reinitialize the environment.
 
-  > _Note:_ on normal reset, global repository and repositories data file (local) are stay un-touched.
-
-- `-l, --affect-local`: If the rage mode is not enabled, also reset the local settings.
+  > _Note:_ on normal reset, global repository stays un-touched.
 
 **which times reset required?**
 

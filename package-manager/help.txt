@@ -1,5 +1,9 @@
-Usage: gxpm [OPTIONS]... [VERBS]... [ARGUMENTS/OPTIONS]...
+Usage: gxpm [FLAGS]... [VERBS]... [ARGUMENTS/OPTIONS]...
 Package manager for Gama-X, manages repositories of Gama-X.
+
+Flags:
+    [-u, --username]: set username of target user, this is required if youre running on admin premision.
+    [-v, --verbose]: verbose mode.
 
 Verbs:
     start               initalizes empty repository (creates empty metadata file).
@@ -47,18 +51,16 @@ Verbs:
         repo    add new repository.
         lib     insert a library into a repository.
             [-r, --repository]:         to which repository.
-            [-dp, --dependecies]:        dependecies of library.
-            [-V, --version]:            version of library.
+            [-p, --dependecies]:        dependecies of library.
+            [-V, --lib-version]:            version of library.
             [-m, --mainpoint-relative]: relative to library directory mainpoint file path.
 
         [-n, --name]:           name of library/repository.
         [-d, --description]:    description of library/repository.
         
     list:   gxpm list <'lib'/'repo'> <ARGS> <OPTIONS>
-        repo   lists available repositories.
-            [-l, --local]:      list only local repositories.
-            
         lib    lists available libraries (argument required).
+        repo   lists available repositories.
             [-r, --repository]: from which repository.
 
     copy:   gxpm copy <'lib'/'repo'> <ARGS> <OPTIONS>

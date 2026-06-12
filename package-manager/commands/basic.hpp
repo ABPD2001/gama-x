@@ -10,7 +10,7 @@ extern bool verbose;
 
 void setup(bool local, bool local_ignore);
 void initialize(string path);
-void reset(bool rage, bool local_affected);
+void reset(bool rage);
 vector<_GXPM_conflict_t> mergable(vector<string> repositories, bool dry, bool &stat);
 void merge(vector<string> repositories, _GXPM_repository_t output);
 void lint(string repo);

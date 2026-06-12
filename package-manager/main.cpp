@@ -6,12 +6,30 @@
 
 #define VERSION "V1.0.0"
 
+string GXPM_LOCAL_PATH;
+string REPOSITORIES_PATH;
+string _HOME_;
 bool verbose = false;
 
 int main(int argc, char *argv[]);
 
 int main(int argc, char *argv[])
 {
+    bool is_root = false, username_set = false;
+
+#ifdef __linux__
+    _HOME_ = "/home";
+    GXPM_LOCAL_PATH = string(getenv("HOME")) + "/.gxpm";
+    REPOSITORIES_PATH = string(getenv("HOME")) + "/.gxpm/repos.riff";
+    is_root = getenv("HOME") == "/";
+#endif
+#ifdef _WIN32
+    _HOME_ = "C:\\Users";
+    GXPM_LOCAL_PATH = string(getenv("USERPROFILE")) + "/.gxpm";
+    REPOSITORIES_PATH = string(getenv("USERPROFILE")) + "/.gxpm/repos.riff";
+    is_root = getenv("C:\\") == "/";
+#endif
+
     const string treebased_verbs[6] = {"add", "list", "remove", "copy", "edit"};
 
     for (uint32_t i = 1; i < argc; i++)
@@ -22,6 +40,24 @@ int main(int argc, char *argv[])
         {
             verbose = true;
             continue;
+        }
+        if (flag == "-u" || flag == "--username")
+        {
+            if (i == argc - 1)
+            {
+                print_error("'-u, --username' argument value missed!");
+                exit(1);
+            }
+            username_set = true;
+            GXPM_LOCAL_PATH = _HOME_ + string(argv[i + 1]) + "/.gxpm";
+            REPOSITORIES_PATH = GXPM_LOCAL_PATH + "/repos.riff";
+            i++;
+            continue;
+        }
+        else if (is_root && !username_set)
+        {
+            print_error("'-u, --username' flag is required when admin permision used.");
+            exit(1);
         }
         if (flag == "setup")
         {
@@ -71,8 +107,8 @@ int main(int argc, char *argv[])
         {
             const string param = argv[i + 1];
             bool rage = false;
-            bool local_affected = false;
-            if (argc - i - 1 > 2)
+
+            if (argc - i - 1 > 1)
             {
                 print_error("to much arguments for 'reset' verb!");
                 exit(1);
@@ -82,13 +118,8 @@ int main(int argc, char *argv[])
             {
 
                 if (param == "-r" || param == "--rage")
-                {
                     rage = true;
-                }
-                else if (param == "-l" || param == "--affect-local")
-                {
-                    local_affected = true;
-                }
+
                 else
                 {
                     print_error("invalid flag '" + param + "' for 'reset' verb!");
@@ -96,7 +127,7 @@ int main(int argc, char *argv[])
                 }
             }
 
-            reset(rage, local_affected);
+            reset(rage);
             exit(0);
         }
         else if (flag == "create-mainpoint")

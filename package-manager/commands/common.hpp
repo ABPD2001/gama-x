@@ -2,12 +2,7 @@
 #define CMDS_COMMON
 #define GXPM_PATH "/etc/gxpm"
 
-#define GXPM_LOCAL_PATH "/home/abpd2001/.gxpm"
-#define CONFIGURATION_PATH "/etc/gxpm/config.cnf"
-#define LOCAL_CONFIGURATION_PATH "/home/abpd2001/.gxpm/config.cnf"
-#define REPOSITORIES_PATH "/home/abpd2001/.gxpm/repos.riff"
 #define GLOBAL_REPOSITORY_PATH "/etc/gxpm/globals"
-#define DEFAULT_CONFIG_FORMAT "metadata_filename=metadata.riff"
 #include <string>
 #include <iostream>
 #include "../../utils/riff.hpp"
@@ -16,8 +11,13 @@
 using std::cout;
 using std::getenv;
 using std::string;
+using std::system;
 
 extern bool verbose;
+
+extern string _HOME_;
+extern string GXPM_LOCAL_PATH;
+extern string REPOSITORIES_PATH;
 
 void print_error(string text);
 bool create_8byte_id(char bytes[8], uint32_t &lvl);

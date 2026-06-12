@@ -1,7 +1,11 @@
 #ifndef HELP_HPP
 #define HELP_HPP
-constexpr const char help[] = R"(Usage: gxpm [OPTIONS]... [VERBS]... [ARGUMENTS/OPTIONS]...
+constexpr const char help[] = R"(Usage: gxpm [FLAGS]... [VERBS]... [ARGUMENTS/OPTIONS]...
 Package manager for Gama-X, manages repositories of Gama-X.
+
+Flags:
+    [-u, --username]: set username of target user, this is required if youre running on admin premision.
+    [-v, --verbose]: verbose mode.
 
 Verbs:
     start               initalizes empty repository (creates empty metadata file).

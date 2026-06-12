@@ -390,6 +390,13 @@ bool validate_chunks(string filepath, bool &stat)
         }
         else if (string(temp_header.id) == "REPO")
         {
+            _GXPM_repository_chunk_t temp_chunk;
+            f.read((char *)&temp_chunk, sizeof(_GXPM_repository_chunk_t));
+            stat = true;
+            if (!valid_name(string(temp_chunk.name)))
+                return false;
+            if (!fs::exists(string(temp_chunk.pathname)))
+                return false;
         }
         else if (string(temp_header.id) == "INIT")
         {

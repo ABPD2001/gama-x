@@ -1,6 +1,6 @@
 #include "./basic.hpp"
 
-void reset(bool rage, bool local_affected)
+void reset(bool rage)
 {
     try
     {
@@ -12,25 +12,22 @@ void reset(bool rage, bool local_affected)
             fs::remove_all(GXPM_PATH);
             if (verbose)
                 cout << "['" << GXPM_PATH << "' deleted]\n";
+
             fs::remove_all(GXPM_LOCAL_PATH);
             if (verbose)
                 cout << "['" << GXPM_LOCAL_PATH << "' deleted]\n";
         }
         else
         {
-            fstream f;
-            if (local_affected)
+            bool stat = false;
+            write_initial_chunk(REPOSITORIES_PATH, true, stat);
+            if (!stat)
             {
-                bool stat = false;
-                write_initial_chunk(REPOSITORIES_PATH, true, stat);
-                if (!stat)
-                {
-                    print_error("failed to reset repositories (local) data file!");
-                    exit(1);
-                }
-                if (verbose)
-                    cout << "['" << REPOSITORIES_PATH << "' file reseted]\n";
+                print_error("failed to reset repositories (local) data file!");
+                exit(1);
             }
+            if (verbose)
+                cout << "['" << REPOSITORIES_PATH << "' file reseted]\n";
         }
     }
     catch (const fs::filesystem_error &err)
@@ -168,6 +165,11 @@ void setup(bool local, bool local_ignore)
             if (!stat)
             {
                 print_error("failed to validate repositories data (local) file!");
+                exit(1);
+            }
+            if (!is_valid)
+            {
+                print_error("invalid repositories data file!");
                 exit(1);
             }
         }
