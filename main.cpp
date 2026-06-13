@@ -6,7 +6,7 @@
 #include "./core/linker.hpp"
 #include "./core/lint.hpp"
 #include "./help.hpp"
-#define VERSION "v2.0.0"
+#define VERSION "v1.0.0"
 
 using std::cout;
 using std::fstream;
